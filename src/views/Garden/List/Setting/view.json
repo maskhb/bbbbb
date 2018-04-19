@@ -1,0 +1,15 @@
+{
+  "route": {
+    "params": "/:id",
+    "authority": ""
+  },
+  "breadcrumb": {
+    "name": "家居项目配置",
+    "icon": "",
+    "order": 0,
+    "authority": ""
+  },
+  "model": [
+    "garden"
+  ]
+}

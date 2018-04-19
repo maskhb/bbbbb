@@ -1,0 +1,13 @@
+{
+  "route": {
+    "params": "/:id",
+    "authority": ""
+  },
+  "breadcrumb": {
+    "name": "管理属性",
+    "icon": "",
+    "order": 0,
+    "authority": ""
+  },
+  "model": ["propertyGroup", "propertyKey", "propertyValue"]
+}

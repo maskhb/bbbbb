@@ -1,0 +1,13 @@
+{
+  "route": {
+    "params": "",
+    "authority": ""
+  },
+  "menu": {
+    "name": "广告项列表",
+    "icon": "",
+    "order": 4,
+    "authority": ""
+  },
+  "model": [""]
+}

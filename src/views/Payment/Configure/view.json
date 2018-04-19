@@ -1,0 +1,13 @@
+{
+  "route": {
+    "params": "",
+    "authority": ""
+  },
+  "menu": {
+    "name": "支付方式配置",
+    "icon": "",
+    "order": 1,
+    "authority": ""
+  },
+  "model": ["payment"]
+}

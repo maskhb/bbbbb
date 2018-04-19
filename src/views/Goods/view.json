@@ -1,0 +1,13 @@
+{
+    "route": {
+        "params": "",
+        "authority": "OPERPORT_MATERIAL_GOODS"
+    },
+    "menu": {
+        "name": "商品管理",
+        "icon": "appstore",
+        "order": 2,
+        "authority": ""
+    },
+    "model": []
+}

@@ -1,0 +1,13 @@
+{
+  "route": {
+    "params": "",
+    "authority": ""
+  },
+  "menu": {
+    "name": "晒家评论列表",
+    "icon": "",
+    "order": 0,
+    "authority": ""
+  },
+  "model": [""]
+}

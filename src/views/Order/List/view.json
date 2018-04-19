@@ -1,0 +1,16 @@
+{
+  "route": {
+    "params": "",
+    "authority": ""
+  },
+  "menu": {
+    "name": "订单列表",
+    "icon": "",
+    "order": 0,
+    "authority": ""
+  },
+  "model": [
+    "orders",
+    "exports"
+  ]
+}

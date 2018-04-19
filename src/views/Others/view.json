@@ -1,0 +1,13 @@
+{
+  "route": {
+    "params": "",
+    "authority": ""
+  },
+  "menu": {
+    "name": "其他",
+    "icon": "appstore",
+    "order": 11,
+    "authority": ""
+  },
+  "model": [""]
+}

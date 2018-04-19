@@ -1,0 +1,13 @@
+{
+  "route": {
+    "params": "/:name",
+    "authority": ""
+  },
+  "breadcrumb": {
+    "name": "设置权限",
+    "icon": "",
+    "order": 1,
+    "authority": ""
+  },
+  "model": ["business"]
+}

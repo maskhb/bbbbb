@@ -1,0 +1,13 @@
+{
+  "route": {
+    "params": "",
+    "authority": ""
+  },
+  "breadcrumb": {
+    "name": "底部导航",
+    "icon": "",
+    "order": 1,
+    "authority": ""
+  },
+  "model": ["pagetable"]
+}

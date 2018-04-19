@@ -1,0 +1,13 @@
+{
+  "route": {
+    "params": "/:countId",
+    "authority": ""
+  },
+  "breadcrumb": {
+    "name": "新增帐号",
+    "icon": "",
+    "order": 0,
+    "authority": ""
+  },
+  "model": ["business"]
+}

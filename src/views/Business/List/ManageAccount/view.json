@@ -1,0 +1,13 @@
+{
+  "route": {
+    "params": "/:name",
+    "authority": ""
+  },
+  "breadcrumb": {
+    "name": "管理帐号",
+    "icon": "",
+    "order": 1,
+    "authority": ""
+  },
+  "model": ["business"]
+}

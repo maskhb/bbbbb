@@ -1,0 +1,13 @@
+{
+  "route": {
+    "params": "",
+    "authority": ""
+  },
+  "menu": {
+    "name": "批量导入管理",
+    "icon": "appstore",
+    "order": 11,
+    "authority": ""
+  },
+  "model": [""]
+}

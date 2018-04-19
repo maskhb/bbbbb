@@ -1,0 +1,13 @@
+{
+  "route": {
+    "params": "",
+    "authority": ""
+  },
+  "breadcrumb": {
+    "name": "首页-移动端",
+    "icon": "",
+    "order": 1,
+    "authority": ""
+  },
+  "model": ["pagetable"]
+}

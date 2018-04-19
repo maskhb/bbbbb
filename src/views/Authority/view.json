@@ -1,0 +1,13 @@
+{
+  "route": {
+    "params": "",
+    "authority": ""
+  },
+  "menu": {
+    "name": "权限管理",
+    "icon": "user",
+    "order": 11,
+    "authority": ""
+  },
+  "model": [""]
+}

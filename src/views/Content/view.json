@@ -1,0 +1,13 @@
+{
+    "route": {
+        "params": "",
+        "authority": ""
+    },
+    "menu": {
+        "name": "内容管理",
+        "icon": "setting",
+        "order": 7,
+        "authority": ""
+    },
+    "model": [""]
+}

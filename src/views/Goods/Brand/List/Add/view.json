@@ -1,0 +1,13 @@
+{
+  "route": {
+    "params": "/:id",
+    "authority": ""
+  },
+  "breadcrumb": {
+    "name": "新增品牌",
+    "icon": "",
+    "order": 0,
+    "authority": ""
+  },
+  "model": ["goodsBrand"]
+}

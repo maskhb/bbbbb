@@ -1,0 +1,13 @@
+{
+    "route": {
+        "params": "",
+        "authority": ""
+    },
+    "menu": {
+        "name": "支付管理",
+        "icon": "appstore",
+        "order": 5,
+        "authority": ""
+    },
+    "model": [""]
+}

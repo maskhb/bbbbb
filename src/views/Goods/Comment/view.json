@@ -1,0 +1,13 @@
+{
+  "route": {
+    "params": "",
+    "authority": ""
+  },
+  "menu": {
+    "name": "商品评论",
+    "icon": "",
+    "order": 0,
+    "authority": ""
+  },
+  "model": [""]
+}

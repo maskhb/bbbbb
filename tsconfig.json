@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "experimentalDecorators": true,
+    "sourceMap": true,
+    "strict": true,
+    "module": "es2015",
+    "moduleResolution": "node",
+    "target": "es5",
+    "lib": [ "es2015" ]
+  }
+}

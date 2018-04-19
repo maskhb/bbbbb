@@ -1,0 +1,13 @@
+{
+  "route": {
+    "params": "",
+    "authority": ""
+  },
+  "menu": {
+    "name": "页面列表",
+    "icon": "",
+    "order": 1,
+    "authority": ""
+  },
+  "model": ["pagetable"]
+}

@@ -1,0 +1,13 @@
+{
+    "route": {
+        "params": "",
+        "authority": ""
+    },
+    "menu": {
+        "name": "短信推送",
+        "icon": "appstore",
+        "order": 10,
+        "authority": ""
+    },
+    "model": [""]
+}

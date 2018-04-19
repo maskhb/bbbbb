@@ -1,0 +1,30 @@
+{
+  "ht-json-dev.htmimi.com": [
+    "dev",
+    "ht-yunying-dev.hd"
+  ],
+  "ht-json-sit.htmimi.com": [
+    "sit",
+    "ht-yunying-sit.hd"
+  ],
+  "ht-json-stg.htmimi.com": [
+    "stg",
+    "ht-yunying-stg.hd"
+  ],
+  "ht-json-beta.htmimi.com": [
+    "beta",
+    "ht-yunying-beta.hd"
+  ],
+  "ht-json.htmimi.com": [
+    "production",
+    "ht-yunying.hd"
+  ],
+  "ht-json-fix.htmimi.com": [
+    "fix",
+    "ht-yunying-fix.hd"
+  ],
+  "ht-json-stress.htmimi.com": [
+    "stress",
+    "ht-yunying-stress.hd"
+  ]
+}

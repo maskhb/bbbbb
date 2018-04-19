@@ -1,0 +1,15 @@
+{
+  "route": {
+    "params": "/:id",
+    "authority": ""
+  },
+  "breadcrumb": {
+    "name": "创建短信推送",
+    "icon": "",
+    "order": 0,
+    "authority": ""
+  },
+  "model": [
+    "messagePush"
+  ]
+}

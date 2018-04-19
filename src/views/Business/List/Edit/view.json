@@ -1,0 +1,13 @@
+{
+  "route": {
+    "params": "/:id",
+    "authority": ""
+  },
+  "breadcrumb": {
+    "name": "编辑商家",
+    "icon": "",
+    "order": 0,
+    "authority": ""
+  },
+  "model": ["business"]
+}

@@ -1,0 +1,13 @@
+{
+  "route": {
+    "params": "",
+    "authority": ""
+  },
+  "menu": {
+    "name": "预存款管理",
+    "icon": "",
+    "order": 2,
+    "authority": ""
+  },
+  "model": ["predeposit"]
+}

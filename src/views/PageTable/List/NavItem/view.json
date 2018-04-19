@@ -1,0 +1,13 @@
+{
+  "route": {
+    "params": "",
+    "authority": ""
+  },
+  "breadcrumb": {
+    "name": "公共导航-PC端",
+    "icon": "",
+    "order": 1,
+    "authority": ""
+  },
+  "model": ["pagetable"]
+}

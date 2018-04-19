@@ -1,0 +1,29 @@
+.component_order_table {
+  :global {
+    .ant-table-tbody {
+      tr.ant-table-expanded-row {
+        td:last-child {
+          padding: 0;
+        }
+      }
+    }
+  }
+}
+
+.component_order_table_noexpanded {
+  :global {
+    .ant-table-expand-icon-th {
+      display: none;
+    }
+
+    .ant-table-row-expand-icon-cell {
+      display: none;
+    }
+
+    .ant-table-expanded-row {
+      > td:first-child {
+        display: none;
+      }
+    }
+  }
+}
