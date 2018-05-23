@@ -1,13 +1,13 @@
 {
   "route": {
     "params": "",
-    "authority": ""
+    "authority": "OPERPORT_JIAJU_BRANDLIST_LIST"
   },
   "menu": {
-    "name": "品牌管理",
+    "name": "品牌列表",
     "icon": "",
-    "order": 0,
-    "authority": ""
+    "order": 5,
+    "authority": "OPERPORT_JIAJU_BRANDLIST_LIST"
   },
   "model": ["goodsBrand"]
 }

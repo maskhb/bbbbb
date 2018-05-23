@@ -1,7 +1,7 @@
 import { getUrlParams } from './utils';
 
 const tableListDataSource = [];
-for (let i = 0; i < 46; i += 1) {
+for (let i = 0; i < 2; i += 1) {
   tableListDataSource.push({
     propertyKeyId: i + 1,
     propertyName: `基本属性${i}`,
@@ -13,6 +13,9 @@ for (let i = 0; i < 46; i += 1) {
     createrName: `创建人${i}`,
     status: (Math.floor(Math.random() * 10) % 3) + 1,
     url: 'https://www.baidu.com',
+    isCustmer: (Math.floor(Math.random() * 10) % 2) + 1,
+    propertyGroupId: 1,
+    propertyValuesAll: [i, i + 1, i + 2, i + 3].join(),
   });
 }
 

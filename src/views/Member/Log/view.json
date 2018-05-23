@@ -1,13 +1,13 @@
 {
-  "route": {
-    "params": "",
-    "authority": ""
-  },
-  "menu": {
-    "name": "会员日志",
-    "icon": "",
-    "order": 0,
-    "authority": ""
-  },
-  "model": [""]
+    "route": {
+        "params": "",
+        "authority": "OPERPORT_JIAJU_USER_OPERATIONGLOG"
+    },
+    "menu": {
+        "name": "会员日志",
+        "icon": "",
+        "order": 0,
+        "authority": "OPERPORT_JIAJU_USER_OPERATIONGLOG"
+    },
+    "model": ["member"]
 }

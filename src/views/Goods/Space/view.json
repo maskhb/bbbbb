@@ -6,8 +6,8 @@
   "menu": {
     "name": "适用空间管理",
     "icon": "",
-    "order": 0,
-    "authority": ""
+    "order": 10,
+    "authority": "OPERPORT_JIAJU_SPACELIST_LIST"
   },
   "model": ["space"]
 }

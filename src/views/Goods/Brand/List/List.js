@@ -1,10 +1,19 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'dva';
-import { Card, Button, Input } from 'antd';
+import { Card, Button, Input, Select } from 'antd';
 import PageHeaderLayout from 'layouts/PageHeaderLayout';
 import PanelList, { Search, Batch, Table } from 'components/PanelList';
 import { rules } from 'components/input';
+import ENABLEALLSTATUS from 'components/EnableStatus/ENABLEALLSTATUS';
 import getColumns from './columns';
+import { optionsToHtml } from '../../../../components/DataTransfer';
+
+const statusOptions = optionsToHtml(Object.keys(ENABLEALLSTATUS).map((key) => {
+  return {
+    label: ENABLEALLSTATUS[key].text,
+    value: ENABLEALLSTATUS[key].value,
+  };
+}));
 
 @connect(({ goodsBrand, loading }) => ({
   goodsBrand,
@@ -13,7 +22,7 @@ import getColumns from './columns';
 export default class View extends PureComponent {
   static defaultProps = {
     searchDefault: {
-      status: 1,
+      status: ENABLEALLSTATUS.ALL.value,
     },
   };
 
@@ -50,7 +59,7 @@ export default class View extends PureComponent {
               searchDefault={searchDefault}
               onSearch={this.handleSearch}
             >
-              <Search.Item label="名称" simple>
+              <Search.Item label="品牌名称" simple>
                 {
                   ({ form }) => (
                     form.getFieldDecorator('brandName', {
@@ -63,11 +72,23 @@ export default class View extends PureComponent {
                   )
                 }
               </Search.Item>
+              <Search.Item label="开启状态" simple>
+                {
+                  ({ form }) => (
+                    form.getFieldDecorator('status', {
+                    })(
+                      <Select placeholder="请选择">
+                        {statusOptions}
+                      </Select>
+                    )
+                  )
+                }
+              </Search.Item>
             </Search>
 
             <Batch>
               <a href="#/goods/brand/list/add/0">
-                <Button icon="plus" type="primary">新建</Button>
+                <Button icon="plus" type="primary">添加品牌</Button>
               </a>
             </Batch>
 

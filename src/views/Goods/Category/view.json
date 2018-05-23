@@ -1,12 +1,12 @@
 {
   "route": {
     "params": "",
-    "authority": ""
+    "authority": "OPERPORT_JIAJU_PROCATEGORYLIST_LIST"
   },
   "menu": {
     "name": "商品分类管理",
     "icon": "",
-    "order": 0,
+    "order": 7,
     "authority": ""
   },
   "model": ["goodsCategory"]

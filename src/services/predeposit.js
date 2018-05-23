@@ -4,11 +4,35 @@
 import request from '../utils/request';
 
 /*
-*** 支付记录列表
+*** 预存款列表
 */
-// 查询支付记录列表
+// 查询预存款列表
 async function predepositList(params) {
-  return request('/api/ht-mj-account-server/predeposit', {
+  return request('/mj/ht-mj-account-server/predeposit', {
+    method: 'POST',
+    body: {
+      ...params,
+    },
+    transformResponse(response) {
+      return response?.data?.result;
+    },
+    pagination: true,
+  });
+}
+
+// 预存款充值
+async function rechargepredeposit(params) {
+  return request('/mj/ht-mj-account-server/rechargepredeposit', {
+    method: 'POST',
+    body: {
+      ...params,
+    },
+  });
+}
+
+// 设置预存款有效期
+async function validpredeposit(params) {
+  return request('/mj/ht-mj-account-server/validpredeposit', {
     method: 'POST',
     body: {
       ...params,
@@ -17,11 +41,25 @@ async function predepositList(params) {
 }
 
 /*
- * 支付配置相关
- */
-// 获取支付方式列表
-async function searchPayTypeAndInfoList(params) {
-  return request('/payment/paybehind/searchPayTypeAndInfoList', {
+*** 交易明细
+*/
+// 获取预存款交易明细
+async function dealpredeposit(params) {
+  return request('/mj/ht-mj-account-server/dealpredeposit', {
+    method: 'POST',
+    body: {
+      ...params,
+    },
+    transformResponse(response) {
+      return response?.data?.result;
+    },
+    pagination: true,
+  });
+}
+
+// 导出预存款交易明细
+async function exportpredeposit(params) {
+  return request('/mj/ht-mj-account-server/exportpredeposit', {
     method: 'POST',
     body: {
       ...params,
@@ -29,18 +67,29 @@ async function searchPayTypeAndInfoList(params) {
   });
 }
 
-// 更新支付方式信息
-async function modifyPayTypeAndInfo(params) {
-  return request('/payment/paybehind/modifyPayTypeAndInfo', {
+/*
+*** 操作日志
+*/
+// 查询预存款操作日志
+async function predepositlogsbypage(params) {
+  return request('/mj/ht-mj-account-server/predepositlogsbypage', {
     method: 'POST',
     body: {
       ...params,
     },
+    transformResponse(response) {
+      return response?.data?.result;
+    },
+    pagination: true,
   });
 }
+
 
 export default {
-  searchPayTypeAndInfoList,
-  modifyPayTypeAndInfo,
+  rechargepredeposit,
   predepositList,
+  validpredeposit,
+  dealpredeposit,
+  exportpredeposit,
+  predepositlogsbypage,
 };

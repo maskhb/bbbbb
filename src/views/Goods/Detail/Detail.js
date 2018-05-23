@@ -1,93 +1,286 @@
 import React, { Component } from 'react';
 import { connect } from 'dva';
-import { Card, Form, Col, Row, Radio, Cascader, Select, Input, message, Switch, Icon } from 'antd';
+import { Card, Form, Col, Row, Cascader, Select, message, Spin, Icon, Checkbox } from 'antd';
 import draftToHtml from 'draftjs-to-html';
+import uuidv4 from 'uuid/v4';
+import _ from 'lodash';
+import { OPERPORT_JIAJU_PRODUCTLIST_EDIT } from 'config/permission';
+import { goTo } from 'utils/utils';
 import PageHeaderLayout from 'layouts/PageHeaderLayout';
-import { d3Col0, d3Col1 } from 'components/Const';
+import flat2nested from 'components/Flat2nested';
+import { d3Col0, d3Col1, d3Col2 } from 'components/Const';
 import { MonitorInput, rules } from 'components/input';
 import Editor from 'components/Editor';
 import DetailFooterToolbar from 'components/DetailFooterToolbar';
 import { GoodsType } from 'components/Enum/GoodsType';
+import { listToOptions, optionsToHtml, enumToHtml } from 'components/DataTransfer';
+import SelectSearchConnectFactory from 'components/SelectSearchConnect/Factory';
+import SelectSearchConnectMerchant from 'components/SelectSearchConnect/MerchantNoSearch';
 import InputSelectGroup from './InputSelectGroup';
+import BasePropsCard from './BasePropsCard';
 import SkuCard from './SkuCard';
 import ImageCard from './ImageCard';
 import fieldLabels from './fieldLabels';
-import styles from './Detail.less';
+import OperateRecordCard from './OperateRecordCard';
+import './Detail.less';
 
-@connect(({ goods, goodsCategory, goodsBrand, marketingCategory, business, loading }) => ({
+const CheckboxGroup = Checkbox.Group;
+
+@connect(({ user, business, goods, goodsCategory, goodsBrand, goodsCategoryBrand,
+  propertyKey, marketingCategory, space, loading }) => ({
+  user,
+  business,
   goods,
   goodsCategory,
   goodsBrand,
+  goodsCategoryBrand,
+  propertyKey,
   marketingCategory,
-  business,
+  space,
+  loading,
   submitting: loading.effects['goods/add'],
-  fetchingBusinessList: loading.effects['business/list'],
+  fetchingBusinessList: loading.effects['business/queryList'],
 }))
 @Form.create()
 export default class Detail extends Component {
+  constructor(props) {
+    super(props);
+    this.emitterUid = uuidv4();
+  }
+
   state = {
     pattern: 'detail',
+    currentFactoryId: null, // 当前厂商ID，用于处理商家
+    currentGoodsCategory: {}, // 确定商品分类后，得到商品分类详情：基本/规格属性组ID等
+    initalFieldsValue: {},
   };
 
   componentWillMount() {
-    const { match: { params: { id } } } = this.props;
+    const { match: { params: { id } }, user } = this.props;
+    const userMerchantId = user?.merchant?.merchantId;
+    const userMerchantType = user?.merchant?.merchantType;
+    const isFactory = userMerchantId && userMerchantType === 1;
+    const isSmallBusiness = userMerchantId && userMerchantType === 3;
+
     this.setState({
       pattern: Number(id) === 0 ? 'add' : 'detail',
     });
+
+    if (isFactory || isSmallBusiness) {
+      this.setState({
+        currentFactoryId: userMerchantId,
+      });
+    }
   }
 
-  componentDidMount() {
+  componentDidMount = async () => {
     const { dispatch, match: { params: { id } } } = this.props;
+    const me = this;
+
     if (Number(id) !== 0) {
-      dispatch({
+      await dispatch({
         type: 'goods/detail',
-        payload: { id },
+        payload: { goodsId: Number(id) },
+      });
+
+      const { goods } = this.props;
+      const detail = goods?.[`detail${id}`];
+
+      this.setState({
+        currentFactoryId: detail?.factoryId,
+      });
+
+      // 厂家
+      dispatch({
+        type: 'business/queryUnionMerchantList',
+        payload: {
+          merchantTypeList: [1, 3],
+          merchantName: detail?.factoryName,
+        },
+      });
+
+      me.handleFactoryChange(detail?.factoryId); // 选中厂家
+
+      // 商家
+      dispatch({
+        type: 'business/queryMerchantOfUnionList',
+        payload: {
+          merchantTypeList: [2],
+          unionMerchantId: detail?.factoryId,
+        },
+      });
+
+      me.handleMemchantChange(detail?.merchantId); // 选中商家
+
+      // 全部商品分类
+      await dispatch({
+        type: 'goodsCategory/list',
+        payload: {},
+      });
+
+      const { goodsCategory } = this.props;
+
+      const values = [];
+      const loop = (loopId) => {
+        const result = _.find(goodsCategory?.list || [], v => v.categoryId === loopId);
+
+        if (result) {
+          values.push(result.categoryId);
+        }
+
+        if (result && result.parentId !== 0) {
+          return loop(result.parentId);
+        } else {
+          return result;
+        }
+      };
+
+      loop(detail?.goodsCategoryId);
+
+      // 商品分类下的品牌、基本属性、sku属性
+      me.handleGoodsCategoryChange(values.reverse(), false);
+
+      // 所属商家下的营销分类
+      dispatch({
+        type: 'marketingCategory/list',
+        payload: {
+          merchantId: detail?.merchantId,
+        },
+      });
+    }
+  }
+
+  handlePatternChange = () => {
+    const { form } = this.props;
+    const { pattern, initalFieldsValue } = this.state;
+
+    // 缓存详情数据
+    if (!initalFieldsValue || _.isEmpty(initalFieldsValue)) {
+      this.setState({
+        initalFieldsValue: form.getFieldsValue(),
       });
     }
 
-    dispatch({
-      type: 'goodsCategory/list',
-      payload: {},
+    this.setState({
+      pattern: pattern === 'detail' ? 'edit' : 'detail',
     });
 
-    dispatch({
-      type: 'marketingCategory/list',
-      payload: {},
-    });
-
-    dispatch({
-      type: 'goods/unit',
-      payload: {},
-    });
+    // 重置数据
+    if (pattern === 'edit') {
+      form.setFieldsValue(initalFieldsValue);
+    }
   }
 
+  // 提交
   handleSubmit = () => {
-    const { form, dispatch } = this.props;
+    const { form, dispatch, business, match: { params: { id } } } = this.props;
+    const { pattern, currentGoodsCategory, currentFactoryId } = this.state;
     const { validateFieldsAndScroll } = form;
+    const businessList = _.compact(_.concat(business?.queryUnionMerchantList?.list,
+      business?.[`queryMerchantOfUnionList${currentFactoryId}`]?.list)) || [];
 
     import('draft-js').then((raw) => {
       const { convertToRaw } = raw;
 
-      const description = draftToHtml(
+      const goodsDetail = draftToHtml(
         convertToRaw(this.editor.state.editorState.getCurrentContent())
       );
 
-      validateFieldsAndScroll((error, values) => {
+      // 排除验证字段：sku属性
+      const fileds = Object.keys(form.getFieldsValue()).filter(f => !(f.match(/skuProp_/) || f.match(/fileList_/)));
+      validateFieldsAndScroll(fileds, (error, values) => {
+        const params = {
+          goodsDetail,
+          ...values,
+          factoryId: values.factoryId ? Number(values.factoryId) : undefined,
+          merchantId: values.merchantId ? Number(values.merchantId) : undefined,
+          merchantName: businessList?.find(v => v?.merchantId === values.merchantId)?.merchantName,
+          goodsCategoryId: values.goodsCategoryId?.[values.goodsCategoryId.length - 1],
+          marketingCategoryId: values.marketingCategoryId?.[values.marketingCategoryId.length - 1],
+          serviceTime: values.afterSaleServiceTime?.number,
+          serviceType: values.afterSaleServiceTime?.unit,
+          basePropertyGroupId: currentGoodsCategory?.basePropertyGroupId,
+          propertyGroupId: currentGoodsCategory?.propertyGroupId,
+        };
+
+        delete params.afterSaleServiceTime;
+
+        // 处理基本属性
+        const goodsPropertyRelationVoSList = [];
+        for (const [key, value] of Object.entries(values)) {
+          const matchKey = key.match(/baseProp_(\w+)/);
+          if (matchKey) {
+            goodsPropertyRelationVoSList.push({
+              // 属性组ID
+              propertyGroupId: currentGoodsCategory?.basePropertyGroupId,
+              // 属性ID
+              propertyKeyId: Number(matchKey[1]),
+              // 属性名称
+              // propertyKey: '',
+              // 属性值id
+              propertyValueId: typeof value === 'number' || typeof value === 'string'
+                ? [value].join()
+                : value?.constructor?.name === 'Array'
+                  ? value.join()
+                  : '',
+              // 属性值名称
+              // propertyValue: '',
+            });
+            delete params[key];
+          }
+        }
+        params.goodsPropertyRelationVoSList = goodsPropertyRelationVoSList;
+        delete params.basePropList;
         // 对参数进行处理
+
+        // 处理图片
+        params.goodsImgGroupVoList = params.goodsImgGroupVoList?.imageGroups.map((img) => {
+          const r = { ...img };
+          r.id = r.imgGroupId;
+          r.imgGroupId = 0;
+          r.goodsImgVoList = r.goodsImgVoList.map((i) => { return { imgUrl: i, isMain: 0 }; });
+          delete r.enableDelete;
+          return r;
+        });
+
+        params.delSkuIds = params.goodsSkuVoList?.delSkuIds;
+
+        // 处理sku
+        params.goodsSkuVoList = params.goodsSkuVoList?.goodsSkuVoList.map((v) => {
+          const r = {};
+
+          for (const [key, val] of Object.entries(v)) {
+            if (!key.match(/skuProp_/)) {
+              r[key] = val;
+            }
+          }
+          r.id = r.imgGroupId;
+
+          delete r.imgGroupId;
+          if (typeof r.skuId === 'string' && r.skuId.match('-')) {
+            delete r.skuId;
+          }
+
+          r.supplyPrice *= 100;
+          r.discountPrice *= 100;
+          r.salePrice *= 100;
+          r.marketPrice *= 100;
+
+          return r;
+        });
+
+        if (pattern === 'edit') {
+          params.goodsId = Number(id);
+        }
+
         if (!error) {
           dispatch({
-            type: 'goods/add',
-            payload: {
-              description,
-              ...values,
-            },
-          }).then(() => {
-            const { result, msg } = this.props.goods;
-            if (result === 1) {
-              message.error(`提交失败！${msg}`);
-            } else if (result === 0) {
-              message.success('提交成功。', 1, () => {
-                history.back();
+            type: pattern === 'add' ? 'goods/add' : 'goods/edit',
+            payload: params,
+          }).then((res) => {
+            if (res) {
+              message.success('提交成功。', 0.4, () => {
+                goTo('/goods/list');
               });
             }
           });
@@ -96,101 +289,456 @@ export default class Detail extends Component {
     });
   }
 
-  handleCategoryChange = (value) => {
-    const { dispatch } = this.props;
+  // 选中 - 厂家
+  handleFactoryChange = async (value) => {
+    this.setState({
+      currentFactoryId: Number(value),
+    });
 
-    if (value.length) {
+    const { dispatch, form } = this.props;
+
+    // 清空 - 商家
+    form.resetFields('merchantId');
+    form.setFieldsValue({
+      merchantId: null,
+    });
+    // 清空 - 商家 搜索数据
+
+    // this.merchantRef?.reset();
+    // 获取厂家下的 - 商家
+    // 缺省，目前需要输入才可以获取
+
+    // 商家变动的联动效果
+
+    // 清空 - 商品分类
+    form.resetFields('goodsCategoryId');
+    form.setFieldsValue({
+      goodsCategoryId: null,
+    });
+
+    await dispatch({
+      type: 'business/queryMerchantOfUnionList',
+      payload: {
+        merchantTypeList: [2],
+        unionMerchantId: Number(value),
+      },
+    });
+
+    // 获取厂家下的 - 商品分类ids
+    // 获取所有分类，根据ids筛选
+
+    await dispatch({
+      type: 'business/queryDetailAll',
+      payload: {
+        merchantId: Number(value),
+      },
+    });
+
+    await dispatch({
+      type: 'goodsCategory/list',
+      payload: {},
+    });
+  }
+
+  // 选中 - 商家
+  handleMemchantChange = (value) => {
+    const { dispatch, form } = this.props;
+
+    // 清空 - 营销分类
+    form.resetFields('marketingCategoryId');
+    form.setFieldsValue({
+      marketingCategoryId: null,
+    });
+
+    // 获取所属商家下的 - 营销分类
+    dispatch({
+      type: 'marketingCategory/list',
+      payload: {
+        merchantId: Number(value),
+      },
+    });
+  }
+
+  // 选中 - 商品分类
+  handleGoodsCategoryChange = (value, reset) => {
+    const { dispatch, goodsCategory } = this.props;
+
+    // 选中的最后一级分类
+    const goodsCategoryId = value[value.length - 1];
+    // 选中的最后一级分类 - 对象
+    const currentGoodsCategory = _.find(goodsCategory?.list, v => v.categoryId === goodsCategoryId);
+
+    this.setState({ currentGoodsCategory });
+
+    if (value.length && currentGoodsCategory) {
+      if (reset) {
+        const { form } = this.props;
+        // 清空 - 品牌
+        form.resetFields('brandId');
+        form.setFieldsValue({
+          brandId: null,
+        });
+
+        // 清空 - 适用空间
+        form.resetFields('spaceIds');
+        form.setFieldsValue({
+          spaceIds: [],
+        });
+      }
+
+      // 获取分类下的 - 品牌
       dispatch({
-        type: 'goodsBrand/list',
-        payload: {},
+        type: 'goodsCategoryBrand/listOnlyBond',
+        payload: {
+          categoryId: value[0],
+          pageInfo: {
+            currPage: 1,
+            pageSize: 9999,
+          },
+        },
+      });
+
+      // 获取分类下的 - 适用空间
+      dispatch({
+        type: 'space/listByCategoryId',
+        payload: {
+          categoryId: value[0],
+        },
+      });
+
+      // 获取分类下的 - 基本属性组的全部属性
+      dispatch({
+        type: 'propertyKey/list',
+        payload: {
+          propertyGroupId: currentGoodsCategory.basePropertyGroupId,
+          pageInfo: {
+            currPage: 1,
+            pageSize: 9999,
+          },
+        },
+      });
+
+      // 获取分类下的 - 规格属性组的全部属性
+      dispatch({
+        type: 'propertyKey/list',
+        payload: {
+          propertyGroupId: currentGoodsCategory.propertyGroupId,
+          pageInfo: {
+            currPage: 1,
+            pageSize: 9999,
+          },
+        },
       });
     }
   }
 
-  handlePatternChange = () => {
-    const { pattern } = this.state;
-    this.setState({
-      pattern: pattern === 'detail' ? 'edit' : 'detail',
-    });
-  }
-
   render() {
-    const { form, submitting, goods, goodsCategory, goodsBrand } = this.props;
-    const { pattern } = this.state;
-
+    const { form, loading, submitting, user, goods, business,
+      goodsCategoryBrand, propertyKey, goodsCategory, marketingCategory, space,
+      match: { params: { id } } } = this.props;
+    const { pattern, currentGoodsCategory, currentFactoryId } = this.state;
     const disabled = pattern === 'detail';
-    const options = [
-      { label: '阳台', value: 0 },
-      { label: '客厅', value: 1 },
-      { label: '厨房', value: 2 },
-      { label: '阳台', value: 3 },
-      { label: '客厅', value: 4 },
-      { label: '厨房', value: 5 },
-      { label: '阳台', value: 6 },
-      { label: '客厅', value: 7 },
-      { label: '厨房', value: 8 },
-    ];
+    const detail = goods?.[`detail${id}`];
+    const unionBusinessList = business?.queryUnionMerchantList?.list || [];
+    let businessList = business?.[`queryMerchantOfUnionList${currentFactoryId}`]?.list || [];
+    const goodsCategoryBrandList = goodsCategoryBrand?.listOnlyBond?.list || [];
+    const basePropsListByCategory =
+      propertyKey?.[currentGoodsCategory?.basePropertyGroupId]?.list || [];
+    const skuPropsListByCategory = propertyKey?.[currentGoodsCategory?.propertyGroupId]?.list || [];
+
+    const userMerchantId = user?.merchant?.merchantId; // 登录用户的商家id
+    const userMerchantType = user?.merchant?.merchantType; // 登录用户的商家id
+    const isFactory = userMerchantId && userMerchantType === 1; // 是厂家
+
+    // 厂家可以给自己新建商品
+    if (currentFactoryId &&
+      !businessList?.find(v => v.merchantId === currentFactoryId)) {
+      const unionObj = unionBusinessList.find(v => v.merchantId === currentFactoryId);
+      if (unionObj) {
+        businessList = _.concat(unionObj, businessList);
+      }
+    }
+
+    // 所属厂家 - 名称
+    let factoryName = unionBusinessList.find(v =>
+      v.merchantId === detail?.factoryId)?.merchantName;
+
+    if (isFactory) {
+      factoryName = user?.merchant?.merchantName;
+    }
+
+    const { merchantName = '' } = businessList.find(v =>
+      v.merchantId === detail?.merchantId) || {};
+
+    const currentMerchantId = form.getFieldsValue()?.merchantId;
+
+    const getCategoryName = (list, detailId = '', listId = 'categoryId') => {
+      const currentCategory = list.find(v => v.value === detail?.[detailId]);
+      const parent = list.find(v => v.value === currentCategory?.parentId);
+
+      let preParentId = 0;
+      let firstParentId = 0;
+      let preParent = {};
+      let firstParent = {};
+      if (parent?.parentId !== 0) {
+        preParentId = list.find(v => v.value === parent?.[listId])?.parentId;
+        preParent = list.find(v => v.value === preParentId);
+      }
+
+      if (preParent?.parentId !== 0) {
+        firstParentId = list.find(v => v.value === preParent?.[listId])?.parentId;
+        firstParent = list.find(v => v.value === firstParentId);
+      }
+
+      return `${firstParent?.label ? `${firstParent?.label} > ` : ''}${preParent?.label ? `${preParent?.label} > ` : ''}${parent?.label ? `${parent?.label} > ` : ''}${currentCategory?.label ? currentCategory?.label : ''}`;
+    };
+
+    const getCategoryIds = (list, detailId = '', listId = 'categoryId') => {
+      const currentCategory = list.find(v => v.value === detail?.[detailId]);
+      const parent = list.find(v => v.value === currentCategory?.parentId);
+
+      let preParentId = 0;
+      let firstParentId = 0;
+      let preParent = {};
+      let firstParent = {};
+      if (parent?.parentId !== 0) {
+        preParentId = list.find(v => v.value === parent?.[listId])?.parentId;
+        preParent = list.find(v => v.value === preParentId);
+      }
+
+      if (preParent?.parentId !== 0) {
+        firstParentId = list.find(v => v.value === preParent?.[listId])?.parentId;
+        firstParent = list.find(v => v.value === firstParentId);
+      }
+
+      return _.compact([firstParent?.value, preParent?.value,
+        parent?.value, currentCategory?.value]);
+    };
+
+    // 商品分类 - id集合
+    const idsByFactory = business?.details?.merchantOperateScopeVoList?.map(v => v.goodsCategoryId);
+    // 商品分类 - 含子级
+    const goodsCategoryCascaderOptions = flat2nested(goodsCategory?.list || [], { id: 'categoryId', parentId: 'parentId' })
+      .filter(v => idsByFactory?.includes(v.categoryId));
+    // 商品分类 - 名称
+    const goodsCategoryName = getCategoryName(goodsCategory?.list || [], 'goodsCategoryId');
+    // 商品分类 - id
+    const goodsCategoryIds = getCategoryIds(goodsCategory?.list || [], 'goodsCategoryId');
+
+    // 商品品牌
+    const goodsBrandOptionsHtml = optionsToHtml(listToOptions(
+      goodsCategoryBrandList,
+      'brandId',
+      'brandName',
+    ));
+    // 商品品牌 - 名称
+    const goodsBrandName = goodsCategoryBrandList.find(v =>
+      v.brandId === detail?.brandId)?.brandName;
+
+    // 商品类型
+    const goodsTypeOptionsHtml = enumToHtml(GoodsType);
+    // 商品类型 - 名称
+    const goodsTypeName = Object.entries(GoodsType).find(([k]) =>
+      Number(k) === detail?.goodsType)?.[1];
+
+    // 营销分类
+    const marketingCategoryOptions = flat2nested(marketingCategory?.list || [], { id: 'categoryId', parentId: 'parentId' });
+    // 营销分类 - 名称
+    const marketingCategoryName = getCategoryName(marketingCategory?.list || [], 'marketingCategoryId');
+    // 营销分类 - ids
+    const marketingCategoryIds = getCategoryIds(marketingCategory?.list || [], 'marketingCategoryId');
+
+    // 售后服务时间
+    const numberUnit = {
+      number: detail?.serviceTime,
+      unit: detail?.serviceType,
+    };
+
+    // 售后服务时间 - 名称
+    const numberUnitName = detail?.serviceTime && detail?.serviceType
+      ? `${detail?.serviceTime}${['未知', '日', '月', '年'][detail?.serviceType] || '--'}`
+      : '';
+
+    // 适用空间
+    const spaceOptions = listToOptions(
+      space?.listByCategoryId || [],
+      'spaceId',
+      'name',
+    );
+
+    // 基本属性 - 可选列表
+    const basePropChoiceList = basePropsListByCategory.filter(
+      item => item.propertyGroupId === currentGoodsCategory?.basePropertyGroupId
+        || detail?.basePropertyGroupId);
+    // 基本属性 - 当前值
+    const basePropList = detail?.goodsPropertyRelationVoSList || [];
+    // 基本属性
+    const baseProp = {
+      list: basePropList,
+      choiceList: basePropChoiceList,
+    };
+
+    // sku属性 - 可选列表
+    const skuPropsChiceList = skuPropsListByCategory.filter(item =>
+      item.propertyGroupId === currentGoodsCategory?.propertyGroupId
+      || detail?.propertyGroupId)?.map(((p) => {
+      const r = p;
+
+      for (const cp of (detail?.customProperyList || []).filter(v =>
+        v.propertyKeyId === p.propertyKeyId)) {
+        r.propertyValuesIds = _.union(r.propertyValuesIds.split(','), [`c-${cp.propertyValueId}`]).join(',');
+        r.propertyValuesAll = _.union(r.propertyValuesAll.split(','), [`c-${cp.propertyValue}`]).join(',');
+      }
+
+      return r;
+    }));
+
+    const skuProp = {
+      goodsSkuVoList: [
+        ...detail?.goodsSkuVoList?.map((sku) => {
+          return {
+            ...sku,
+            supplyPrice: sku.supplyPrice / 100,
+            discountPrice: sku.discountPrice / 100,
+            salePrice: sku.salePrice / 100,
+            marketPrice: sku.marketPrice / 100,
+          };
+        }) || [],
+      ],
+      choiceList: skuPropsChiceList,
+      delSkuIds: [],
+    };
+
+    // 图片组
+    const imgCard = {
+      imageGroups: detail?.goodsImgGroupVoList || [],
+    };
+
+    const indicator = <Icon type="loading" style={{ fontSize: 12, position: 'absolute', top: 4 }} spin />;
 
     return (
       <PageHeaderLayout>
-        <Card title="基本信息" className={styles.card} bordered={false}>
+        <Card
+          title="基本信息"
+          styleName="card"
+          bordered={false}
+          loading={pattern === 'detail' && (!!loading.effects['goods/detail']
+            || !!loading.effects['business/queryUnionMerchantList']
+            || !!loading.effects['business/queryMerchantOfUnionList']
+            || !!loading.effects['goodsCategoryBrand/listOnlyBond']
+            || !!loading.effects['marketingCategory/list']
+            || !!loading.effects['space/listByCategoryId'])}
+        >
           <Form layout="vertical">
             <Row gutter={16}>
               <Col {...d3Col0}>
-                <Form.Item label="所属厂家">
+                <Form.Item
+                  label={
+                    <span>所属厂家
+                      <Spin indicator={indicator} spinning={!!loading.effects['business/queryUnionMerchantList']} />
+                    </span>
+                  }
+                >
                   {form.getFieldDecorator('factoryId', {
                     rules: [{
                       required: true, message: '请填写所属厂家',
                     }],
+                    initialValue: detail?.factoryId,
                   })(
-                    <Cascader disabled={disabled} options={[]} placeholder="" />
+                    pattern === 'detail' || isFactory
+                      ? <span>{factoryName}</span>
+                      : (
+                        <SelectSearchConnectFactory
+                          dataSource={unionBusinessList}
+                          onChange={this.handleFactoryChange}
+                          disabled={pattern === 'detail' || pattern === 'edit'}
+                        />
+                      )
                   )}
                 </Form.Item>
               </Col>
               <Col {...d3Col1}>
-                <Form.Item label="所属商家">
+                <Form.Item
+                  label={
+                    <span>所属商家
+                      <Spin indicator={indicator} spinning={!!loading.effects['business/queryMerchantOfUnionList']} />
+                    </span>
+                  }
+                >
                   {form.getFieldDecorator('merchantId', {
                     rules: [{
                       required: true, message: '请填写所属商家',
                     }],
+                    initialValue: detail?.merchantId,
                   })(
-                    <Cascader disabled={disabled} options={[]} placeholder="" />
+                    pattern === 'detail'
+                      ? <span>{merchantName}</span>
+                      : (
+                        <SelectSearchConnectMerchant
+                          unionMerchantId={currentFactoryId}
+                          dataSource={businessList}
+                          disabled={pattern === 'detail' || pattern === 'edit' || !(currentFactoryId || detail?.factoryId)}
+                          placeholder={!currentFactoryId ? '请先选择厂家' : ''}
+                          onChange={this.handleMemchantChange}
+                        />
+                      )
                   )}
                 </Form.Item>
               </Col>
               <Col {...d3Col1}>
-                <Form.Item label="商品分类">
+                <Form.Item
+                  label={
+                    <span>商品分类
+                      <Spin indicator={indicator} spinning={!!loading.effects['business/queryDetailAll'] || !!loading.effects['goodsCategory/list']} />
+                    </span>
+                  }
+                >
                   {form.getFieldDecorator('goodsCategoryId', {
                     rules: [{
                       required: true, message: '请输入商品分类',
                     }],
+                    initialValue: goodsCategoryIds || null,
                   })(
-                    <Cascader
-                      options={goodsCategory?.list?.list}
-                      placeholder=""
-                      onChange={this.handleCategoryChange}
-                      disabled={disabled}
-                    />
+                    pattern === 'detail'
+                      ? <span>{goodsCategoryName}</span>
+                      : (
+                        <Cascader
+                          options={goodsCategoryCascaderOptions}
+                          placeholder={!currentFactoryId ? '请先选择厂家' : ''}
+                          onChange={this.handleGoodsCategoryChange}
+                          changeOnSelect
+                          disabled={pattern === 'detail' || pattern === 'edit' || !(currentFactoryId || detail?.factoryId)}
+                        />
+                      )
                   )}
                 </Form.Item>
               </Col>
             </Row>
             <Row gutter={16}>
               <Col {...d3Col0}>
-                <Form.Item label="商品品牌">
+                <Form.Item
+                  label={
+                    <span>商品品牌
+                      <Spin indicator={indicator} spinning={!!loading.effects['goodsCategoryBrand/listOnlyBond']} />
+                    </span>
+                  }
+                >
                   {form.getFieldDecorator('brandId', {
                     rules: [{
                       required: true, message: '请填写商品品牌',
                     }],
+                    initialValue: detail?.brandId,
                   })(
-                    <Select
-                      placeholder={!goodsBrand?.list?.list?.length ? '请先选择商品分类' : ''}
-                      disabled={!goodsBrand?.list?.list?.length || disabled}
-                    >
-                      {goodsBrand?.list?.list.map(brand => (
-                        <Select.Option key={brand.id} value={brand.id}>{brand.name}</Select.Option>
-                      ))}
-                    </Select>
+                    pattern === 'detail'
+                      ? <span>{goodsBrandName}</span>
+                      : (
+                        <Select
+                          placeholder={!goodsCategoryBrandList.length ? '请先选择商品分类' : ''}
+                          disabled={!goodsCategoryBrandList.length || disabled}
+                        >
+                          {goodsBrandOptionsHtml}
+                        </Select>
+                      )
                   )}
                 </Form.Item>
               </Col>
@@ -198,25 +746,27 @@ export default class Detail extends Component {
                 <Form.Item label="商品类型">
                   {form.getFieldDecorator('goodsType', {
                     rules: [{ required: true, message: '请填写商品类型' }],
+                    initialValue: detail?.goodsType || 2,
                   })(
-                    <Select disabled={disabled}>
-                      {Object.entries(GoodsType).map(([k, v]) =>
-                        <Select.Option value={Number(k)} key={k}>{v}</Select.Option>)}
-                    </Select>
+                    pattern === 'detail'
+                      ? <span>{goodsTypeName}</span>
+                      : <Select disabled={disabled}>{goodsTypeOptionsHtml}</Select>
                   )}
                 </Form.Item>
               </Col>
               <Col {...d3Col1}>
                 <Form.Item label="商品标题">
-                  {form.getFieldDecorator('name', {
+                  {form.getFieldDecorator('goodsName', {
                     rules: rules([{
                       required: true, message: '请输入商品标题',
                     }, {
                       max: 60,
                     }]),
-                    initialValue: goods?.detail?.goodsName,
+                    initialValue: detail?.goodsName,
                   })(
-                    <MonitorInput maxLength={60} disabled={disabled} />
+                    pattern === 'detail'
+                      ? <span>{detail?.goodsName}</span>
+                      : <MonitorInput maxLength={60} disabled={disabled} />
                   )}
                 </Form.Item>
               </Col>
@@ -224,12 +774,15 @@ export default class Detail extends Component {
             <Row gutter={16}>
               <Col {...d3Col0}>
                 <Form.Item label="商品卖点">
-                  {form.getFieldDecorator('sellingPoint', {
+                  {form.getFieldDecorator('goodsSellingPoint', {
                     rules: rules([{
                       max: 50,
                     }]),
+                    initialValue: detail?.goodsSellingPoint,
                   })(
-                    <MonitorInput maxLength={50} disabled={disabled} />
+                    pattern === 'detail'
+                      ? <span>{detail?.goodsSellingPoint}</span>
+                      : <MonitorInput maxLength={50} disabled={disabled} />
                   )}
                 </Form.Item>
               </Col>
@@ -239,22 +792,35 @@ export default class Detail extends Component {
                     rules: rules([{
                       max: 50,
                     }]),
+                    initialValue: detail?.goodsCode,
                   })(
-                    <MonitorInput maxLength={50} disabled={disabled} />
+                    pattern === 'detail'
+                      ? <span>{detail?.goodsCode}</span>
+                      : <MonitorInput maxLength={50} disabled={disabled} />
                   )}
                 </Form.Item>
               </Col>
               <Col {...d3Col1}>
-                <Form.Item label="营销分类">
+                <Form.Item
+                  label={
+                    <span>营销分类
+                      <Spin indicator={indicator} spinning={!!loading.effects['marketingCategory/list']} />
+                    </span>
+                  }
+                >
                   {form.getFieldDecorator('marketingCategoryId', {
                     rules: [],
+                    initialValue: marketingCategoryIds || null,
                   })(
-                    <Cascader
-                      options={[]}
-                      placeholder=""
-                      onChange={this.handleCategoryChange}
-                      disabled={disabled}
-                    />
+                    pattern === 'detail'
+                      ? <span>{marketingCategoryName}</span>
+                      : (
+                        <Cascader
+                          options={marketingCategoryOptions}
+                          placeholder={currentMerchantId ? '' : '请先选择所属商家'}
+                          disabled={!currentMerchantId || disabled}
+                        />
+                      )
                   )}
                 </Form.Item>
               </Col>
@@ -264,130 +830,167 @@ export default class Detail extends Component {
                 <Form.Item label="售后服务时间">
                   {form.getFieldDecorator('afterSaleServiceTime', {
                     rules: [],
-                    initialValue: {
-                      number: 3,
-                      unit: 'month',
-                    },
+                    initialValue: numberUnit,
                   })(
-                    <InputSelectGroup disabled={disabled}>
-                      <Select.Option value="year">年</Select.Option>
-                      <Select.Option value="month">月</Select.Option>
-                      <Select.Option value="day">日</Select.Option>
-                    </InputSelectGroup>
+                    pattern === 'detail'
+                      ? <span>{numberUnitName}</span>
+                      : (
+                        <InputSelectGroup disabled={disabled}>
+                          <Select.Option value={3}>年</Select.Option>
+                          <Select.Option value={2}>月</Select.Option>
+                          <Select.Option value={1}>日</Select.Option>
+                        </InputSelectGroup>
+                      )
                   )}
                 </Form.Item>
               </Col>
+              {
+                space?.listByCategoryId && space?.listByCategoryId?.length > 0
+                  ? (
+                    <Col {...d3Col2}>
+                      <Form.Item
+                        label={
+                          <span>适用空间
+                            <Spin indicator={indicator} spinning={!!loading.effects['space/listByCategoryId']} />
+                          </span>
+                        }
+                      >
+                        {form.getFieldDecorator('spaceIds', {
+                          rules: [{
+                            required: true, message: '请选择适用空间',
+                          }],
+                          initialValue: detail?.spaceIds || [],
+                        })(
+                          <CheckboxGroup options={spaceOptions} disabled={disabled} />
+                        )}
+                      </Form.Item>
+                    </Col>
+                  )
+                  : ''
+              }
             </Row>
           </Form>
         </Card>
-
-        <Card title="基本属性" className={styles.card} bordered={false}>
-          <Form layout="vertical">
-            <Row gutter={16}>
-              <Col>
-                <Form.Item label="适用位置">
-                  {form.getFieldDecorator('position', {
-                    rules: [{
-                      required: true, message: '请选择适用位置',
-                    }],
-                  })(
-                    <Radio.Group options={options} disabled={disabled} />
-                  )}
-                </Form.Item>
-              </Col>
-            </Row>
-            <Row gutter={16}>
-              <Col {...d3Col0}>
-                <Form.Item label="可送货/安装">
-                  {form.getFieldDecorator('delivery', {
-                    valuePropName: 'checked',
-                    rules: [{
-                      required: true, message: '请选择是否可送货/安装',
-                    }],
-                  })(
-                    <Switch
-                      checkedChildren={<Icon type="check" />}
-                      unCheckedChildren={<Icon type="cross" />}
-                      disabled={disabled}
-                    />
-                  )}
-                </Form.Item>
-              </Col>
-              <Col {...d3Col1}>
-                <Form.Item label="是否带储物空间">
-                  {form.getFieldDecorator('storage', {
-                    rules: [],
-                  })(
-                    <Switch
-                      checkedChildren={<Icon type="check" />}
-                      unCheckedChildren={<Icon type="cross" />}
-                      disabled={disabled}
-                    />
-                  )}
-                </Form.Item>
-              </Col>
-              <Col {...d3Col1}>
-                <Form.Item label="是否可订制">
-                  {form.getFieldDecorator('custom', {
-                    rules: [],
-                  })(
-                    <Switch
-                      checkedChildren={<Icon type="check" />}
-                      unCheckedChildren={<Icon type="cross" />}
-                      disabled={disabled}
-                    />
-                  )}
-                </Form.Item>
-              </Col>
-            </Row>
-            <Row gutter={16}>
-              <Col {...d3Col0}>
-                <Form.Item label="材质">
-                  {form.getFieldDecorator('material', {
-                    rules: [],
-                  })(
-                    <Input disabled={disabled} />
-                  )}
-                </Form.Item>
-              </Col>
-              <Col {...d3Col1}>
-                <Form.Item label="面料">
-                  {form.getFieldDecorator('fabric', {
-                    rules: [],
-                  })(
-                    <Input disabled={disabled} />
-                  )}
-                </Form.Item>
-              </Col>
-              <Col {...d3Col1}>
-                <Form.Item label="产地">
-                  {form.getFieldDecorator('productionPlace', {
-                    rules: [],
-                  })(
-                    <Input disabled={disabled} />
-                  )}
-                </Form.Item>
-              </Col>
-            </Row>
-          </Form>
-        </Card>
-
-        <SkuCard form={form} disabled={disabled} />
 
         {
-          form.getFieldDecorator('imgCard', {
+          form.getFieldDecorator('basePropList', {
+            initialValue: baseProp,
           })(
-            <ImageCard disabled={disabled} />
+            <BasePropsCard
+              form={form}
+              disabled={disabled}
+              loading={loading}
+              pattern={pattern}
+            />
           )
         }
 
-        <Card title="介绍" className={styles.card} bordered={false}>
+        <Card title="图片" styleName="card" bordered={false}>
+          <Form.Item>
+            {
+              form.getFieldDecorator('goodsImgGroupVoList', {
+                rules: [{
+                  validator: (rule, value, callback) => {
+                    const errors = [];
+
+                    if (!_.isArray(value.imageGroups) || !value.imageGroups?.length) {
+                      errors.push(new Error(
+                        '请添加图片组',
+                        rule.field));
+                    } else if (_.find(value.imageGroups, v => v.goodsImgVoList?.length <= 0)) {
+                      errors.push(new Error(
+                        '每个图片组至少要有一张图片',
+                        rule.field));
+                    }
+
+                    callback(errors);
+                  },
+                }],
+                initialValue: imgCard,
+              })(
+                <ImageCard
+                  form={form}
+                  disabled={disabled}
+                  emitterUid={this.emitterUid}
+                  pattern={pattern}
+                />
+              )
+            }
+          </Form.Item>
+        </Card>
+
+        <Card title="规格" styleName="card" bordered={false} loading={loading.effects['propertyKey/list']}>
+          <Form.Item>
+            {
+              form.getFieldDecorator('goodsSkuVoList', {
+                rules: [{
+                  validator: (rule, value, callback) => {
+                    const errors = [];
+
+                    if (!value.goodsSkuVoList?.length) {
+                      errors.push(new Error(
+                        '请添加规格',
+                        rule.field));
+                    }
+
+                    const defaultIds = [];
+                    for (const sku of value.goodsSkuVoList || []) {
+                      if (!sku.imgGroupId) {
+                        errors.push(new Error(
+                          '请选择图片组',
+                          rule.field));
+                      }
+
+                      defaultIds.push(sku.isDefault || 0);
+                    }
+
+                    if (!defaultIds.includes(2)) {
+                      errors.push(new Error(
+                        '请选择默认规格',
+                        rule.field));
+                    }
+
+                    callback(errors);
+                  },
+                }],
+                initialValue: skuProp,
+              })(
+                <SkuCard
+                  form={form}
+                  disabled={disabled}
+                  propertyGroupId={detail?.propertyGroupId || currentGoodsCategory.categoryId}
+                  pattern={pattern}
+                  loading={loading}
+                  emitterUid={this.emitterUid}
+                />
+              )
+            }
+          </Form.Item>
+        </Card>
+
+        <Card title="介绍" styleName="card" bordered={false}>
           <Form layout="vertical">
             <Row gutter={16}>
-              <Editor ref={(inst) => { this.editor = inst; }} maxLength={2} disabled={disabled} />
+              {
+                form.getFieldDecorator('goodsDetail', {
+                  initialValue: detail?.goodsDetail,
+                })(
+                  <Editor
+                    ref={(inst) => { this.editor = inst; }}
+                    maxLength={2}
+                    disabled={disabled}
+                  />
+                )
+              }
             </Row>
           </Form>
         </Card>
+
+        {
+          disabled
+            ? <OperateRecordCard disabled={disabled} goodsId={id} />
+            : ''
+        }
 
         <DetailFooterToolbar
           form={form}
@@ -395,6 +998,7 @@ export default class Detail extends Component {
           submitting={submitting}
           handleSubmit={this.handleSubmit}
           pattern={pattern}
+          permission={[OPERPORT_JIAJU_PRODUCTLIST_EDIT]}
           handlePatternChange={this.handlePatternChange}
         />
       </PageHeaderLayout>

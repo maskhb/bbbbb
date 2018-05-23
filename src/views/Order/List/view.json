@@ -1,16 +1,17 @@
 {
   "route": {
     "params": "",
-    "authority": ""
+    "authority": "OPERPORT_JIAJU_ORDERLIST_LIST"
   },
   "menu": {
     "name": "订单列表",
     "icon": "",
     "order": 0,
-    "authority": ""
+    "authority": "OPERPORT_JIAJU_ORDERLIST_LIST"
   },
   "model": [
     "orders",
-    "exports"
+    "propertyKey",
+    "goods"
   ]
 }

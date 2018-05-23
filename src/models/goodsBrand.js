@@ -14,7 +14,7 @@ export default {
     *list({ payload }, { call, put }) {
       const response = yield call(service.list, payload);
 
-      const vm = plainToClassFromExist(GoodsBrandPaginationList(), response);
+      const vm = plainToClassFromExist(GoodsBrandPaginationList(), response || {});
       const errors = validateSync(vm);
       if (errors.length > 0) {
         console.log('validation failed. errors: ', errors); /* eslint no-console: 0 */
@@ -31,7 +31,7 @@ export default {
     *detail({ payload }, { call, put }) {
       const response = yield call(service.detail, payload);
 
-      const vm = plainToClass(GoodsBrand, response);
+      const vm = plainToClass(GoodsBrand, response || {});
       const errors = validateSync(vm);
       if (errors.length > 0) {
         console.log('validation failed. errors: ', errors); /* eslint no-console: 0 */
@@ -53,6 +53,17 @@ export default {
           add: response,
         },
       });
+      return response;
+    },
+    *edit({ payload }, { call, put }) {
+      const response = yield call(service.edit, payload);
+      yield put({
+        type: 'save',
+        payload: {
+          edit: response,
+        },
+      });
+      return response;
     },
     *remove({ payload }, { call, put }) {
       const response = yield call(service.remove, payload);

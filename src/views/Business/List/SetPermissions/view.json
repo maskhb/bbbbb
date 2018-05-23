@@ -1,6 +1,6 @@
 {
   "route": {
-    "params": "/:name",
+    "params": "/:data",
     "authority": ""
   },
   "breadcrumb": {
@@ -9,5 +9,5 @@
     "order": 1,
     "authority": ""
   },
-  "model": ["business"]
+  "model": ["businessAccount","business"]
 }

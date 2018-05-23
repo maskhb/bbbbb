@@ -7,10 +7,9 @@ export default class InputSelectGroup extends Component {
 
     const { value = {} } = this.props;
     this.state = {
-      number: value.number || 0,
+      number: value.number,
       unit: value.unit || '',
     };
-    this.triggerChange();
   }
 
   componentWillReceiveProps(nextProps) {

@@ -1,13 +1,14 @@
 {
-    "route": {
-        "params": "",
-        "authority": ""
-    },
-    "menu": {
-        "name": "售后管理",
-        "icon": "appstore",
-        "order": 4,
-        "authority": ""
-    },
-    "model": [""]
+  "route": {
+    "params": "",
+    "authority": ""
+  },
+  "menu": {
+    "name": "售后管理",
+    "icon": "appstore",
+    "order": 14,
+    "authority": "",
+    "hideInMenu": true
+  },
+  "model": [""]
 }

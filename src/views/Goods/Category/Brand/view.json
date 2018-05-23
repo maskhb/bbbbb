@@ -1,7 +1,7 @@
 {
   "route": {
     "params": "/:id",
-    "authority": ""
+    "authority": "OPERPORT_JIAJU_PROCATEGORYLIST_SETBRAND"
   },
   "breadcrumb": {
     "name": "设置品牌",
@@ -9,5 +9,5 @@
     "order": 0,
     "authority": ""
   },
-  "model": ["goodsCategory","goodsBrand"]
+  "model": ["goodsCategory","goodsCategoryBrand"]
 }

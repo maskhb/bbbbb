@@ -2,7 +2,7 @@ import { stringify } from 'qs';
 import request from '../utils/request';
 
 async function list(params) {
-  return request('/space/queryList', {
+  return request('/mj/ht-mj-goods-server/space/queryList', {
     method: 'POST',
     body: {
       ...params,
@@ -10,55 +10,51 @@ async function list(params) {
   });
 }
 async function enable(params) {
-  return request(`/space/enable?${stringify(params)}`);
+  return request(`/mj/ht-mj-goods-server/space/enable?${stringify(params)}`);
 }
 async function disable(params) {
-  return request(`/space/disable?${stringify(params)}`);
+  return request(`/mj/ht-mj-goods-server/space/disable?${stringify(params)}`);
 }
 async function remove(params) {
-  return request(`/space/delete?${stringify(params)}`);
+  return request(`/mj/ht-mj-goods-server/space/delete?${stringify(params)}`);
 }
 async function link(params) {
-  return request(`/space/link?${stringify(params)}`);
+  return request('/mj/ht-mj-goods-server/space/link', {
+    method: 'POST',
+    body: {
+      spaceId: params.spaceId,
+      categoryIds: params.categoryIds,
+    },
+  });
 }
 async function detail(params) {
-  return request(`/space/queryDetail?${stringify(params)}`);
+  return request(`/mj/ht-mj-goods-server/space/queryDetail?${stringify(params)}`);
 }
 
 async function add(params) {
-  return request('/api/goods/add', {
+  return request('/mj/ht-mj-goods-server/space/save', {
     method: 'POST',
     body: {
       ...params,
     },
   });
 }
-
 async function edit(params) {
-  return request('/api/goods/edit', {
+  return request('/mj/ht-mj-goods-server/space/update', {
     method: 'POST',
     body: {
       ...params,
     },
   });
 }
-
-async function audit(params) {
-  return request('/api/goods/audit', {
+async function listByCategoryId(params) {
+  return request('/mj/ht-mj-goods-server/space/queryListByCategoryId', {
     method: 'POST',
     body: {
       ...params,
     },
   });
 }
-
-async function unit() {
-  return request('/api/goods/unit', {
-    method: 'POST',
-    body: {},
-  });
-}
-
 export default {
   list,
   disable,
@@ -68,6 +64,5 @@ export default {
   add,
   edit,
   remove,
-  audit,
-  unit,
+  listByCategoryId,
 };

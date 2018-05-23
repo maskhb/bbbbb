@@ -5,8 +5,8 @@
   },
   "menu": {
     "name": "项目管理",
-    "icon": "user",
-    "order": 1,
+    "icon": "setting",
+    "order": 31,
     "authority": ""
   },
   "model": [""]

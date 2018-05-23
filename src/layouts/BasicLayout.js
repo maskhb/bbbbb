@@ -14,7 +14,7 @@ import NotFound from '../views/Exception/404/view.js';
 import { getRoutes } from '../utils/utils';
 import Authorized from '../utils/Authorized';
 import { getMenuData } from '../core/menu';
-import logo from '../assets/logo.svg';
+import logo from '../assets/favicon.ico';
 
 const { Content } = Layout;
 const { AuthorizedRoute } = Authorized;
@@ -76,8 +76,11 @@ export default class BasicLayout extends React.PureComponent {
     this.props.dispatch({
       type: 'user/current',
     });
+    // this.props.dispatch({
+    //   type: 'permission/current',
+    // });
     this.props.dispatch({
-      type: 'permission/current',
+      type: 'global/fetchNotices',
     });
   }
 

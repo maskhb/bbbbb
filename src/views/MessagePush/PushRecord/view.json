@@ -7,7 +7,7 @@
     "name": "系统短信记录",
     "icon": "",
     "order": 0,
-    "authority": ""
+    "authority": "OPERPORT_JIAJU_SMSLIST_LIST"
   },
   "model": ["messagePush"]
 }

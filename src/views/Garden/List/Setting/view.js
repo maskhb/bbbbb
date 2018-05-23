@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'dva';
-import { Form, Card } from 'antd';
+import { Form, Card, Message } from 'antd';
 import PageHeaderLayout from '../../../../layouts/PageHeaderLayout';
 // import ImageUpload from '../../../../components/Upload/Image/ImageUpload';
 import DetailFooterToolbar from '../../../../components/DetailFooterToolbar';
@@ -41,7 +41,7 @@ export default class View extends PureComponent {
     validateFieldsAndScroll((error, values) => {
       const obj = values.name;
       const params = {
-        communityMap: View.handleCommunityList(obj.allCommunityIds, obj.checkedCommunityIds),
+        communityMap: View.handleCommunityList(obj.allCommunity, obj.checkedCommunityIds),
         platformType: 3,
       };
       // console.log(params.communityMap);
@@ -52,14 +52,14 @@ export default class View extends PureComponent {
           type: 'garden/add',
           payload: params,
         }).then(() => {
-          // console.log(res);
-          // if (add.msgCode === 200 && add.data) {
-          //   message.success('提交成功。', 1, () => {
-          //     history.back();
-          //   });
-          // } else {
-          //   message.error(`提交失败！${add.message}`);
-          // }
+          const { add } = this.props.garden;
+          if (add && typeof add === 'boolean') {
+            Message.success('保存成功。', 1, () => {
+              history.back();
+            });
+          } else {
+            Message.error('保存失败，请稍候重试！');
+          }
         });
       }
     });
@@ -94,7 +94,7 @@ export default class View extends PureComponent {
             <FormItem {...formItemLayout} label="">
               {form.getFieldDecorator('name', {})(
                 <CommunitySelect
-                  needInitCheck
+                  checkType={1}
                   expandAll
                 />
               )}

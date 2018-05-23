@@ -2,64 +2,220 @@
  * @Author: wuhao
  * @Date: 2018-04-18 09:34:14
  * @Last Modified by: wuhao
- * @Last Modified time: 2018-04-18 15:23:05
+ * @Last Modified time: 2018-05-11 10:59:04
  *
  * 导出弹框 业务组件
  */
 
 import React, { PureComponent } from 'react';
+import { connect } from 'dva';
+
+import { goTo } from 'utils/utils';
+
+import { toFullPath } from 'utils/request/utils';
 
 import ModalExport from './index';
+import ResultHint from './ResultHint';
+import ResultPrompt from './ResultPrompt';
+import AdvancePrompt from './AdvancePrompt';
 
+@connect(({ common, loading }) => ({
+  common,
+  loading: loading.models.common,
+}))
 class ModalExportBusiness extends PureComponent {
    static defaultProps = {};
 
    state = {}
 
-   handleOk = async (values) => {
-     const { dispatch, prefix: pubPrefix, dataUrl: pubDataUrl, convertParam } = this.props;
-     const { exportFileName, prefix, totalCount, ...param } = values;
+   getEnvs = () => {
+     return [
+       'dev',
+       'sit',
+       'stg',
+       'test',
+       'fix',
+       'stress',
+     ];
+   }
 
-     // repParam prefix dataUrl param page
-     let cParam = {};
-     if (convertParam) {
-       cParam = convertParam(values);
+   getPrefix = (dataUrl = '', oldServiceUrl) => {
+     if (dataUrl.indexOf('http') === 0) {
+       return dataUrl;
+     }
+     const { hostname } = location;
+
+     let env = 'prd';
+     const envList = this.getEnvs();
+     envList.forEach((item) => {
+       if (hostname?.indexOf(item) > -1) {
+         env = item;
+       }
+     });
+
+     if (hostname === 'localhost') {
+       env = 'dev';
+     } else if (env === 'prd' && oldServiceUrl) {
+       env = 'release';
      }
 
-     const repParam = {
-       dataUrl: cParam?.dataUrl || pubDataUrl,
+     if (oldServiceUrl) {
+       return `http://${env}.${oldServiceUrl}.hd${dataUrl.indexOf('/') === 0 ? '' : '/'}${dataUrl}`;
+     } else {
+       return `http://zuul-internal-${env}.hd${dataUrl.indexOf('/') === 0 ? '' : '/'}${dataUrl}`;
+     }
+   }
+
+   getExportParams = (params = {}) => {
+     const newParams = [];
+
+     for (const [key, value] of Object.entries(params)) {
+       newParams.push(`${key}=${JSON.stringify(value)}`);
+     }
+
+     return newParams.length > 0 ? newParams.join('&') : '';
+   }
+
+   handleSkip = async () => { // values
+     //  const { prefix: pubPrefix, convertParam } = this.props;
+     //  const { prefix } = values;
+
+     //  let cParam = {};
+     //  if (convertParam) {
+     //    cParam = await convertParam(values);
+     //  }
+
+     //  const prefixUrl = '/';
+     const url = '#/exportmanage/export';
+     const fullUrl = toFullPath(url);
+     const { isOpen = false } = this.props;
+     if (isOpen) {
+       goTo(url);
+     } else {
+       //  window.open(`${fullUrl}?prefix=${cParam?.prefix || prefix || pubPrefix}`, '_blank');
+       window.open(`${fullUrl}`, '_blank');
+     }
+   }
+
+   handleOk = async (values) => {
+     const {
+       dispatch,
+       prefix: pubPrefix,
+       dataUrl: pubDataUrl,
+       oldServiceUrl: pubOldServiceUrl,
+       convertParam,
+       exportInstruction,
+     } = this.props;
+     const {
+       exportFileName: fileName,
+       prefix,
+       dataUrl,
+       totalCount,
+       oldServiceUrl,
+       ...param
+     } = values;
+
+     let cParam = {};
+     if (convertParam) {
+       cParam = await convertParam(values);
+     } else {
+       cParam = {
+         ...param,
+         fileName,
+       };
+     }
+
+     const reqParam = {
+       dataUrl: this.getPrefix(
+         cParam?.dataUrl || dataUrl || pubDataUrl,
+         cParam?.oldServiceUrl || oldServiceUrl || pubOldServiceUrl
+       ),
        prefix: cParam?.prefix || prefix || pubPrefix,
-       param: JSON.stringify({
-         ...(cParam?.param || param),
-       }),
+       param: this.getExportParams(cParam?.param || param),
        page: {
          pageSize: 500,
          totalCount: cParam?.totalCount || totalCount || 1,
        },
+       exportExtendedParam: {
+         platformType: 2,
+       },
+       exportInstruction,
      };
 
      await dispatch({
-       type: 'exports/startExportFile',
-       payload: repParam,
+       type: 'common/startExportFile',
+       payload: reqParam,
      });
 
-     const { exports } = this.props;
-     const { startExportFile } = exports;
+     const { common } = this.props;
+     const { startExportFile } = common;
 
      return {
-       ...startExportFile,
+       succ: startExportFile || false,
        totalCount: totalCount || cParam?.totalCount || 1,
        sucTitle: cParam?.sucTitle,
      };
    }
 
-   render() {
+   renderModalExport = () => {
+     const { params } = this.props;
      return (
        <ModalExport
          {...this.props}
          onOk={this.handleOk}
+         onSkip={this.handleSkip}
+         tabOptions={params}
        />
      );
+   }
+
+   renderResultHint = () => {
+     const { params } = this.props;
+     return (
+       <ResultHint
+         {...this.props}
+         onOk={this.handleOk}
+         onSkip={this.handleSkip}
+         params={params?.[0]}
+       />
+     );
+   }
+
+   renderResultPrompt = () => {
+     const { params } = this.props;
+     return (
+       <ResultPrompt
+         {...this.props}
+         onOk={this.handleOk}
+         onSkip={this.handleSkip}
+         params={params?.[0]}
+       />
+     );
+   }
+
+   renderAdvancePrompt = () => {
+     const { params } = this.props;
+     return (
+       <AdvancePrompt
+         {...this.props}
+         onOk={this.handleOk}
+         onSkip={this.handleSkip}
+         params={params?.[0]}
+       />
+     );
+   }
+
+   render() {
+     const { exportModalType } = this.props;
+     if (exportModalType === 1) {
+       return this.renderModalExport();
+     } else if (exportModalType === 2) {
+       return this.renderResultHint();
+     } else if (exportModalType === 3) {
+       return this.renderAdvancePrompt();
+     } else {
+       return this.renderResultPrompt();
+     }
    }
 }
 

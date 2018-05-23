@@ -1,13 +1,13 @@
 {
-  "route": {
-    "params": "",
-    "authority": ""
-  },
-  "menu": {
-    "name": "会员列表",
-    "icon": "",
-    "order": 0,
-    "authority": ""
-  },
-  "model": [""]
+    "route": {
+        "params": "",
+        "authority": "OPERPORT_JIAJU_USER_LIST"
+    },
+    "menu": {
+        "name": "会员管理",
+        "icon": "",
+        "order": 0,
+        "authority": "OPERPORT_JIAJU_USER_LIST"
+    },
+    "model": ["member"]
 }

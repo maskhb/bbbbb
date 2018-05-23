@@ -1,12 +1,10 @@
-import { getUrlParams } from './utils';
-
 function list(req, res, u) {
   let url = u;
   if (!url || Object.prototype.toString.call(url) !== '[object String]') {
     url = req.url; // eslint-disable-line
   }
 
-  const params = getUrlParams(url);
+
   const dataSource = [];
   for (let i = 0; i < 100; i += 1) {
     dataSource.push({
@@ -21,21 +19,12 @@ function list(req, res, u) {
       status: Math.floor(Math.random() * 10) % 3,
       isAllowUseDiscount: Math.floor(Math.random() * 10) % 2,
       isArrivalAll: Math.floor(Math.random() * 10) % 2,
+      propertyGroupId: 1,
+      basePropertyGroupId: 1,
     });
   }
-  let pageSize = 10;
-  if (params.pageSize) {
-    pageSize = params.pageSize * 1;
-  }
 
-  const result = {
-    dataList: dataSource,
-    pagination: {
-      total: dataSource.length,
-      pageSize,
-      current: parseInt(params.currentPage, 10) || 1,
-    },
-  };
+  const result = dataSource;
 
   if (res && res.json) {
     res.json(result);
@@ -49,9 +38,9 @@ function detail(req, res, u) {
   if (!url || Object.prototype.toString.call(url) !== '[object String]') {
     url = req.url; // eslint-disable-line
   }
-  const params = getUrlParams(url);
-  const i = params.id;
-  const data = {
+
+  const i = 20;
+  const result = {
     categoryId: i + 1,
     key: i,
     orderNum: i,
@@ -64,7 +53,12 @@ function detail(req, res, u) {
     isAllowUseDiscount: Math.floor(Math.random() * 10) % 2,
     isArrivalAll: Math.floor(Math.random() * 10) % 2,
   };
-  return data;
+
+  if (res && res.json) {
+    res.json(result);
+  } else {
+    return result;
+  }
 }
 
 function add(req, res) {

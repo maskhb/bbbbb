@@ -1,8 +1,15 @@
-import { stringify } from 'qs';
 import request from '../utils/request';
 
 async function list(params) {
-  return request(`/api/marketingCategory/list?${stringify(params)}`);
+  return request('/mj/ht-mj-goods-server/goodsSaleCategory/queryList', {
+    method: 'POST',
+    body: {
+      goodsSaleCategoryVoQ: {
+        ...params,
+      },
+    },
+    // pagination: true,
+  });
 }
 
 export default {

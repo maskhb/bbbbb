@@ -3,7 +3,7 @@ export function login(req, res) {
     msgCode: 200,
     status: 'ok',
     data: {
-      result: 'KYU0JOF1t/ooK85NvoCEkPdWJn5G5N52vJjP8r7IvyGGAQfuX9IBORqoSAfNA/xu',
+      result: 'cAqdYVTJ37dEmDO7nfqkTAIUuuzOWSqWG9dOrD66/OCGAQfuX9IBORqoSAfNA/xu',
     },
   };
 

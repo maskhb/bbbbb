@@ -1,7 +1,7 @@
 {
   "route": {
     "params": "/:id",
-    "authority": ""
+    "authority": ["OPERPORT_JIAJU_SALESPROPERTYLIST_SETVALUE", "OPERPORT_JIAJU_BASICPROPERTYLIST_SETVALUE"]
   },
   "breadcrumb": {
     "name": "管理属性",

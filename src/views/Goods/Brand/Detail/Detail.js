@@ -1,15 +1,20 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'dva';
-import { Form, Card, Cascader, InputNumber, message, Spin } from 'antd';
+import { Form, Card, Cascader, InputNumber, message, Spin, Row, Col, Checkbox } from 'antd';
+import _ from 'lodash';
+import { OPERPORT_JIAJU_BRANDLIST_EDIT } from 'config/permission';
 import PageHeaderLayout from 'layouts/PageHeaderLayout';
+import flat2nested from 'components/Flat2nested';
 import { MonitorInput, MonitorTextArea } from 'components/input';
 import ImageUpload from 'components/Upload/Image/ImageUpload';
 import DetailFooterToolbar from 'components/DetailFooterToolbar';
+import { getStatus } from 'components/EnableStatus';
 
 const FormItem = Form.Item;
 
-@connect(({ goodsBrand, loading }) => ({
+@connect(({ goodsBrand, brandCategory, loading }) => ({
   goodsBrand,
+  brandCategory,
   loading: loading.effects['goodsBrand/detail'],
   submitting: loading.effects['goodsBrand/add'] || loading.effects['goodsBrand/edit'],
 }))
@@ -21,6 +26,7 @@ export default class View extends PureComponent {
   state = {
     pattern: 'detail',
     fileList: [],
+    initalFieldsValue: {},
   };
 
   componentWillMount() {
@@ -38,6 +44,32 @@ export default class View extends PureComponent {
         payload: { brandId: Number(id) },
       });
     }
+
+    dispatch({
+      type: 'brandCategory/list',
+      payload: {},
+    });
+  }
+
+  handlePatternChange = () => {
+    const { form } = this.props;
+    const { pattern, initalFieldsValue } = this.state;
+
+    // 缓存详情数据
+    if (!initalFieldsValue || _.isEmpty(initalFieldsValue)) {
+      this.setState({
+        initalFieldsValue: form.getFieldsValue(),
+      });
+    }
+
+    this.setState({
+      pattern: pattern === 'detail' ? 'edit' : 'detail',
+    });
+
+    // 重置数据
+    if (pattern === 'edit') {
+      form.setFieldsValue(initalFieldsValue);
+    }
   }
 
   handleImageChange = (fileList) => {
@@ -48,49 +80,42 @@ export default class View extends PureComponent {
 
   handleSubmit = () => {
     const { form, dispatch, goodsBrand, match: { params: { id } } } = this.props;
+    const { pattern } = this.state;
     const { validateFieldsAndScroll } = form;
     const data = goodsBrand?.[`detail${id}`];
 
     validateFieldsAndScroll((error, values) => {
       // 对参数进行处理
+      const status = values.status ? 1 : 3;
       if (!error) {
         dispatch({
-          type: 'goodsBrand/add',
+          type: pattern === 'add' ? 'goodsBrand/add' : 'goodsBrand/edit',
           payload: {
-            brand: {
-              brandId: data?.brandId,
-              ...values,
-              supplierList: data?.supplierList,
-              brandDocList: [],
-              logo: values.logo?.[0],
-            },
+            brandId: data?.brandId,
+            ...values,
+            supplierList: data?.supplierList,
+            brandUrl: values.brandUrl?.constructor.name === 'Array' ? null : values.brandUrl,
+            brandCategoryId: values.brandCategoryId?.[values.brandCategoryId.length - 1],
+            status: pattern === 'add' ? status : data?.status,
           },
-        }).then(() => {
-          const { add } = this.props.goodsBrand;
-          if (add.msgCode === 200 && add.data) {
+        }).then((res) => {
+          if (res) {
             message.success('提交成功。', 1, () => {
               history.back();
             });
-          } else {
-            message.error(`提交失败！${add.message}`);
           }
         });
       }
     });
   }
 
-  handlePatternChange = () => {
-    const { pattern } = this.state;
-    this.setState({
-      pattern: pattern === 'detail' ? 'edit' : 'detail',
-    });
-  }
-
   render() {
-    const { goodsBrand, loading, submitting, form, match: { params: { id } } } = this.props;
+    const { goodsBrand, brandCategory, loading,
+      submitting, form, match: { params: { id } } } = this.props;
     const { pattern, fileList } = this.state;
     const disabled = pattern === 'detail';
     const data = goodsBrand?.[`detail${id}`];
+    const detail = goodsBrand?.[`detail${id}`];
 
     const formItemLayout = {
       labelCol: {
@@ -104,6 +129,27 @@ export default class View extends PureComponent {
       },
     };
 
+    // 品牌分类
+    const goodsBrandCascaderOptions = flat2nested(brandCategory?.list || [], { id: 'categoryId', parentId: 'parentId' });
+
+    const currentCategory = brandCategory?.list?.find(v =>
+      v.value === detail?.brandCategoryId) || {};
+
+    const parent = brandCategory?.list?.find(v =>
+      v.value === currentCategory.parentId) || {};
+
+    let preParentId = 0;
+    let preParent = {};
+    if (parent.parentId !== 0) {
+      preParentId = brandCategory?.list?.find(v =>
+        v.value === parent.categoryId)?.parentId;
+
+      preParent = brandCategory?.list?.find(v =>
+        v.value === preParentId);
+    }
+
+    const goodsBrandIds = _.compact([preParent?.value, parent?.value, currentCategory?.value]);
+
     return (
       <PageHeaderLayout>
         <Card loading={!data && loading}>
@@ -112,7 +158,7 @@ export default class View extends PureComponent {
               pattern !== 'edit' || (pattern === 'edit' && data)
                 ? (
                   <Form onSubmit={this.handleSubmit} style={{ marginTop: 8 }}>
-                    <FormItem {...formItemLayout} label="名称">
+                    <FormItem {...formItemLayout} label="品牌名称">
                       {form.getFieldDecorator('brandName', {
                         rules: [{
                           required: true, message: '请输入名称',
@@ -124,18 +170,34 @@ export default class View extends PureComponent {
                           : <MonitorInput maxLength={100} disabled={disabled} simple="true" />
                       )}
                     </FormItem>
-                    <FormItem {...formItemLayout} label="分类">
+                    <FormItem {...formItemLayout} label="品牌分类">
                       {form.getFieldDecorator('brandCategoryId', {
-                        initialValue: data?.brandCategoryId,
+                        initialValue: goodsBrandIds || null,
                       })(
                         pattern === 'detail'
-                          ? <span>{data?.brandCategoryId}</span>
-                          : <Cascader placeholder="" disabled={disabled} />
+                          ? <span>{data?.brandCategoryNameAll}</span>
+                          : (
+                            <Cascader
+                              options={goodsBrandCascaderOptions}
+                              placeholder=""
+                              changeOnSelect
+                              disabled={disabled}
+                            />
+                          )
                       )}
                     </FormItem>
+                    {
+                      pattern !== 'add' ? (
+                        <FormItem {...formItemLayout} label="状态">
+                          <span>{getStatus(data?.status)}</span>
+                        </FormItem>
+                      ) : null
+                    }
                     <FormItem {...formItemLayout} label="网址">
                       {form.getFieldDecorator('brandHomeUrl', {
-                        rules: [],
+                        rules: [{
+                          type: 'url', message: 'url格式不正确',
+                        }],
                         initialValue: data?.brandHomeUrl,
                       })(
                         pattern === 'detail'
@@ -148,16 +210,16 @@ export default class View extends PureComponent {
                         rules: [{
                           required: true, message: '请输入排序',
                         }],
-                        initialValue: data?.orderNum,
+                        initialValue: data?.orderNum || 0,
                       })(
                         pattern === 'detail'
                           ? <span>{data?.orderNum}</span>
                           : <InputNumber min={0} max={9999} precision={0} disabled={disabled} />
                       )}
                     </FormItem>
-                    <FormItem {...formItemLayout} label="Logo">
+                    <FormItem {...formItemLayout} label="品牌Logo">
                       {form.getFieldDecorator('brandUrl', {
-                        initialValue: [data?.brandUrl],
+                        initialValue: data?.brandUrl ? [data?.brandUrl] : [],
                       })(
                         <ImageUpload
                           exclude={['gif']}
@@ -169,16 +231,29 @@ export default class View extends PureComponent {
                         />
                       )}
                     </FormItem>
-                    <FormItem {...formItemLayout} label="描述">
+                    <FormItem {...formItemLayout} label="品牌描述">
                       {form.getFieldDecorator('brandDesc', {
                         rules: [],
                         initialValue: data?.brandDesc,
                       })(
                         pattern === 'detail'
                           ? <span>{data?.brandDesc}</span>
-                          : <MonitorTextArea datakey="description" rows={5} maxLength={200} form={form} disabled={disabled} />
+                          : <MonitorTextArea datakey="brandDesc" rows={5} maxLength={200} form={form} disabled={disabled} />
                       )}
                     </FormItem>
+                    {pattern === 'add' ? (
+                      <div style={{ marginTop: '15px' }}>
+                        <Row>
+                          <Col span={8} offset={10}>
+                            {form.getFieldDecorator('status', {
+                              initialValue: data?.status,
+                            })(
+                              <Checkbox>保存后立即启用</Checkbox>
+                            )}
+                          </Col>
+                        </Row>
+                      </div>
+                    ) : ''}
                     <DetailFooterToolbar
                       form={form}
                       fieldLabels={{
@@ -192,6 +267,7 @@ export default class View extends PureComponent {
                       submitting={submitting}
                       handleSubmit={this.handleSubmit}
                       pattern={pattern}
+                      permisson={OPERPORT_JIAJU_BRANDLIST_EDIT}
                       handlePatternChange={this.handlePatternChange}
                     />
                   </Form>

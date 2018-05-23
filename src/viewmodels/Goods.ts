@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsPositive, IsUrl, IsDate, IsString, MaxLength, IsOptional, IsEnum, ValidateNested } from 'class-validator';
+import { IsNotEmpty, IsPositive, IsNumber, IsUrl, IsDate, IsString, MaxLength, IsOptional, IsEnum, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 import moment from 'moment';
 import PaginationList from './PaginationList';
@@ -23,11 +23,11 @@ enum Status {
 
 enum OnlineStatus {
   // 待上架
-  WAITING = 0,
+  WAITING = 1,
   // 上架
-  ENABLE = 1,
+  ENABLE = 2,
   // 下架
-  DISABLE = 2,
+  DISABLE = 3,
 };
 
 // 商品类型
@@ -54,12 +54,21 @@ enum ServiceType {
   YEAR = 3,
 }
 
+// 是否复制的：复制的不可操作审核状态
+enum CopyType {
+  // 非复制的
+  NO = 1,
+  // 复制的
+  YES = 2,
+}
+
 class Image {
   @IsUrl()
   url: string = '';
 }
 
 export default class Goods {
+  // 商品id
   @IsPositive()
   goodsId: number = 0;
 
@@ -70,22 +79,35 @@ export default class Goods {
   goodsName: string = '';
 
   // 商品图片
-  @IsString()
   imgUrl: string = '';
 
-  // 所属厂家id
-  factoryId: number = 0 ;
-  // 所属商家id
-  merchantId: number = 0;
-
   // 所属商家名称
-  @IsNotEmpty()
   @IsString()
   merchantName: string = '';
 
   // 商品分类ID
   @IsPositive()
   goodsCategoryId: number = 0;
+
+  // 上下架状态
+  @IsEnum(OnlineStatus)
+  status: OnlineStatus = OnlineStatus.WAITING;
+
+  // 审核状态
+  @IsEnum(AuditStatus)
+  auditStatus: AuditStatus = AuditStatus.DRAFT;
+
+  // 创建时间
+  @IsDate()
+  @Type(() => Date)
+  createdTime?: Date;
+
+  // 所属厂家id
+  factoryId: number = 0 ;
+
+  // 所属商家id
+  @IsNumber()
+  merchantId: number = 0;
 
   model?: string;
 
@@ -98,21 +120,7 @@ export default class Goods {
 
   sellUnitName?: string;
 
-  @IsDate()
-  @Type(() => Date)
-  createdTime?: Date;
-
-  @IsDate()
-  @Type(() => Date)
-  beginTime?: Date;
-
-  @IsEnum(AuditStatus)
-  auditStatus?: AuditStatus = AuditStatus.DRAFT;
-
   orderStatus?: Status = Status.DRAFT;
-
-  @IsEnum(OnlineStatus)
-  onlineStatus?: OnlineStatus = OnlineStatus.WAITING;
 
   // 商家商品编码
   goodsCode?: string;
@@ -150,6 +158,15 @@ export default class Goods {
 
   // 售后服务类型
   serviceType?: ServiceType;
+
+  // 商品卖点
+  goodsSellingPoint? : string;
+
+  // 空间id
+  spaceId: number = 0;
+
+  // 是否复制的：复制的不可操作审核状态。1：非复制的；2：复制的。
+  isCopy?: CopyType = CopyType.NO;
 }
 
 export function GoodsPaginationList() {

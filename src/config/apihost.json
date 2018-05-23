@@ -11,9 +11,10 @@
     "stg",
     "ht-yunying-stg.hd"
   ],
-  "ht-json-beta.htmimi.com": [
+  "ht-json-test.htmimi.com": [
     "beta",
-    "ht-yunying-beta.hd"
+    "test",
+    "ht-yunying-test.hd"
   ],
   "ht-json.htmimi.com": [
     "production",

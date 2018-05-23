@@ -2,18 +2,32 @@
  * @Author: wuhao
  * @Date: 2018-04-08 16:17:48
  * @Last Modified by: wuhao
- * @Last Modified time: 2018-04-10 10:13:25
+ * @Last Modified time: 2018-05-18 14:54:16
  *
  * 订单列表搜索组件
  */
 
 import React, { PureComponent } from 'react';
 import { Input, Select, DatePicker } from 'antd';
+import { parse } from 'qs';
 import moment from 'moment';
+import ProjectInput from 'components/ProjectInput/business';
+import SelectPaymentMethod from 'components/SelectPaymentMethod/business';
+import SelectRegion from 'components/SelectRegion/business';
 
-import { Search } from '../../../../components/PanelList';
+import { Search } from 'components/PanelList';
 
-import { getSearchOptions, payTypeOptions, payStatusOptions, orderSourceOptions, orderStatusOptions, invoiceTypeOptions, deliveryMethodOptions, needInvoiceTypeOptions, whenExcessTypeOptions } from '../attr';
+import {
+  payStatusOptions,
+  orderSourceOptions,
+  orderStatusSelectOptions,
+  invoiceTypeOptions,
+  // deliveryMethodOptions,
+  needInvoiceTypeOptions,
+  whenExcessTypeOptions,
+} from '../../attr';
+
+import { transformSearchParam } from '../../transform';
 
 const SelectOption = Select.Option;
 const { RangePicker } = DatePicker;
@@ -44,20 +58,18 @@ class SearchHeader extends PureComponent {
   /**
    * 返回Select元素的公共方法
    */
-  getSearchOptionsElm = (options, isMore = false) => {
-    const searchOptions = (isMore ? options : getSearchOptions(options)) || [];
+  getSearchOptionsElm = (options = [], isMore = false, placeholder = '全部') => {
+    // const searchOptions = (isMore ? options : getSearchOptions(options)) || [];
 
     const params = isMore ? {
       mode: 'multiple',
-      placeholder: '全部',
-      allowClear: true,
     } : {};
 
     return (
-      <Select {...params}>
+      <Select allowClear placeholder={placeholder} {...params}>
         {
-          searchOptions.map((item) => {
-            return <SelectOption value={item.value}>{item.label}</SelectOption>;
+          options.map((item) => {
+            return <SelectOption key={item.value} value={item.value}>{item.label}</SelectOption>;
           })
         }
       </Select>
@@ -67,11 +79,17 @@ class SearchHeader extends PureComponent {
   /**
    * 搜索回调
    */
-  handleSearch = (values = {}) => {
+  handleSearch = async (values) => {
     const { dispatch } = this.props;
-    return dispatch({
+    const params = transformSearchParam(values);
+    await dispatch({
       type: 'orders/list',
-      payload: values,
+      payload: params,
+    });
+
+    await dispatch({
+      type: 'orders/queryOrdeListTotalCount',
+      payload: params,
     });
   }
 
@@ -94,6 +112,10 @@ class SearchHeader extends PureComponent {
     const { searchDefault } = this.props;
     const { labelCol, rangePickerStyle } = this.state;
 
+    const { phone: initPhone } = parse(this.props?.location?.search, {
+      ignoreQueryPrefix: true,
+    }) || {};
+
     return (
       <Search
         {...this.props}
@@ -105,7 +127,7 @@ class SearchHeader extends PureComponent {
         <SearchItem {...labelCol} label="订单号" simple>
           {
             ({ form }) => (
-              form.getFieldDecorator('orderNo', {
+              form.getFieldDecorator('orderSn', {
               })(
                 <Input placeholder="请输入订单号" />
               )
@@ -116,7 +138,8 @@ class SearchHeader extends PureComponent {
         <SearchItem {...labelCol} label="用户手机号" simple>
           {
             ({ form }) => (
-              form.getFieldDecorator('phoneNo', {
+              form.getFieldDecorator('userMobile', {
+                initialValue: initPhone || '',
               })(
                 <Input placeholder="请输入用户手机号" />
               )
@@ -127,7 +150,7 @@ class SearchHeader extends PureComponent {
         <SearchItem {...labelCol} label="商家名称" simple>
           {
             ({ form }) => (
-              form.getFieldDecorator('businessName', {
+              form.getFieldDecorator('merchantName', {
               })(
                 <Input placeholder="请输入商家名称" />
               )
@@ -138,7 +161,7 @@ class SearchHeader extends PureComponent {
         <SearchItem {...labelCol} label="收货人手机号" simple>
           {
             ({ form }) => (
-              form.getFieldDecorator('consigneePhoneNo', {
+              form.getFieldDecorator('consigneeMobile', {
               })(
                 <Input placeholder="请输入收货人手机号" />
               )
@@ -149,7 +172,7 @@ class SearchHeader extends PureComponent {
         <SearchItem {...labelCol} label="商品名称" simple>
           {
             ({ form }) => (
-              form.getFieldDecorator('productName', {
+              form.getFieldDecorator('goodsName', {
               })(
                 <Input placeholder="请输入商品名称" />
               )
@@ -161,7 +184,6 @@ class SearchHeader extends PureComponent {
           {
             ({ form }) => (
               form.getFieldDecorator('needInvoice', {
-                initialValue: searchDefault.needInvoice,
               })(
                 this.getSearchOptionsElm(needInvoiceTypeOptions)
               )
@@ -172,13 +194,9 @@ class SearchHeader extends PureComponent {
         <SearchItem {...labelCol} label="所在项目" simple>
           {
             ({ form }) => (
-              form.getFieldDecorator('projectName', {
-                initialValue: searchDefault.projectName,
+              form.getFieldDecorator('project', {
               })(
-                <Select>
-                  <SelectOption value="" >全部项目</SelectOption>
-                </Select>
-
+                <ProjectInput style={{ width: '100%' }} placeholder="全部项目" />
               )
             )
           }
@@ -187,8 +205,7 @@ class SearchHeader extends PureComponent {
         <SearchItem {...labelCol} label="订单来源" simple>
           {
             ({ form }) => (
-              form.getFieldDecorator('orderSource', {
-                initialValue: searchDefault.orderSource,
+              form.getFieldDecorator('orderSourceList', {
               })(
                 this.getSearchOptionsElm(orderSourceOptions, true)
               )
@@ -199,10 +216,9 @@ class SearchHeader extends PureComponent {
         <SearchItem {...labelCol} label="订单状态" simple>
           {
             ({ form }) => (
-              form.getFieldDecorator('orderStatus', {
-                initialValue: searchDefault.orderStatus,
+              form.getFieldDecorator('orderStatusList', {
               })(
-                this.getSearchOptionsElm(orderStatusOptions, true)
+                this.getSearchOptionsElm(orderStatusSelectOptions, true)
               )
             )
           }
@@ -211,8 +227,7 @@ class SearchHeader extends PureComponent {
         <SearchItem {...labelCol} label="支付状态" simple>
           {
             ({ form }) => (
-              form.getFieldDecorator('payStatus', {
-                initialValue: searchDefault.payStatus,
+              form.getFieldDecorator('payStatusList', {
               })(
                 this.getSearchOptionsElm(payStatusOptions, true)
               )
@@ -223,8 +238,8 @@ class SearchHeader extends PureComponent {
         <SearchItem {...labelCol} label="下单时间" simple>
           {
             ({ form }) => (
-              form.getFieldDecorator('createTime', {
-                initialValue: searchDefault.createTime,
+              form.getFieldDecorator('orderTime', {
+                initialValue: searchDefault.orderTime,
                 rules: [{
                   validator: this.validatorLimit6Months,
                 }],
@@ -243,10 +258,9 @@ class SearchHeader extends PureComponent {
         <SearchItem {...labelCol} label="支付方式">
           {
             ({ form }) => (
-              form.getFieldDecorator('payType', {
-                initialValue: searchDefault.payType,
+              form.getFieldDecorator('paymentMethodCodeList', {
               })(
-                this.getSearchOptionsElm(payTypeOptions, true)
+                <SelectPaymentMethod mode="multiple" type={0} allowClear placeholder="全部" />
               )
             )
           }
@@ -255,33 +269,29 @@ class SearchHeader extends PureComponent {
         <SearchItem {...labelCol} label="配送地区">
           {
             ({ form }) => (
-              form.getFieldDecorator('address', {
-                initialValue: searchDefault.address,
+              form.getFieldDecorator('region', {
               })(
-                <Select>
-                  <SelectOption value="">全部地区</SelectOption>
-                </Select>
+                <SelectRegion placeholder="全部地区" depth={3} />
               )
             )
           }
         </SearchItem>
 
-        <SearchItem {...labelCol} label="配送方式">
+        {/* <SearchItem {...labelCol} label="配送方式">
           {
             ({ form }) => (
-              form.getFieldDecorator('shipType', {
-                initialValue: searchDefault.shipType,
+              form.getFieldDecorator('deliveryMethod', {
               })(
                 this.getSearchOptionsElm(deliveryMethodOptions)
               )
             )
           }
-        </SearchItem>
+        </SearchItem> */}
 
         <SearchItem {...labelCol} label="收货人">
           {
             ({ form }) => (
-              form.getFieldDecorator('receiver', {
+              form.getFieldDecorator('consigneeName', {
               })(
                 <Input placeholder="请输入收货人" />
               )
@@ -293,7 +303,6 @@ class SearchHeader extends PureComponent {
           {
             ({ form }) => (
               form.getFieldDecorator('invoiceType', {
-                initialValue: searchDefault.invoiceType,
               })(
                 this.getSearchOptionsElm(invoiceTypeOptions)
               )
@@ -315,8 +324,7 @@ class SearchHeader extends PureComponent {
         <SearchItem {...labelCol} label="是否超额">
           {
             ({ form }) => (
-              form.getFieldDecorator('excess', {
-                initialValue: searchDefault.excess,
+              form.getFieldDecorator('excessPay', {
               })(
                 this.getSearchOptionsElm(whenExcessTypeOptions)
               )
@@ -328,7 +336,6 @@ class SearchHeader extends PureComponent {
           {
             ({ form }) => (
               form.getFieldDecorator('payTime', {
-                initialValue: searchDefault.payTime,
                 rules: [{
                   validator: this.validatorLimit6Months,
                 }],
@@ -348,7 +355,6 @@ class SearchHeader extends PureComponent {
           {
             ({ form }) => (
               form.getFieldDecorator('finishTime', {
-                initialValue: searchDefault.finishTime,
                 rules: [{
                   validator: this.validatorLimit6Months,
                 }],

@@ -34,6 +34,7 @@ export default {
           add: response,
         },
       });
+      return response;
     },
     *edit({ payload }, { call, put }) {
       const response = yield call(values.edit, payload);
@@ -43,6 +44,7 @@ export default {
           edit: response,
         },
       });
+      return response;
     },
     *remove({ payload }, { call, put }) {
       const response = yield call(values.remove, payload);
@@ -52,6 +54,7 @@ export default {
           remove: response,
         },
       });
+      return response;
     },
   },
 

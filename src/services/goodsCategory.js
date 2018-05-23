@@ -1,8 +1,16 @@
-// import { stringify } from 'qs';
 import request from '../utils/request';
 
 async function list(params) {
-  return request('/goodsCategory/queryListAndHasChild', {
+  return request('/mj/ht-mj-goods-server/goodsCategory/queryList', {
+    method: 'POST',
+    body: {
+      goodsCategoryVoQ: params,
+    },
+  });
+}
+
+async function listByMerchantId(params) {
+  return request('/mj/ht-mj-goods-server/goodsCategory/queryListAndHasChildByMerchantId', {
     method: 'POST',
     body: {
       ...params,
@@ -11,17 +19,16 @@ async function list(params) {
 }
 
 async function add(params) {
-  return request('/api/goodsCategory/add', {
+  return request('/mj/ht-mj-goods-server/goodsCategory/save', {
     method: 'POST',
     body: {
-      ...params,
-      method: 'post',
+      goodsCategoryVoS: { ...params },
     },
   });
 }
 
 async function detail(params) {
-  return request('/api/goodsCategory/detail', {
+  return request('/mj/ht-mj-goods-server/goodsCategory/queryDetail', {
     method: 'POST',
     body: {
       ...params,
@@ -30,27 +37,25 @@ async function detail(params) {
 }
 
 async function edit(params) {
-  return request('/api/goodsCategory/edit', {
+  return request('/mj/ht-mj-goods-server/goodsCategory/update', {
     method: 'POST',
     body: {
-      ...params,
-      method: 'post',
+      goodsCategoryVoU: { ...params },
     },
   });
 }
 
 async function remove(params) {
-  return request('/api/goodsCategory/remove', {
+  return request('/mj/ht-mj-goods-server/goodsCategory/delete', {
     method: 'POST',
     body: {
-      ...params,
-      method: 'post',
+      goodsCategoryVoD: params,
     },
   });
 }
 
 async function status(params) {
-  return request('/api/goodsCategory/status', {
+  return request('/mj/ht-mj-goods-server/goodsCategory/updateStatus', {
     method: 'POST',
     body: {
       ...params,
@@ -60,6 +65,7 @@ async function status(params) {
 
 export default {
   list,
+  listByMerchantId,
   detail,
   add,
   edit,

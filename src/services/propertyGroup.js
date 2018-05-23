@@ -1,46 +1,55 @@
 import request from '../utils/request';
 
 async function list(params) {
-  return request('/api/ht-mj-goods-server/propertyGroup/list', {
+  return request('/mj/ht-mj-goods-server/propertyGroup/queryListByPage', {
     method: 'POST',
     body: {
-      ...params,
+      propertyGroupVoQ: {
+        ...params,
+        pageInfo: params.pageInfo || {
+          pageSize: 10,
+        },
+      },
     },
+    pagination: true,
   });
 }
 
 async function remove(params) {
-  return request('/api/ht-mj-goods-server/propertyGroup/list/delete', {
+  return request('/mj/ht-mj-goods-server/propertyGroup/delete', {
     method: 'POST',
     body: {
-      ...params,
+      propertyGroupVoD: params,
     },
   });
 }
 
 async function add(params) {
-  return request('/api/goods/propertyGroup/save', {
+  return request('/mj/ht-mj-goods-server/propertyGroup/save', {
     method: 'POST',
     body: {
-      ...params,
+      propertyGroupVoS: params,
     },
   });
 }
 
 async function edit(params) {
-  return request('/api/goods/propertyGroup/update', {
+  return request('/mj/ht-mj-goods-server/propertyGroup/update', {
     method: 'POST',
     body: {
-      ...params,
+      propertyGroupVoU: params,
     },
   });
 }
 
 async function detail(params) {
-  return request('/api/goods/propertyGroup/queryDetail', {
+  return request('/mj/ht-mj-goods-server/propertyGroup/queryDetail', {
     method: 'POST',
     body: {
-      ...params,
+      propertyGroupVoQ: params,
+    },
+    transformResponse(json) {
+      return json.data.result;
     },
   });
 }

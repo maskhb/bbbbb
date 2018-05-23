@@ -1,18 +1,60 @@
 import React from 'react';
-import { Popconfirm } from 'antd';
 import moment from 'moment';
 import { format } from 'components/Const';
-import { handleRemove } from 'components/Handle';
+import Authorized from 'utils/Authorized';
+import { fenToYuan } from '../../../utils/money';
+import { mul } from '../../../utils/number';
+
 
 const payTypeArr = [
-  { key: 'wx_app', value: '微信手机支付' },
-  { key: 'ali_app', value: '支付宝电脑支付' },
-  { key: 'wx_jsapi', value: '微信公众号' },
+  { key: 'jjq_h5', value: '品牌家居券手机支付' },
+  { key: 'wx_jsapi', value: '微信手机支付' },
   { key: 'ali_wap', value: '支付宝手机支付' },
-  { key: 'allin_h5', value: '通联手机网页H5支付' },
-  { key: 'lakala_pos', value: '拉卡拉pos支付' },
-  { key: 'allin_b2b', value: '通联B2B网关支付' },
+  { key: 'lakala_pos', value: '拉卡拉pos机刷卡支付' },
 ];
+
+const logcolumns = () => {
+  return [
+    {
+      title: '操作时间',
+      dataIndex: 'operateTime',
+      render: val => <span>{moment(val).format(format)}</span>,
+    },
+    {
+      title: '操作人',
+      dataIndex: 'operatorName',
+    },
+    {
+      title: '操作类型',
+      dataIndex: 'operateType',
+      render(val) {
+        switch (val) {
+          case 1:
+            return '新增';
+          case 2:
+            return '修改';
+          default:
+            break;
+        }
+      },
+    },
+    {
+      title: '操作前',
+      dataIndex: 'beforeValue',
+      width: '20%',
+    },
+    {
+      title: '操作后',
+      dataIndex: 'afterValue',
+      width: '20%',
+    },
+    {
+      title: '备注',
+      dataIndex: 'remark',
+      width: '20%',
+    },
+  ];
+};
 
 export default (me) => {
   return [
@@ -23,10 +65,11 @@ export default (me) => {
     {
       title: '恒腾支付流水号',
       dataIndex: 'transactionId',
+      width: '10%',
     },
     {
       title: '订单编号',
-      dataIndex: 'businessNo',
+      dataIndex: 'outOrderId',
     },
     {
       title: '支付方式',
@@ -35,18 +78,20 @@ export default (me) => {
     {
       title: '支付金额',
       dataIndex: 'totalFee',
-      render(val) {
-        if (val || val === 0) {
-          return (Math.parseInt(val) / 100).toFixed(2);
-        } else {
-          return '';
-        }
+      render: (val) => {
+        return fenToYuan(mul(val, 100));
       },
     },
     {
       title: '支付时间',
       dataIndex: 'endTime',
-      render: val => <span>{moment(val).format(format)}</span>,
+      render: (val, record) => {
+        if (record.payState === 1) {
+          return <span>{moment(val).format(format)}</span>;
+        } else {
+          return <span />;
+        }
+      },
     },
     {
       title: '状态',
@@ -65,15 +110,24 @@ export default (me) => {
     {
       title: '支付平台交易流水号',
       dataIndex: 'thirdPartTransactionId',
+      width: '20%',
     },
     {
       title: '操作',
-      render: (val) => {
+      render: (val, record) => {
         return (
           <div>
-            <Popconfirm placement="top" title="确认删除？" onConfirm={handleRemove.bind(me, [val.id], 'goods')} okText="确认" cancelText="取消">
-              <a>删除</a>
-            </Popconfirm>
+            {
+              record.transactionType === 1 ? (
+                <Authorized authority="OPERPORT_JIAJU_PAYRECORDLIST_VIEWLOG">
+                  <a onClick={() => me.log(record)}>日志</a>
+                </Authorized>) : ''
+            }{
+              record.payState === 0 ? (
+                <Authorized authority="OPERPORT_JIAJU_PAYRECORDLIST_EDIT">
+                  <a onClick={() => me.edit(record)}>修改</a>
+                </Authorized>) : ''
+            }
           </div>
         );
       },
@@ -81,6 +135,8 @@ export default (me) => {
   ];
 };
 
+
 export {
   payTypeArr,
+  logcolumns,
 };

@@ -7,7 +7,7 @@
     "name": "创建短信推送",
     "icon": "",
     "order": 0,
-    "authority": ""
+    "authority": "OPERPORT_JIAJU_SMSPUSH_CREATE"
   },
   "model": [
     "messagePush"

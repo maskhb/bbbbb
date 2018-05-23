@@ -17,38 +17,46 @@ class AsyncCascader extends Component {
     if (asyncType && params) {
       AsyncCascaderReq[asyncType](params).then((res) => {
         const options = [];
-        if (res && res.length > 0) {
+        if (res && Array.isArray(res) && res.length > 0) {
+          // console.log(res) //eslint-disable-line
           res.forEach((v) => {
             if (filter(v)) {
               options.push({
                 value: v[labelParam.value],
                 label: v[labelParam.label],
-                isLeaf: Boolean(!v.isHasChild),
+                // isLeaf: Boolean(!v.isHasChild),
               });
             }
           });
+          // console.log({options}) //eslint-disable-line
           that.setState({ options });
         }
       });
     }
   }
 
-  handleChange(value, selectedOptions) {
-    // debugger;
-    console.log(value, selectedOptions);//eslint-disable-line
+  handleChange(value) {
     this.props.onChange(Array.isArray(value) && value.length === 1 ? value[0] : value);
   }
 
 
   render() {
+    const { placeholder, resetFields } = this.props;
+    // console.log('.......', this.props.defaultValue || this.props.value);
+    const value = this.props.defaultValue || this.props.value;
     return (
-      <Cascader
-        placeholder={this.props.placeholder}
-        options={this.state.options}
-        changeOnSelect
-        resetFields={this.props.resetFields}
-        onChange={this.handleChange.bind(this)}
-      />
+      <div>
+        {this.state.options && this.state.options.length > 0 && (
+          <Cascader
+            value={Array.isArray(value) ? value : [value]}
+            placeholder={placeholder}
+            options={this.state.options}
+            changeOnSelect
+            resetFields={resetFields}
+            onChange={this.handleChange.bind(this)}
+          />
+        )}
+      </div>
     );
   }
 }

@@ -9,5 +9,8 @@
     "order": 0,
     "authority": ""
   },
-  "model": ["goodsBrand"]
+  "model": [
+    "goodsBrand",
+    "brandCategory"
+  ]
 }

@@ -152,6 +152,7 @@ for (const i in serviceDir) {
         mockAlways[`GET ${apiurl}`] = mockAlways[`POST ${apiurl}`] = proxyMethod;
       }
     }
+
   }
 }
 
@@ -182,7 +183,9 @@ try {
 // API_ENV环境覆写
 if (process.env.API_ENV) {
   proxy = {
-    '/api': getApiHost(),
+    // '/api': getApiHost(),
+    'POST /mj': getApiHost(),
+    'POST /json': getApiHost(),
     ...mockAlways,
   };
 
@@ -192,6 +195,7 @@ if (process.env.API_ENV) {
   }
 } else {
   proxy = {
+    ...proxyAlways,
     ...proxy,
     ...proxyAlways,
   };

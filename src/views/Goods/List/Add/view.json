@@ -1,19 +1,23 @@
 {
   "route": {
     "params": "/:id",
-    "authority": ""
+    "authority": "OPERPORT_JIAJU_PRODUCTLIST_ADD"
   },
   "breadcrumb": {
     "name": "新增商品",
     "icon": "",
     "order": 0,
-    "authority": ""
+    "authority": "OPERPORT_JIAJU_PRODUCTLIST_ADD"
   },
   "model": [
+    "user",
     "goods",
     "goodsCategory",
     "goodsBrand",
     "marketingCategory",
-    "business"
+    "business",
+    "propertyKey",
+    "space",
+    "goodsCategoryBrand"
   ]
 }

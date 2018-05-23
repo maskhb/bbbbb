@@ -16,8 +16,17 @@ export default {
         },
       });
     },
+    *exportFile({ payload }, { call, put }) {
+      const response = yield call(batchImport.exportFile, payload);
+      yield put({
+        type: 'save',
+        payload: {
+          exportFile: response,
+        },
+      });
+    },
     *exportList({ payload }, { call, put }) {
-      const response = yield call(batchImport.list, payload);
+      const response = yield call(batchImport.exportList, payload);
       yield put({
         type: 'save',
         payload: {

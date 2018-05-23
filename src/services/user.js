@@ -1,7 +1,12 @@
 import request from '../utils/request';
+import { getToken } from '../utils/request/utils';
 
 async function current() {
-  return request('/api/authorization/iAuthService/getVerifiedAuthoritiesByCurrentUser');
+  return request('/mj/user-center-server/token/check', {
+    query: {
+      token: getToken(),
+    },
+  });
 }
 
 export default {

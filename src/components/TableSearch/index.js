@@ -40,19 +40,23 @@ export default class TableSearch extends PureComponent {
 
     form.validateFields((err, fieldsValue) => {
       if (err) return;
-
+      const pageInfo = {
+        pageSize: searchDefault?.pageInfo?.pageSize || 10,
+        ...stateOfSearch?.pageInfo,
+        ...params.pageInfo,
+      };
       const values = {
-        pageSize: 10,
         ...searchDefault,
         ...stateOfSearch,
         ...fieldsValue,
         ...params,
+        pageInfo,
       };
 
       let diff = false;
       if (this.state.lastValue) {
         for (const [key, value] of Object.entries(values)) {
-          if (key !== 'currentPage' && key !== 'pageSize') {
+          if (key !== 'currentPage' && key !== 'pageSize' && key !== 'pageInfo') {
             /* eslint eqeqeq: 0 */
             if (value != this.state.lastValue[key]) {
               diff = true;
@@ -67,10 +71,14 @@ export default class TableSearch extends PureComponent {
 
       // 不仅仅是改变了页码和每页数量，要重置页码，重置多选
       if (diff) {
-        values.currentPage = 1;
+        values.pageInfo.currPage = 1;
         setSelectedRows([]);
       }
 
+      if (!values.pageInfo.currPage) {
+        values.pageInfo.currPage = 1;
+      }
+      // console.log(999, values) //eslint-disable-line
       setStateOfSearch(values);
       onSearch?.(values);
     });
@@ -110,16 +118,16 @@ export default class TableSearch extends PureComponent {
                 showExpand
                   ? (
                     expand
-                    ? (
-                      <a onClick={this.toggleOperate}>
-                        收起 <Icon type="up" />
-                      </a>
-                    )
-                    : (
-                      <a onClick={this.toggleOperate}>
-                        展开 <Icon type="down" />
-                      </a>
-                    )
+                      ? (
+                        <a onClick={this.toggleOperate}>
+                          收起 <Icon type="up" />
+                        </a>
+                      )
+                      : (
+                        <a onClick={this.toggleOperate}>
+                          展开 <Icon type="down" />
+                        </a>
+                      )
                   )
                   : ''
               }

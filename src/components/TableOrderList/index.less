@@ -1,11 +1,41 @@
+.component_order_table_div {
+  >div:nth-child(1) {
+    :global {
+      .ant-table-placeholder {
+        display: none;
+      }
+    }
+  }
+  >div:nth-child(2) {
+    >div:first-child {
+      margin-bottom: 0;
+    }
+  }
+}
+
 .component_order_table {
   :global {
     .ant-table-tbody {
       tr.ant-table-expanded-row {
-        td:last-child {
+        >td:last-child {
           padding: 0;
         }
       }
+    }
+
+    .component_order_table_remarks {
+      background-color: cornsilk;
+      color: red;
+      padding: 10px;
+
+      >span {
+        padding-right: 20px;
+      }
+    }
+
+    .component_order_table_nodata {
+      text-align: center;
+      padding: 15px 0;
     }
   }
 }

@@ -3,14 +3,16 @@
  */
 import React, { PureComponent } from 'react';
 import { connect } from 'dva';
-import { Modal, Form, List, Upload, message, Icon } from 'antd';
+import { Modal, Form, List, Icon } from 'antd';
+import ImageUpload from 'components/Upload/Image/ImageUpload';
+import { handleOperate } from 'components/Handle';
 import { MonitorInput, rules } from '../../../../components/input';
 import PageHeaderLayout from '../../../../layouts/PageHeaderLayout';
 import styles from './mallhome.less';
 
-@connect(({ mallhome, loading }) => ({
-  mallhome,
-  loading: loading.models.mallhome,
+@connect(({ pagetable, loading }) => ({
+  pagetable,
+  loading: loading.models.pagetable,
 }))
 
 @Form.create()
@@ -20,39 +22,56 @@ export default class View extends PureComponent {
   };
 
   state = {
-    navList: [
-      { imgUrl: 'https://baidu.com', title: '恒腾自营' },
-      { imgUrl: 'https://baidu.com', title: '家居百货' },
-      { imgUrl: 'https://baidu.com', title: 'TCL彩电' },
-      { imgUrl: 'https://baidu.com', title: '温馨家纺' },
-      { imgUrl: 'https://baidu.com', title: '恒腾自营' },
-      { imgUrl: 'https://baidu.com', title: '家居百货' },
-      { imgUrl: 'https://baidu.com', title: 'TCL彩电' },
-      { imgUrl: 'https://baidu.com', title: '温馨家纺' },
-      { imgUrl: 'https://baidu.com', title: '恒腾自营' },
-      { imgUrl: 'https://baidu.com', title: '家居百货' },
-      { imgUrl: 'https://baidu.com', title: 'TCL彩电' },
-      { imgUrl: 'https://baidu.com', title: '添加' }],
+    navList: [],
     modalTitleVisible: false,
     modalAddNavVisible: false,
-    fileList: [{
-      uid: -1,
-      name: 'xxx.png',
-      status: 'done',
-      url: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
-    }],
-    // previewVisible: false,
-    // previewImage: '',
-    editingItem: {},
-    adding: false,
+    fileList: [],
+    adItem: {},
+    currentItem: {},
+    picUrl: '',
   };
 
-
-  getBase64 = (img, callback) => {
-    const reader = new FileReader();
-    reader.addEventListener('load', () => callback(reader.result));
-    reader.readAsDataURL(img);
+  componentDidMount() {
+    this.gettitle();
+    this.getNavList();
   }
+
+  getNavList = () => {
+    this.modalAddNavCancel();
+    const { dispatch } = this.props;
+    dispatch({
+      type: 'pagetable/mallNavList',
+      payload: {},
+    }).then(() => {
+      const { pagetable } = this.props;
+      const navList = pagetable?.mallNavList || [];
+      if (navList.length < 12) {
+        navList.push({ title: '添加' });
+      }
+      this.setState({
+        navList,
+      });
+    });
+  }
+
+  gettitle = () => {
+    this.modalTitleCancel();
+    const { dispatch } = this.props;
+    dispatch({
+      type: 'pagetable/mallpagetitle',
+      payload: {},
+    }).then(() => {
+      const { pagetable } = this.props;
+      this.setState({
+        adItem: pagetable?.mallpagetitle,
+      });
+    });
+  }
+
+  uploadChange = (value) => {
+    this.state.picUrl = value;
+  }
+
   modalTitleShow = () => {
     this.setState({ modalTitleVisible: true });
   }
@@ -61,56 +80,67 @@ export default class View extends PureComponent {
   }
   modalTitleOk = () => {
     // 这里写接口
-    this.props.form.getFieldValue('titleInput');
-    this.modalTitleCancel();
+    const { form } = this.props;
+    form.validateFields(['adtitle'], (err, values) => {
+      if (!err) {
+        const MallPageTitleVo = { adName: values.adtitle, adItemId: this.state.adItem.adItemId };
+        handleOperate.call(this, { MallPageTitleVo }, 'pagetable', 'mallupdatetitle', '修改', this.gettitle);
+      }
+    });
   }
 
-  modalAddNavShow = () => {
+  modalAddNavShow = (item) => {
     this.setState({ modalAddNavVisible: true });
+    this.setState({
+      currentItem: item,
+    });
+    this.setState({
+      picUrl: item?.picUrl,
+    });
+    this.props.form.setFieldsValue({
+      adName: item?.adName,
+      linkUrl: item?.linkUrl,
+      orderNum: item?.orderNum,
+      picUrl: item?.picUrl,
+    });
   }
   modalAddNavCancel = () => {
     this.setState({ modalAddNavVisible: false });
   }
   modalAddNavOk = () => {
     // 这里写接口
-    // console.log(this.props.form.getFieldValue('IconUpload'));
-    if (!this.state.adding) {
-      console.log(this.state.editingItem);
-    } else {
-      console.log('增加', this.props.form);
+    const { form } = this.props;
+    const { picUrl } = this.state;
+    if (!this.state.currentItem) { // 增加
+      form.validateFields(['adName', 'linkUrl', 'orderNum'], (err, values) => {
+        if (!err) {
+          const MallPageTitleVo = { adName: values.adName,
+            orderNum: values.orderNum,
+            linkUrl: values.linkUrl,
+            picUrl };
+          handleOperate.call(this, { MallPageTitleVo }, 'pagetable', 'mallsaveNav', '添加', this.getNavList);
+        }
+      });
+    } else { // 编辑
+      form.validateFields(['adName', 'linkUrl', 'orderNum'], (err, values) => {
+        if (!err) {
+          const MallPageTitleVo = { adName: values.adName,
+            linkUrl: values.linkUrl,
+            picUrl,
+            orderNum: values.orderNum,
+            adItemId: this.state.currentItem.adItemId };
+          handleOperate.call(this, { MallPageTitleVo }, 'pagetable', 'mallupdateNav', '编辑', this.getNavList);
+        }
+      });
     }
   }
-  beforeUpload = (file) => {
-    const isJPG = file.type === 'image/jpeg';
-    const isPNG = file.type === 'image/png';
-    if (!(isJPG || isPNG)) {
-      message.error('图片格式不符合要求');
-    }
-    const isLt5M = file.size / 1024 / 1024 < 5;
-    if (!isLt5M) {
-      message.error('图片大小不能超过5M!');
-    }
-    return (isJPG || isPNG) && isLt5M;
-  }
-
-  handlePreview = (file) => {
-    console.log(file);
-    // this.setState({
-    //   previewImage: file.url || file.thumbUrl,
-    //   previewVisible: true,
-    // });
-  }
-
-  handleChange = ({ fileList }) => this.setState({ fileList })
 
   addItem = () => {
-    this.modalAddNavShow();
-    this.setState({ adding: true });
+    this.modalAddNavShow(null);
   }
 
   editItem = (item) => {
-    this.modalAddNavShow();
-    this.setState({ editingItem: item });
+    this.modalAddNavShow(item);
   }
 
   deleteItem = (item) => {
@@ -119,15 +149,13 @@ export default class View extends PureComponent {
       content: '',
       okText: '确定',
       cancelText: '取消',
-      onOk: () => {
-        console.log('调用删除接口', item);
-      },
+      onOk: handleOperate.bind(this, { MallPageNavVo: item }, 'pagetable', 'malldeleteNav', '删除', this.getNavList),
     });
   }
 
   render() {
-    const { form } = this.props;
-    const { fileList } = this.state;
+    const { form, loading } = this.props;
+    const { fileList, adItem, currentItem } = this.state;
 
     const formItemLayout = {
       labelCol: {
@@ -139,17 +167,12 @@ export default class View extends PureComponent {
         sm: { span: 20 },
       },
     };
-
-    const uploadButton = (
-      <div>
-        <Icon type={this.state.loading ? 'loading' : 'plus'} />
-        <div className="ant-upload-text">Upload</div>
-      </div>
-    );
     return (
       <PageHeaderLayout>
         <div className={styles.homecontainer} >
-          <div className={styles.title} onClick={() => { this.modalTitleShow(); }}>恒腾密蜜家居商城</div>
+          <div className={styles.title} onClick={() => { this.modalTitleShow(); }}>
+            {adItem?.adName}
+          </div>
           <div className={styles.position}>banner</div>
           <div className={styles.navArea}>
             <List
@@ -158,9 +181,9 @@ export default class View extends PureComponent {
               renderItem={item => (
                 <List.Item>
                   { item.title !== '添加' ?
-                  (<div className={styles.itemDiv}><Icon className={styles.closeIcon} onClick={() => { this.deleteItem(item); }} type="close-circle" /><div className={styles.icon} onClick={() => { this.editItem(item); }}>图标</div></div>) :
-                  (<div className={styles.icon} onClick={() => { this.addItem(); }}>添加</div>)}
-                  <div>{ item.title !== '添加' ? item.title : '' }</div>
+                  (<div className={styles.itemDiv}><Icon className={styles.closeIcon} onClick={() => { this.deleteItem(item); }} type="close-circle" /><img className={styles.icon} src={item.picUrl} alt="" onClick={() => { this.editItem(item); }} /></div>) :
+                  (<div className={styles.icon} onClick={() => { this.addItem(); }}>+</div>)}
+                  <div>{ item.title !== '添加' ? item.adName : '' }</div>
                 </List.Item>
               )}
             />
@@ -174,13 +197,14 @@ export default class View extends PureComponent {
           title="编辑标题"
           visible={this.state.modalTitleVisible}
           onOk={this.modalTitleOk}
+          confirmLoading={loading}
           onCancel={this.modalTitleCancel}
           okText="保存"
           width="30%"
         >
           <Form layout="inline">
             <Form.Item label="标题：">
-              {form.getFieldDecorator('titleInput', {
+              {form.getFieldDecorator('adtitle', {
                 rules: rules([{
                   required: true, message: '请输入标题',
                 }]),
@@ -195,13 +219,15 @@ export default class View extends PureComponent {
           title="添加导航入口"
           visible={this.state.modalAddNavVisible}
           onOk={this.modalAddNavOk}
+          confirmLoading={loading}
           onCancel={this.modalAddNavCancel}
           okText="保存"
           width="30%"
         >
           <Form>
             <Form.Item label="名称：" {...formItemLayout}>
-              {form.getFieldDecorator('nameInput', {
+              {form.getFieldDecorator('adName', {
+                initialValue: currentItem?.adName,
                 rules: rules([{
                   required: true, message: '请输入名称',
                 }]),
@@ -210,7 +236,8 @@ export default class View extends PureComponent {
               )}
             </Form.Item>
             <Form.Item label="链接：" {...formItemLayout}>
-              {form.getFieldDecorator('LinkInput', {
+              {form.getFieldDecorator('linkUrl', {
+                initialValue: currentItem?.linkUrl,
                 rules: rules([{
                   required: true, message: '请输入链接',
                 }]),
@@ -218,24 +245,33 @@ export default class View extends PureComponent {
                 <MonitorInput />
               )}
             </Form.Item>
+            <Form.Item label="排序：" {...formItemLayout}>
+              {form.getFieldDecorator('orderNum', {
+                initialValue: currentItem?.orderNum,
+                rules: rules([{
+                  required: true, message: '请输入排序',
+                }]),
+              })(
+                <MonitorInput />
+              )}
+            </Form.Item>
             <Form.Item label="图片：" {...formItemLayout}>
-              {form.getFieldDecorator('IconUpload', {
+              {form.getFieldDecorator('picUrl', {
+                initialValue: fileList,
                 rules: rules([{
                   required: true,
                 }]),
               })(
-                <Upload
-                  action="//jsonplaceholder.typicode.com/posts/"
-                  listType="picture-card"
+                <ImageUpload
+                  exclude={['gif']}
+                  maxSize={5120}
+                  maxLength={1}
+                  action="/api/upload/img"
                   fileList={fileList}
-                  beforeUpload={this.beforeUpload}
-                  onPreview={this.handlePreview}
-                  onChange={this.handleChange}
-                >
-                  {fileList.length >= 1 ? null : uploadButton}
-                </Upload>
+                  listType="picture-card"
+                  uploadChange={this.uploadChange}
+                />
               )}
-
             </Form.Item>
           </Form>
         </Modal>

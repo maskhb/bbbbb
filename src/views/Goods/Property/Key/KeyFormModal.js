@@ -1,28 +1,35 @@
+import { MonitorInput } from 'components/input';
 import React, { PureComponent } from 'react';
-import { Input, Select, Modal, Form, Radio } from 'antd';
+import { /* Input, */ InputNumber, Select, Modal, Form, Radio } from 'antd';
 import { inputTypes, TYPE_SELECT_MULTI, PROPERTY_BASIC_TYPE } from '../const';
 
 const RadioGroup = Radio.Group;
 
 class KeyFormModal extends PureComponent {
   formItemLayout = {
-    labelCol: { span: 5 },
-    wrapperCol: { span: 19 },
+    labelCol: { span: 7 },
+    wrapperCol: { span: 17 },
   };
 
   handleOk = () => {
-    const { onOk, form } = this.props;
+    const { onOk, form, item } = this.props;
     form.validateFields((err, values) => {
       if (!err) {
         if (onOk) {
-          onOk(values);
+          onOk({
+            ...item,
+            ...values,
+            propertyName: values.propertyName.replace(/,|，/g, ''),
+          });
         }
       }
     });
   }
   renderTitle() {
-    const { item } = this.props;
-    const title = item ? '添加属性组' : '编辑属性组';
+    const { item, type } = this.props;
+    const title = `${(item ? '编辑' : '添加')}${
+      type === PROPERTY_BASIC_TYPE ? '基本属性' : '规格属性'
+    }`;
     return title;
   }
   render() {
@@ -39,14 +46,14 @@ class KeyFormModal extends PureComponent {
           label="属性名称"
           {...this.formItemLayout}
         >
-          {getFieldDecorator('name', {
-            initialValue: item ? item.name : '',
+          {getFieldDecorator('propertyName', {
+            initialValue: item ? item.propertyName : '',
             rules: [
               { required: true, message: '属性组名称不允许为空!' },
               { max: 50, message: '属性组名称不允许超过50个字符!' },
             ],
           })(
-            <Input />
+            <MonitorInput maxLength={50} simple="true" />
           )}
         </Form.Item>
         <Form.Item
@@ -54,7 +61,7 @@ class KeyFormModal extends PureComponent {
           {...this.formItemLayout}
         >
           {getFieldDecorator('inputType', {
-            initialValue: item ? item.inputTypes : null,
+            initialValue: item ? item.inputType : null,
             rules: [
               { required: true, message: '录入形式不允许为空!' },
             ],
@@ -69,7 +76,7 @@ class KeyFormModal extends PureComponent {
                 return false;
               }).map((k) => {
                 return (
-                  <Select.Option key={k} value={k}>{inputTypes[k]}</Select.Option>
+                  <Select.Option key={k} value={parseInt(k, 10)}>{inputTypes[k]}</Select.Option>
                 );
               }) }
             </Select>
@@ -80,14 +87,14 @@ class KeyFormModal extends PureComponent {
           {...this.formItemLayout}
         >
           {getFieldDecorator('isRequired', {
-            initialValue: 2, // item ? item.name : '',
+            initialValue: item ? item.isRequired : (type === PROPERTY_BASIC_TYPE ? 2 : 1),
             rules: [
               { required: true },
             ],
           })(
             <RadioGroup>
               <Radio value={1}>是</Radio>
-              <Radio value={2}>否</Radio>
+              { type === PROPERTY_BASIC_TYPE && (<Radio value={2}>否</Radio>) }
             </RadioGroup>
           )}
         </Form.Item>
@@ -96,7 +103,7 @@ class KeyFormModal extends PureComponent {
           {...this.formItemLayout}
         >
           {getFieldDecorator('isFilter', {
-            initialValue: 1, // item ? item.name : '',
+            initialValue: item ? item.isFilter : 2,
             rules: [
               { required: true, message: '属性组名称不允许为空!' },
             ],
@@ -107,18 +114,37 @@ class KeyFormModal extends PureComponent {
             </RadioGroup>
           )}
         </Form.Item>
+        {
+          type !== PROPERTY_BASIC_TYPE && (
+            <Form.Item
+              label="是否支持自定义值"
+              {...this.formItemLayout}
+            >
+              {getFieldDecorator('isCustmer', {
+                initialValue: item ? item.isCustmer : 2,
+                rules: [
+                  { required: true, message: '是否支持自定义值不允许为空!' },
+                ],
+              })(
+                <RadioGroup>
+                  <Radio value={1}>是</Radio>
+                  <Radio value={2}>否</Radio>
+                </RadioGroup>
+              )}
+            </Form.Item>
+          )
+        }
         <Form.Item
           label="排序"
           {...this.formItemLayout}
         >
           {getFieldDecorator('orderNum', {
-            initialValue: item ? item.name : '',
+            initialValue: item ? item.orderNum : 1,
             rules: [
-              { required: true, message: '属性组名称不允许为空!' },
-              { max: 50, message: '属性组名称不允许超过50个字符!' },
+              { required: true, message: '属性名称排序不允许为空!' },
             ],
           })(
-            <Input />
+            <InputNumber />
           )}
         </Form.Item>
       </Modal>

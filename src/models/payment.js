@@ -10,30 +10,57 @@ export default {
   },
 
   effects: {
-    *gethislist({ payload }, { call, put }) {
+    *hislist({ payload }, { call, put }) {
       const response = yield call(payment.searchPayOrderHis, payload);
       yield put({
         type: 'save',
         payload: {
-          list: response,
+          hislist: response,
         },
       });
     },
-    *getlist({ payload }, { call, put }) {
+    *exportPayOrderHis({ payload }, { call, put }) {
+      const response = yield call(payment.exportPayOrderHis, payload);
+      yield put({
+        type: 'save',
+        payload: {
+          exportPayOrderHis: response,
+        },
+      });
+    },
+    *saveManualTransaction({ payload }, { call, put }) {
+      const response = yield call(payment.saveManualTransaction, payload);
+      yield put({
+        type: 'save',
+        payload: {
+          saveManualTransaction: response,
+        },
+      });
+    },
+    *searchTransactionManualLogList({ payload }, { call, put }) {
+      const response = yield call(payment.searchTransactionManualLogList, payload);
+      yield put({
+        type: 'save',
+        payload: {
+          searchTransactionManualLogList: response,
+        },
+      });
+    },
+    *infolist({ payload }, { call, put }) {
       const response = yield call(payment.searchPayTypeAndInfoList, payload);
       yield put({
         type: 'save',
         payload: {
-          list: response,
+          searchPayTypeAndInfoList: response,
         },
       });
     },
-    *modifyInfo({ payload }, { call, put }) {
+    *modifyPayTypeAndInfo({ payload }, { call, put }) {
       const response = yield call(payment.modifyPayTypeAndInfo, payload);
       yield put({
         type: 'save',
         payload: {
-          save: response,
+          modifyPayTypeAndInfo: response,
         },
       });
     },

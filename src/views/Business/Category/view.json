@@ -1,13 +1,13 @@
 {
   "route": {
     "params": "",
-    "authority": ""
+    "authority": "OPERPORT_JIAJU_SHOPCATEGORY_LIST"
   },
   "menu": {
     "name": "分类管理",
     "icon": "",
-    "order": 2,
-    "authority": ""
+    "order": 3,
+    "authority": "OPERPORT_JIAJU_SHOPCATEGORY_LIST"
   },
-  "model": ["business"]
+  "model": ["businessClass"]
 }

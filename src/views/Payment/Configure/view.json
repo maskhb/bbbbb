@@ -7,7 +7,7 @@
     "name": "支付方式配置",
     "icon": "",
     "order": 1,
-    "authority": ""
+    "authority": "OPERPORT_JIAJU_PAYTYPELIST_LIST"
   },
   "model": ["payment"]
 }

@@ -2,7 +2,7 @@
  * @Author: wuhao
  * @Date: 2018-04-08 15:39:29
  * @Last Modified by: wuhao
- * @Last Modified time: 2018-04-17 18:14:11
+ * @Last Modified time: 2018-04-26 15:16:04
  *
  * 订单的mock数据
  */
@@ -269,12 +269,13 @@ function list(req, res, u) {
 
 
   const result = {
-    list: dataSource,
-    pagination: {
-      total: dataSource.length,
-      pageSize,
-      current: parseInt(params.currentPage, 10) || 1,
-    },
+    dataList: dataSource,
+    totalCount: dataSource.length,
+    pageSize,
+    totalPage: 10,
+    firstPage: true,
+    lastPage: true,
+    currPage: parseInt(params.currentPage, 10) || 1,
   };
 
   if (res && res.json) {

@@ -9,6 +9,7 @@ export default {
   effects: {
     *list({ payload }, { call, put }) {
       const response = yield call(marketingCategory.list, payload);
+      // console.log('category', response);
       yield put({
         type: 'save',
         payload: {

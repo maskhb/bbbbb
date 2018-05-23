@@ -1,21 +1,26 @@
 import permission from '../services/permission';
-import { setAuthority } from '../utils/authority';
+import { setAuthority, getAuthority } from '../utils/authority';
 
 export default {
   namespace: 'permission',
 
   state: {
-    currentAuthority: [],
+    currentAuthority: getAuthority(),
   },
 
   effects: {
     *current({ payload }, { call, put }) {
       const response = yield call(permission.current, payload);
-      setAuthority(response?.currentAuthority);
-      yield put({
-        type: 'save',
-        payload: response,
-      });
+      if (response && typeof response.map === 'function') {
+        const authories = response.map(s => s.authorityId);
+        setAuthority(authories);
+        yield put({
+          type: 'save',
+          payload: {
+            currentAuthority: authories,
+          },
+        });
+      }
     },
   },
 

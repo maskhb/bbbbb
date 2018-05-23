@@ -1,168 +1,122 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'dva';
-import { Card, Table, Input, Button, message, Select } from 'antd';
+import { Card, Table, Button, message, Modal, Form, InputNumber } from 'antd';
+import { handleOperate } from 'components/Handle';
+import { MonitorInput, rules } from 'components/input';
 import getColumns from './columns';
 import PageHeaderLayout from '../../../../layouts/PageHeaderLayout';
-
-
-const EditableCell = ({ editable, value, onChange }) => (
-  <div>
-    {editable
-      ? <Input style={{ margin: '-5px 0' }} value={value} onChange={e => onChange(e.target.value)} />
-      : value
-    }
-  </div>
-);
-
-const EditableCellSelect = ({ editable, value, onChange }) => {
-  const status = ['启用', '禁用'];
-
-  return (
-    <div>
-      {editable
-        ? (
-          <Select defaultValue={value} onChange={onChange}>
-            <Select.Option key="0" value={0}>{status[0]}</Select.Option>
-            <Select.Option key="1" value={1}>{status[1]}</Select.Option>
-          </Select>
-        )
-        : status[value]
-      }
-    </div>
-  );
-};
 
 @connect(({ pagetable, loading }) => ({
   pagetable,
   loading: loading.models.pagetable,
 }))
+
+@Form.create()
+
 export default class View extends PureComponent {
   static defaultProps = {
   };
 
   state = {
     list: [],
+    modalAddItemVisible: false,
+    navItem: null,
   };
 
   componentDidMount() {
+    this.refreshList();
+  }
+
+  refreshList = () => {
     const { dispatch } = this.props;
+    this.setState({
+      modalAddItemVisible: false,
+    });
     dispatch({
-      type: 'pagetable/tablist',
+      type: 'pagetable/commonlist',
       payload: {},
     }).then(() => {
       const { pagetable } = this.props;
       this.setState({
-        list: pagetable?.list?.list,
+        list: pagetable?.commonlist,
       });
     });
   }
 
-  edit(key) {
-    const newList = [...this.state.list];
-    const target = newList.filter(item => key === item.key)[0];
-    if (target) {
-      target.editable = true;
-      this.setState({ list: newList });
-    }
+  modalAddItemShow = (navItem) => {
+    this.setState({ modalAddItemVisible: true });
+    this.setState({
+      navItem,
+    });
+    this.props.form.setFieldsValue({
+      adName: navItem?.adName,
+      linkUrl: navItem?.linkUrl,
+      orderNum: navItem?.orderNum,
+    });
   }
 
-  cancel(key) {
-    const newList = [...this.state.list];
-    const target = newList.filter(item => key === item.key)[0];
-    if (target) {
-      Object.assign(target, this.cacheData?.filter(item => key === item.key)[0]);
-      delete target.editable;
-      this.setState({ list: newList });
-    }
+  modalAddItemCancel = () => {
+    this.setState({ modalAddItemVisible: false });
   }
-
-  save(key) {
-    const { dispatch } = this.props;
-    const target = this.state.list.filter(item => key === item.key)[0];
-    dispatch({
-      type: 'business/edit',
-      payload: {
-        target,
-      },
-    }).then(() => {
-      const { business: { edit } } = this.props;
-      if (edit.result === 0) {
-        message.success('保存成功');
-        this.cancel(key);
-        dispatch({
-          type: 'business/list',
-          payload: {},
-        }).then(() => {
-          const { business } = this.props;
-          this.setState({
-            list: business?.list?.list,
-          });
-        });
-      } else if (edit.result === 1) {
-        message.error(`保存失败, ${edit.msg || '请稍后再试。'}`);
+  modalAddItemOk = () => {
+    // 这里写接口
+    const { form } = this.props;
+    form.validateFields((err, values) => {
+      if (!err) {
+        const CommonPcNavVo = { adName: values.adName,
+          linkUrl: values.linkUrl,
+          orderNum: values.orderNum };
+        if (this.state.navItem) {
+          CommonPcNavVo.adItemId = this.state.navItem.adItemId;
+          handleOperate.call(this, { CommonPcNavVo }, 'pagetable', 'commonupdate', '更新', this.refreshList);
+        } else {
+          handleOperate.call(this, { CommonPcNavVo }, 'pagetable', 'commonsave', '添加', this.refreshList);
+        }
       }
     });
   }
 
-  handleChange(value, key, column) {
-    const newData = [...this.state.list];
-    const target = newData.filter(item => key === item.key)[0];
-    if (target) {
-      target[column] = value;
-      this.setState({ list: newData });
+  addItem = () => {
+    if (this.state.list && this.state.list.length >= 10) {
+      message.error('当前栏目数已达上线，请删除后再添加！');
+    } else {
+      this.modalAddItemShow(null);
     }
   }
 
-  add() {
-    const newList = [...this.state.list];
-    newList.unshift({
-      id: '--',
-      key: '--',
-      parentId: 0,
-      name: '',
-      description: '',
-      time: '--',
-      status: 1,
-      editable: true,
-    });
-    this.setState({
-      list: newList,
-    });
+  edit = (navItem) => {
+    this.modalAddItemShow(navItem);
   }
 
-  renderColumns(text, record, column) {
-    const { editable } = record;
-
-    return (
-      <EditableCell
-        editable={editable}
-        value={text}
-        onChange={value => this.handleChange(value, record.key, column)}
-      />
-    );
-  }
-
-  renderColumnsSelect(text, record, column) {
-    const { editable } = record;
-
-    return (
-      <EditableCellSelect
-        editable={editable}
-        value={text}
-        onChange={value => this.handleChange(value, record.key, column)}
-      />
-    );
+  delete = (navItem) => {
+    Modal.confirm({
+      title: '是否确认删除该栏目？',
+      content: '',
+      okText: '确定',
+      cancelText: '取消',
+      onOk: handleOperate.bind(this, { CommonPcNavVo: navItem }, 'pagetable', 'commondelete', '删除', this.refreshList),
+    });
   }
 
   render() {
-    const { loading } = this.props;
-    const { list } = this.state;
+    const { form, loading } = this.props;
+    const { list, navItem } = this.state;
 
+    const formItemLayout = {
+      labelCol: {
+        xs: { span: 28 },
+        sm: { span: 4 },
+      },
+      wrapperCol: {
+        xs: { span: 12 },
+        sm: { span: 20 },
+      },
+    };
     return (
       <PageHeaderLayout>
         <Card>
           <div style={{ marginBottom: '16px' }}>
-            <Button type="primary" onClick={this.add.bind(this)}>添加栏目</Button>
+            <Button type="primary" onClick={() => { this.addItem(); }}>添加栏目</Button>
           </div>
           <Table
             loading={loading}
@@ -171,6 +125,48 @@ export default class View extends PureComponent {
             pagination={false}
           />
         </Card>
+        <Modal
+          title={this.state.modalType === 1 ? '添加栏目' : '编辑栏目'}
+          visible={this.state.modalAddItemVisible}
+          onOk={this.modalAddItemOk}
+          confirmLoading={loading}
+          onCancel={this.modalAddItemCancel}
+          okText="保存"
+          width="30%"
+        >
+          <Form>
+            <Form.Item label="名称：" {...formItemLayout}>
+              {form.getFieldDecorator('adName', {
+                initialValue: navItem?.adName,
+                rules: rules([{
+                  required: true, message: '请输入名称',
+                }]),
+              })(
+                <MonitorInput maxLength={4} />
+              )}
+            </Form.Item>
+            <Form.Item label="链接：" {...formItemLayout}>
+              {form.getFieldDecorator('linkUrl', {
+                initialValue: navItem?.linkUrl,
+                rules: rules([{
+                  required: true, message: '请输入链接',
+                }]),
+              })(
+                <MonitorInput />
+              )}
+            </Form.Item>
+            <Form.Item label="排序：" {...formItemLayout}>
+              {form.getFieldDecorator('orderNum', {
+                initialValue: navItem?.orderNum,
+                rules: rules([{
+                  required: true, message: '请输入排序',
+                }]),
+              })(
+                <InputNumber style={{ width: '100%' }} />
+              )}
+            </Form.Item>
+          </Form>
+        </Modal>
       </PageHeaderLayout>
     );
   }

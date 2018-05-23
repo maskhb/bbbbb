@@ -1,13 +1,13 @@
 {
   "route": {
-    "params": "/:name",
-    "authority": ""
+    "params": "/:info",
+    "authority": "OPERPORT_JIAJU_SHOP_ACCOUNTLIST"
   },
   "breadcrumb": {
     "name": "管理帐号",
     "icon": "",
     "order": 1,
-    "authority": ""
+    "authority": "OPERPORT_JIAJU_SHOP_ACCOUNTLIST"
   },
-  "model": ["business"]
+  "model": ["business","businessAccount"]
 }

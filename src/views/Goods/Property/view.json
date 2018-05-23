@@ -1,13 +1,13 @@
 {
   "route": {
     "params": "",
-    "authority": ""
+    "authority": ["OPERPORT_JIAJU_BASICPROPERTYLIST_LIST", "OPERPORT_JIAJU_SALESPROPERTYLIST_LIST"]
   },
   "menu": {
     "name": "规格属性管理",
     "icon": "",
-    "order": 0,
-    "authority": ""
+    "order": 9,
+    "authority": ["OPERPORT_JIAJU_BASICPROPERTYLIST_LIST", "OPERPORT_JIAJU_SALESPROPERTYLIST_LIST"]
   },
   "model": ["propertyGroup"]
 }

@@ -1,9 +1,24 @@
 import React, { PureComponent } from 'react';
+import _ from 'lodash';
 import { connect } from 'dva';
 import { Card, Table, Button, message } from 'antd';
+import Authorized from 'utils/Authorized';
+import * as permission from 'config/permission';
 import PageHeaderLayout from '../../../layouts/PageHeaderLayout';
 import getColumns from './columns';
 import { toTreeData } from '../../../utils/utils';
+
+// const addKey = (list = []) => {
+// //   let newList = [];
+// //   if (list && list.length > 0) {
+// //     newList = list.map((item, i) => {
+// //       const newItem = item;
+// //       newItem.key = i;
+// //       return newItem;
+// //     });
+// //   }
+// //   return newList;
+// // };
 
 @connect(({ goodsCategory, loading }) => ({
   goodsCategory,
@@ -27,22 +42,21 @@ export default class View extends PureComponent {
     });
   }
 
-  handleRemove(ids = [], namespace = '') {
+  handleRemove(id = 0, namespace = '') {
     const { dispatch } = this.props;
     const name = '删除';
 
     dispatch({
       type: `${namespace}/remove`,
       payload: {
-        ids,
+        categoryId: id,
       },
     }).then(() => {
       const { remove = {} } = this.props[namespace];
-      if (remove.msgCode === 200 && remove.data) {
+      // console.log(remove);
+      if (remove && !remove.error) {
         message.success(`${name}成功`);
         this.reloadList();
-      } else {
-        message.error(`${name}失败, ${remove.message || '请稍后再试。'}`);
       }
     });
   }
@@ -50,44 +64,43 @@ export default class View extends PureComponent {
   popConfirm = (val, record, confirmText) => {
     const { dispatch } = this.props;
     dispatch({
-      type: 'goodsCategory/list',
-      payload: {},
-    });
-
-    dispatch({
       type: 'goodsCategory/status',
       payload: {
-        id: record.id,
+        categoryId: record.categoryId,
         status: val,
       },
     }).then(() => {
       const { status } = this.props.goodsCategory;
-      if (status.msgCode === 200 && status.data) {
+      if (status && !status.error) {
         message.success(`${confirmText}成功`);
         this.reloadList();
-      } else {
-        message.error(`${confirmText}失败, ${status.message || '请稍后再试。'}`);
       }
     });
   }
 
   render() {
     const { loading, goodsCategory } = this.props;
-    let { list } = goodsCategory;
-    list = list ? (toTreeData(list.slice(0), { id: 'categoryId', pid: 'parentId' })) : list;
+    const { list } = goodsCategory;
+    // console.log(list);
+    let dataList = _.isArray(list) ? list.slice(0) : [];
+    // dataList = addKey(dataList);
+    dataList = dataList ? (toTreeData(dataList.slice(0), { id: 'categoryId', pid: 'parentId' })) : dataList;
     return (
       <PageHeaderLayout>
         <Card>
           <div style={{ marginBottom: '16px' }}>
-            <a href="#/goods/category/add/0">
-              <Button icon="plus" type="primary">添加一级分类</Button>
-            </a>
+            <Authorized authority={[permission.OPERPORT_JIAJU_PROCATEGORYLIST_ADDCAT]}>
+              <a href="#/goods/category/add/0">
+                <Button icon="plus" type="primary">添加一级分类</Button>
+              </a>
+            </Authorized>
           </div>
           <Table
             loading={loading}
             columns={getColumns(this)}
-            dataSource={list}
+            dataSource={dataList}
             pagination={false}
+            rowKey="categoryId"
           />
         </Card>
       </PageHeaderLayout>

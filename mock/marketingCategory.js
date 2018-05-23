@@ -1,31 +1,18 @@
+const tableListDataSource = [];
+for (let i = 0; i < 100; i += 1) {
+  tableListDataSource.push({
+    // 商品营销分类主键
+    categoryId: i + 1,
+    categoryName: `商品营销分类名称${i + 1}`,
+    parentId: Math.floor(i / 5),
+  });
+}
+
 function list(req, res) {
+  const dataSource = [...tableListDataSource];
+
   const result = {
-    list: [
-      {
-        value: '1',
-        label: '1',
-        children: [
-          {
-            value: '11',
-            label: '11',
-            children: [
-              {
-                value: '111',
-                label: '111',
-              },
-            ],
-          },
-          {
-            value: '12',
-            label: '12',
-          },
-        ],
-      },
-      {
-        value: '2',
-        label: '2',
-      },
-    ],
+    list: dataSource,
   };
 
   if (res && res.json) {

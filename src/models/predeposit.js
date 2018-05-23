@@ -1,7 +1,7 @@
 /**
  * Created by rebecca on 2018/4/3.
  */
-import payment from '../services/predeposit';
+import predeposit from '../services/predeposit';
 
 export default {
   namespace: 'predeposit',
@@ -10,21 +10,57 @@ export default {
   },
 
   effects: {
-    *getlist({ payload }, { call, put }) {
-      const response = yield call(payment.predepositList, payload);
+    *predepositList({ payload }, { call, put }) {
+      const response = yield call(predeposit.predepositList, payload);
       yield put({
         type: 'save',
         payload: {
-          list: response,
+          predepositList: response,
         },
       });
     },
-    *modifyInfo({ payload }, { call, put }) {
-      const response = yield call(payment.modifyPayTypeAndInfo, payload);
+    *rechargepredeposit({ payload }, { call, put }) {
+      const response = yield call(predeposit.rechargepredeposit, payload);
       yield put({
         type: 'save',
         payload: {
-          save: response,
+          rechargepredeposit: response,
+        },
+      });
+    },
+    *validpredeposit({ payload }, { call, put }) {
+      const response = yield call(predeposit.validpredeposit, payload);
+      yield put({
+        type: 'save',
+        payload: {
+          validpredeposit: response,
+        },
+      });
+    },
+    *dealpredeposit({ payload }, { call, put }) {
+      const response = yield call(predeposit.dealpredeposit, payload);
+      yield put({
+        type: 'save',
+        payload: {
+          dealpredeposit: response,
+        },
+      });
+    },
+    *exportpredeposit({ payload }, { call, put }) {
+      const response = yield call(predeposit.exportpredeposit, payload);
+      yield put({
+        type: 'save',
+        payload: {
+          exportpredeposit: response,
+        },
+      });
+    },
+    *predepositlogsbypage({ payload }, { call, put }) {
+      const response = yield call(predeposit.predepositlogsbypage, payload);
+      yield put({
+        type: 'save',
+        payload: {
+          predepositlogsbypage: response,
         },
       });
     },

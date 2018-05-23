@@ -17,6 +17,15 @@ export default {
         },
       });
     },
+    *listByCategoryId({ payload }, { call, put }) {
+      const response = yield call(space.listByCategoryId, payload);
+      yield put({
+        type: 'save',
+        payload: {
+          listByCategoryId: response,
+        },
+      });
+    },
     *enable({ payload }, { call, put }) {
       const response = yield call(space.enable, payload);
       yield put({
@@ -86,24 +95,6 @@ export default {
         type: 'save',
         payload: {
           edit: response,
-        },
-      });
-    },
-    *audit({ payload }, { call, put }) {
-      const response = yield call(space.audit, payload);
-      yield put({
-        type: 'save',
-        payload: {
-          audit: response,
-        },
-      });
-    },
-    *unit({ payload }, { call, put }) {
-      const response = yield call(space.unit, payload);
-      yield put({
-        type: 'save',
-        payload: {
-          unit: response,
         },
       });
     },

@@ -89,11 +89,11 @@ export default class ProjectInput extends React.PureComponent {
     return this.convertByDataList(this.getCommunities());
   }
 
-  convertValue = (value) => {
-    if (!value) {
-      return this.state.value;
+  convertValue = () => {
+    if ('value' in this.props) {
+      return this.props.value;
     }
-    return value;
+    return this.state.value;
   }
 
   handleSelectChange = (value, isInit) => {
@@ -101,7 +101,7 @@ export default class ProjectInput extends React.PureComponent {
     if (value.length === 0) {
       newVal = this.initValue || value;
     }
-    console.log(value);
+
     this.setState({
       value,
     });
@@ -119,9 +119,9 @@ export default class ProjectInput extends React.PureComponent {
     return (
       <Cascader
         {...other}
-        placeholder={selectLevel ? arr.slice(0, selectLevel).join('／') : '省／市／项目'}
+        placeholder={placeholder || (selectLevel ? arr.slice(0, selectLevel).join('／') : '省／市／项目')}
         style={style || { width: 220 }}
-        value={this.convertValue(value)}
+        value={this.convertValue()}
         options={this.convertToOptions()}
         onChange={this.handleSelectChange}
         changeOnSelect

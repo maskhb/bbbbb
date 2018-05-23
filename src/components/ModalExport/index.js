@@ -2,12 +2,11 @@
  * @Author: wuhao
  * @Date: 2018-04-09 18:09:55
  * @Last Modified by: wuhao
- * @Last Modified time: 2018-04-18 15:44:35
+ * @Last Modified time: 2018-05-09 14:56:39
  *
  * 导出对话框
  */
 import React, { PureComponent } from 'react';
-import { routerRedux } from 'dva/router';
 import { Row, Col, Modal, Tabs, Divider, Input, Button } from 'antd';
 
 const { TabPane } = Tabs;
@@ -37,12 +36,14 @@ class ModalExport extends PureComponent {
    */
   getShowExportFieldRowElm = (options = []) => {
     return [
-      <Row>
+      <Row key="mefr_export_name">
         <Col>
           <span>导出内容：</span>
         </Col>
       </Row>,
-      <Row style={{
+      <Row
+        key="mefr_export_content"
+        style={{
         marginTop: '10px',
         marginLeft: '15px',
       }}
@@ -50,6 +51,7 @@ class ModalExport extends PureComponent {
         {
           options.map(item => (
             <Col
+              key={item}
               span="6"
               style={{
                 lineHeight: '28px',
@@ -70,8 +72,8 @@ class ModalExport extends PureComponent {
     const { exportFileName } = this.state;
 
     return [
-      <Divider />,
-      <Row type="flex" align="middle">
+      <Divider key="mefr_export_divider" />,
+      <Row key="mefr_export_filename" type="flex" align="middle">
         <Col span={3}>
           <span>文件名称：</span>
         </Col>
@@ -79,7 +81,7 @@ class ModalExport extends PureComponent {
           <Input placeholder="可输入导出文件名称" value={exportFileName} onChange={this.handleExportFileNameChange} />
         </Col>
       </Row>,
-      <Row>
+      <Row key="mefr_export_filedesc">
         <Col offset={3}>
           <span style={{
             color: '#d4d4d4',
@@ -133,7 +135,7 @@ class ModalExport extends PureComponent {
    * modal 导出按钮事件
    */
   handleModalOk = async () => {
-    const { dispatch, onOk, isOkHide = true, tabOptions, title = '', routerUrl, skipUrl } = this.props;
+    const { onOk, isOkHide = true, tabOptions, title = '', onSkip } = this.props;
 
     let exportFail = false;
     let isExportFailHideModal = false;
@@ -149,38 +151,37 @@ class ModalExport extends PureComponent {
       });
 
       // 成功失败判断
-      if (typeof res === 'boolean') {
-        if (!res) {
-          exportFail = true;
-        }
-      } else if (res) {
-        const { msgCode: code, message: msg, totalCount, sucTitle, isHide = false } = res;
-        if (code === 200) {
+      if (res) {
+        const { succ, totalCount, sucTitle, isHide = false } = res;
+        if (succ) {
           Modal.success({
             title: `正在导出${sucTitle || title || '数据'}，请稍等`,
-            content: `本次导出的${sucTitle || title || '数据'}约${totalCount || 0}条，大概需要${Math.ceil(totalCount / 1000)}分钟后才能下载`,
+            content: `本次导出的${sucTitle || title || '数据'}约${totalCount || 0}条，大概需要5分钟后才能下载`, // ${Math.ceil(totalCount / 1000)}
             cancelText: '关闭',
-            ...(routerUrl || skipUrl) ? {
+            ...(onSkip) ? {
               okText: '查看',
               onOk: () => {
-                if (routerUrl) {
-                  dispatch(routerRedux.push(routerUrl));
-                } else {
-                  window.open(skipUrl, '_blank');
-                }
+                onSkip(tabOptions[this.state.activeKey - 1]?.params);
               },
+              maskClosable: true,
             } : null,
 
           });
         } else {
           exportFail = true;
-          Modal.error({
-            title: `导出${sucTitle || title}失败`,
-            content: msg,
-          });
+          // Modal.error({
+          //   title: `导出${sucTitle || title}失败`,
+          //   content: msg,
+          // });
 
           isExportFailHideModal = isHide;
         }
+      } else {
+        exportFail = true;
+        Modal.error({
+          title: `导出${title}失败`,
+          content: '导出失败，请稍后再试~',
+        });
       }
     }
 
@@ -255,16 +256,15 @@ class ModalExport extends PureComponent {
   }
 
   render() {
-    const { hideBtn, tabOptions = [], title = '' } = this.props;
+    const { hideBtn, tabOptions = [], title = '', btnTitle = '导出' } = this.props;
     const { showModal, loading } = this.state;
 
-    const btnElm = <Button icon="download" type="primary" onClick={this.handleButtonClick}>导出</Button>;
+    const btnElm = <Button key="mec_btn" icon="download" type="primary" onClick={this.handleButtonClick}>{btnTitle}</Button>;
 
     return [
-      {
-        ...(hideBtn ? null : btnElm),
-      },
+      hideBtn ? null : btnElm,
       <Modal
+        key="mec_modal"
         visible={showModal}
         confirmLoading={loading}
         title={`导出${title}`}

@@ -1,4 +1,4 @@
-import goodsCategory from '../services/goodsCategory';
+import serviceGoodsCategory from '../services/goodsCategory';
 
 export default {
   namespace: 'goodsCategory',
@@ -8,16 +8,38 @@ export default {
 
   effects: {
     *list({ payload }, { call, put }) {
-      const response = yield call(goodsCategory.list, payload);
+      const response = yield call(serviceGoodsCategory.list, payload);
+
       yield put({
         type: 'save',
         payload: {
-          list: response.dataList,
+          list: response,
+        },
+      });
+      return response;
+    },
+    *listByMerchantId({ payload }, { call, put }) {
+      const response = yield call(serviceGoodsCategory.listByMerchantId, payload);
+
+      yield put({
+        type: 'save',
+        payload: {
+          [`list${payload.merchantId}`]: response,
+        },
+      });
+      return response;
+    },
+    *detail({ payload }, { call, put }) {
+      const response = yield call(serviceGoodsCategory.detail, payload);
+      yield put({
+        type: 'save',
+        payload: {
+          [`detail${payload.categoryId}`]: response,
         },
       });
     },
     *add({ payload }, { call, put }) {
-      const response = yield call(goodsCategory.add, payload);
+      const response = yield call(serviceGoodsCategory.add, payload);
       yield put({
         type: 'save',
         payload: {
@@ -26,7 +48,7 @@ export default {
       });
     },
     *edit({ payload }, { call, put }) {
-      const response = yield call(goodsCategory.edit, payload);
+      const response = yield call(serviceGoodsCategory.edit, payload);
       yield put({
         type: 'save',
         payload: {
@@ -35,7 +57,7 @@ export default {
       });
     },
     *remove({ payload }, { call, put }) {
-      const response = yield call(goodsCategory.remove, payload);
+      const response = yield call(serviceGoodsCategory.remove, payload);
       yield put({
         type: 'save',
         payload: {
@@ -44,7 +66,7 @@ export default {
       });
     },
     *exsit({ payload }, { call, put }) {
-      const response = yield call(goodsCategory.exsit, payload);
+      const response = yield call(serviceGoodsCategory.exsit, payload);
       yield put({
         type: 'save',
         payload: {
@@ -53,7 +75,7 @@ export default {
       });
     },
     *status({ payload }, { call, put }) {
-      const response = yield call(goodsCategory.status, payload);
+      const response = yield call(serviceGoodsCategory.status, payload);
       yield put({
         type: 'save',
         payload: {

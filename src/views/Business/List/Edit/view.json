@@ -1,6 +1,6 @@
 {
   "route": {
-    "params": "/:id",
+    "params": "/:merchantId",
     "authority": ""
   },
   "breadcrumb": {

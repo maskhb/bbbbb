@@ -1,13 +1,13 @@
 {
   "route": {
     "params": "",
-    "authority": ""
+    "authority": "OPERPORT_JIAJU_SHOP_LIST"
   },
   "menu": {
     "name": "商家列表",
     "icon": "",
     "order": 1,
-    "authority": ""
+    "authority": "OPERPORT_JIAJU_SHOP_LIST"
   },
   "model": ["business"]
 }

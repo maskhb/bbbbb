@@ -1,13 +1,15 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'dva';
-import { Card, Button, message } from 'antd';
+import { Card, Button, Modal, message } from 'antd';
 import PageHeaderLayout from 'layouts/PageHeaderLayout';
-import PanelList, { Batch, Table } from 'components/PanelList';
+import PanelList, { Search, Batch, Table } from 'components/PanelList';
 import getColumns from './columns';
+import ModalBindBrand from './modalBindBrand';
 
-@connect(({ goodsBrand, loading }) => ({
-  goodsBrand,
-  loading: loading.models.goodsBrand,
+@connect(({ goodsCategoryBrand, goodsCategory, loading }) => ({
+  goodsCategoryBrand,
+  goodsCategory,
+  loading: loading.models.goodsCategoryBrand,
 }))
 export default class View extends PureComponent {
   static defaultProps = {
@@ -17,63 +19,97 @@ export default class View extends PureComponent {
   };
 
   state = {
+    currentCategory: '',
   };
 
   componentDidMount() {
-    // this.search.handleSearch();
+    this.search.handleSearch();
   }
+  handleSearch = (values) => {
+    const { dispatch, match: { params: { id } } } = this.props;
+    const that = this;
 
-  handleSearch = (values = {}) => {
-    const { dispatch } = this.props;
-    return dispatch({
-      type: 'goodsBrand/list',
+    dispatch({
+      type: 'goodsCategoryBrand/listOnlyBond',
       payload: {
-        currentPage: 1,
-        pageSize: 20,
+        categoryId: id,
         ...values,
       },
     });
-  }
-
-  popConfirm = (val, record, confirmText) => {
-    const { dispatch } = this.props;
-
     dispatch({
-      type: 'goodsBrand/status',
+      type: 'goodsCategory/detail',
       payload: {
-        id: record.id,
-        status: val,
+        categoryId: id,
       },
     }).then(() => {
-      const { status } = this.props.goodsBrand;
-      if (status.msgCode === 200 && status.data) {
-        message.success(`${confirmText}成功`);
-        this.search.handleSearch();
-      } else {
-        message.error(`${confirmText}失败, ${status.message || '请稍后再试。'}`);
+      // console.log('goodsCategory', this.props.goodsCategory);
+      const category = this.props?.goodsCategory?.[`detail${id}`];
+      if (category && !category.error) {
+        that.setState({ currentCategory: category.categoryName });
       }
+    });
+  }
+  modalBindBrandShow = () => {
+    this.setState({ modalBindBrandVisible: true });
+  }
+  modalBindBrandCancel = () => {
+    this.setState({ modalBindBrandVisible: false });
+    this.search.handleSearch();
+  }
+
+  handleRemove = (record) => {
+    const { dispatch } = this.props;
+    dispatch({
+      type: 'goodsCategoryBrand/remove',
+      payload: {
+        categoryBrandId: record.categoryBrandId,
+      },
+    }).then(() => {
+      const result = this.props.goodsCategoryBrand?.remove;
+      if (result && !result.error) {
+        message.success('取消绑定成功');
+      }
+      this.search.handleSearch();
     });
   }
 
   render() {
-    const { loading, goodsBrand, searchDefault } = this.props;
-
+    const { loading, goodsCategoryBrand } = this.props;
+    // console.log('goodsCategoryBrand', goodsCategoryBrand);
     return (
       <PageHeaderLayout>
+        <Card style={{ marginBottom: 10, background: '#fff', fontWeight: 600 }}>
+          <div>当前分类：{this.state.currentCategory}</div>
+        </Card>
         <Card>
           <PanelList>
+            <Search
+              ref={(inst) => { this.search = inst; }}
+              onSearch={this.handleSearch}
+            />
             <Batch>
-              <a href="#/goods/brand/list/add/0">
-                <Button icon="plus" type="primary">添加绑定品牌</Button>
-              </a>
+              <Button icon="plus" type="primary" onClick={this.modalBindBrandShow}>添加绑定品牌</Button>
+              <Modal
+                title="添加绑定品牌"
+                visible={this.state.modalBindBrandVisible}
+                onOk={this.modalBindBrandOk}
+                onCancel={this.modalBindBrandCancel}
+                width="60%"
+                footer={null}
+                destroyOnClose="true"
+              >
+                <ModalBindBrand
+                  ref={(inst) => { this.modalBindBrandRef = inst; }}
+                  {...this.props}
+                />
+              </Modal>
             </Batch>
 
             <Table
               loading={loading}
-              searchDefault={searchDefault}
-              columns={getColumns(this, searchDefault)}
-              dataSource={goodsBrand.list}
-              pagination={goodsBrand.pagination}
+              columns={getColumns(this)}
+              dataSource={goodsCategoryBrand?.listOnlyBond?.list}
+              pagination={goodsCategoryBrand?.listOnlyBond?.pagination}
               disableRowSelection
               rowKey="id"
             />

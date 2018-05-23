@@ -1,126 +1,198 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'dva';
-import { Card, message, DatePicker, Select, Button } from 'antd';
+import { Card, Modal, DatePicker, Select, Form, Table } from 'antd';
 // import _ from 'lodash';
+import { MonitorInput, rules, MonitorTextArea } from 'components/input';
+import { handleOperate } from 'components/Handle';
+import SearchTable from 'components/TableStandard';
+import ModalExportBusiness from 'components/ModalExport/business';
+import Authorized from 'utils/Authorized';
 import PageHeaderLayout from '../../../layouts/PageHeaderLayout';
-import PanelList, { Search, Table, Batch } from '../../../components/PanelList';
+import PanelList, { Search, Batch } from '../../../components/PanelList';
 import CheckboxCascade from '../../../components/CheckBoxCascade';
-import ModalAudit from '../../../components/ModalAudit';
-import getColumns, { payTypeArr } from './columns';
-import { ONLINESTATUS } from '../../../components/Status/online';
-// import { debug } from 'util';
+import getColumns, { payTypeArr, logcolumns } from './columns';
+import { mul } from '../../../utils/number';
 
 @connect(({ payment, loading }) => ({
   payment,
   loading: loading.models.payment,
 }))
 
+@Form.create()
+
 export default class List extends PureComponent {
   static defaultProps = {
-    searchDefault: {},
+    searchDefault: { currentPage: 1, pageSize: 10, condition: { systemType: 1, modelCode: 1007 } },
   };
 
   state = {
-    modalAuditVisible: false,
+    modalEditVisible: false,
+    modalLogVisible: false,
+    modifyItem: null,
+    searchparam: {},
+    searchResult: {},
+    logResult: [],
   };
 
   componentDidMount() {
     this.search.handleSearch();
   }
 
+  convertExportParam = () => {
+    const { searchparam, searchResult } = this.state;
+    return {
+      param: {
+        ...searchparam?.condition,
+      },
+      totalCount: searchResult?.totalCount,
+      dataUrl: '/pay/paybehind/exportPayOrderHis/asynExportMJPayBills',
+      oldServiceUrl: 'payment-api',
+      prefix: 280011,
+    };
+  }
+
   handleSearch = (values = {}) => {
-    console.log(values);
-    const { dispatch } = this.props;
+    this.modalEditCancel();
+    const { dispatch, searchDefault } = this.props;
+    const searchparam = Object.assign({}, searchDefault);
+    searchparam.condition.payTypeKey = values?.payTypeKey;
+    searchparam.condition.payState = values.payState;
+    if (values?.createTime instanceof Array) {
+      searchparam.condition.startTime = new Date(values?.createTime[0]).getTime();
+      searchparam.condition.endTime = new Date(values?.createTime[1]).getTime();
+    }
+    if (!values?.condition?.url || values?.condition?.url !== this.state.searchparam.url) {
+      delete searchparam.condition.payOrderId;
+      delete searchparam.condition.outOrderId;
+      delete searchparam.condition.thirdPartTransactionId;
+    }
+    switch (values?.condition?.url) {
+      case 1:
+        searchparam.condition.payOrderId = values?.condition?.payOrderId;
+        break;
+      case 2:
+        searchparam.condition.outOrderId = values?.condition?.outOrderId;
+        break;
+      case 3:
+        searchparam.condition.thirdPartTransactionId = values?.condition?.thirdPartTransactionId;
+        break;
+      default:
+        break;
+    }
+    searchparam.pageSize = values?.pageInfo?.pageSize || 10;
+    searchparam.currentPage = values?.pageInfo?.currPage || 1;
+    this.state.searchparam = searchparam;
     return dispatch({
-      type: 'payment/gethislist',
-      payload: values,
+      type: 'payment/hislist',
+      payload: searchparam,
     }).then(() => {
       const { payment } = this.props;
-      console.log(payment);
-    });
-  }
-
-  popConfirmOnline = (val) => {
-    const { dispatch } = this.props;
-    const text = ONLINESTATUS[val === 0 ? 1 : 0];
-
-    dispatch({
-      type: 'goods/audit',
-      payload: val,
-    }).then(() => {
-      const { audit } = this.props.goods;
-      if (audit.result === 0) {
-        message.success(`${text}成功`);
-        this.search.handleSearch();
-      } else if (audit.result === 1) {
-        message.error(`${text}失败, ${audit.msg || '请稍后再试。'}`);
-      }
-    });
-  }
-
-  popConfirmDelete = (rows) => {
-    this.handleDelete(rows);
-  }
-
-  modalAuditShow = (records) => {
-    if (!records) {
-      return;
-    }
-
-    let rows = [];
-    if (records.constructor.name !== 'Array') {
-      rows = [records];
-    } else {
-      rows = records;
-    }
-
-    this.modalAuditRef.resetFields();
-    this.modalAuditRef.rows = rows;
-    this.setState({ modalAuditVisible: true });
-  }
-  modalAuditCancel = () => {
-    this.setState({ modalAuditVisible: false });
-  }
-  modalAuditOk = () => {
-    this.modalAuditRef.validateFields((err, values) => {
-      if (err) {
-        return;
-      }
-
-      const { dispatch } = this.props;
-      dispatch({
-        type: 'goods/audit',
-        payload: {
-          ...values,
-          ids: this.modalAuditRef.rows.map(row => row.id).join(','),
-        },
-      }).then(() => {
-        const { audit } = this.props.goods;
-        if (audit.result === 0) {
-          message.success('审核成功');
-          this.search.handleSearch();
-          // this.setState({
-          //   selectedRows: [],
-          // });
-        } else if (audit.result === 1) {
-          message.error(`审核失败, ${audit.msg || '请稍后再试。'}`);
-        }
+      this.setState({
+        searchResult: payment.hislist,
       });
-
-      this.modalAuditCancel();
     });
+  }
+
+  showrefreshconfirm = () => {
+    const that = this;
+    Modal.confirm({
+      title: '提示',
+      content: '正在更新，时长约1分钟，请稍后刷新页面查看结果！',
+      okText: '确定',
+      cancelText: '取消',
+      onOk() {
+        that.search.handleSearch();
+      },
+    });
+  }
+
+  log = (record) => {
+    this.modalLogShow(record);
+  }
+
+  edit = (record) => {
+    this.modalEditShow(record);
+  }
+
+  modalEditShow = (record) => {
+    this.setState({ modalEditVisible: true });
+    this.setState({
+      modifyItem: record,
+    });
+    this.props.form.setFieldsValue({
+      thirdPartTransactionId: '',
+      payTime: '',
+      remark: '',
+    });
+  }
+
+  modalEditCancel = () => {
+    this.setState({ modalEditVisible: false });
+  }
+  modalEditOk = () => {
+    // 这里写接口
+    const { form } = this.props;
+    form.validateFields((err, values) => {
+      if (!err) {
+        const manualTransaction = Object.assign({}, values);
+        manualTransaction.payOrderNo = this.state.modifyItem.payOrder;
+        manualTransaction.outTradeNo = this.state.modifyItem.outOrderId;
+        manualTransaction.payTypeKey = this.state.modifyItem.payTypeKey;
+        manualTransaction.transactionId = this.state.modifyItem.transactionId;
+        manualTransaction.totalAmount = mul(this.state.modifyItem.totalFee, 100);
+        manualTransaction.payTime = new Date(values.payTime).getTime();
+        handleOperate.call(this, { manualTransaction }, 'payment', 'saveManualTransaction', '日志修改', this.showrefreshconfirm);
+      }
+    });
+  }
+
+  modalLogShow = (record) => {
+    this.setState({ modalLogVisible: true });
+    const { dispatch } = this.props;
+    return dispatch({
+      type: 'payment/searchTransactionManualLogList',
+      payload: { transactionId: record.transactionId },
+    }).then(() => {
+      const { payment } = this.props;
+      this.setState({
+        modifyItem: {},
+      });
+      this.setState({
+        logResult: payment?.searchTransactionManualLogList,
+      });
+    });
+  }
+
+  modalLogCancel = () => {
+    this.setState({ modalLogVisible: false, logResult: [] });
   }
 
   render() {
-    const { payment, loading, searchDefault } = this.props;
-    const { modalAuditVisible } = this.state;
+    const { loading, searchDefault } = this.props;
+    const { modalEditVisible, modalLogVisible, modifyItem, searchResult, logResult } = this.state;
     const selectOptions = { // CheckboxCascade组件的入参集合
       url: [
         { value: 1, label: '支付单号', key: 1, childrenType: 1, childrenName: 'payOrderId', childrenProps: { placeholder: '请输入' } },
-        { value: 2, label: '订单编号', key: 2, childrenType: 1, childrenName: 'businessNo', childrenProps: { placeholder: '请输入' } },
-        { value: 3, label: '交易流水号', key: 3, childrenType: 1, childrenName: 'transactionId', childrenProps: { placeholder: '请输入' } },
+        { value: 2, label: '订单编号', key: 2, childrenType: 1, childrenName: 'outOrderId', childrenProps: { placeholder: '请输入' } },
+        { value: 3, label: '交易流水号', key: 3, childrenType: 1, childrenName: 'thirdPartTransactionId', childrenProps: { placeholder: '请输入' } },
       ],
     };
+    const formItemLayout = {
+      labelCol: {
+        xs: { span: 28 },
+        sm: { span: 4 },
+      },
+      wrapperCol: {
+        xs: { span: 12 },
+        sm: { span: 20 },
+      },
+    };
+
+    for (const v of payTypeArr) {
+      if (v.key === modifyItem?.payTypeKey) {
+        modifyItem.payType = v.value;
+      }
+    }
 
     return (
       <PageHeaderLayout>
@@ -128,12 +200,14 @@ export default class List extends PureComponent {
           <PanelList>
             <Search
               ref={(inst) => { this.search = inst; }}
+              searchDefault={searchDefault}
               onSearch={this.handleSearch}
+              onReset={this.handleReset}
             >
               <Search.Item label="" simple>
                 {
                   ({ form }) => (
-                    form.getFieldDecorator('url', {
+                    form.getFieldDecorator('condition', {
                       initialValue: 1,
                     })(
                       <CheckboxCascade
@@ -148,12 +222,12 @@ export default class List extends PureComponent {
                 {
                   ({ form }) => (
                     form.getFieldDecorator('payTypeKey', {
-                      initialValue: '0',
+                      initialValue: '',
                     })(
                       <Select >
-                        <Select.Option key="0" value="0">全部</Select.Option>
+                        <Select.Option key="" value="">全部</Select.Option>
                         {payTypeArr.map(v =>
-                          <Select.Option key={v.key} value={v.value}>{v.value}</Select.Option>
+                          <Select.Option key={v.key} value={v.key}>{v.value}</Select.Option>
                         )}
                       </Select>
                     )
@@ -175,10 +249,10 @@ export default class List extends PureComponent {
                   )
                 }
               </Search.Item>
-              <Search.Item label="支付时间">
+              <Search.Item label="支付时间" simple>
                 {
                   ({ form }) => (
-                    form.getFieldDecorator('createdTime', {
+                    form.getFieldDecorator('createTime', {
                     })(
                       <DatePicker.RangePicker format="YYYY-MM-DD HH:mm:ss" />
                     )
@@ -186,23 +260,122 @@ export default class List extends PureComponent {
                 }
               </Search.Item>
             </Search>
-            <Batch><Button type="primary">导出</Button></Batch>
-            <Table
+            <Batch>
+              <Authorized authority="OPERPORT_JIAJU_PAYRECORDLIST_EXPORT">
+                <ModalExportBusiness
+                  {...this.props}
+                  convertParam={this.convertExportParam}
+                  exportModalType={0}
+                />
+              </Authorized>
+            </Batch>
+            <SearchTable
               loading={loading}
               columns={getColumns(this)}
               searchDefault={searchDefault}
               disableRowSelection
-              dataSource={payment?.list?.list}
-              pagination={payment?.list?.pagination}
+              dataSource={searchResult?.dataList}
+              rowKey="payOrder"
+              pagination={{
+                current: searchResult?.currPage || 1,
+                pageSize: searchResult?.pageSize || 10,
+                total: searchResult?.totalCount || 0,
+              }}
             />
           </PanelList>
+          <Modal
+            title="修改支付记录"
+            visible={modalEditVisible}
+            onOk={this.modalEditOk}
+            confirmLoading={loading}
+            onCancel={this.modalEditCancel}
+            okText="保存"
+            width="50%"
+          >
+            <Form>
+              <Form.Item label="支付单号" {...formItemLayout}>
+                {this.props.form.getFieldDecorator('payOrder', {
+              })(
+                <span>{modifyItem?.payOrder}</span>
+              )}
+              </Form.Item>
+              <Form.Item label="支付方式" {...formItemLayout}>
+                {this.props.form.getFieldDecorator('payType', {
+              })(
+                <span>{modifyItem?.payType}</span>
+              )}
+              </Form.Item>
+              <Form.Item label="支付金额" {...formItemLayout}>
+                {this.props.form.getFieldDecorator('totalAmount', {
+                  initialValue: modifyItem?.totalFee,
+              })(
+                <span>{modifyItem?.totalFee}</span>
+              )}
+              </Form.Item>
+              <Form.Item label="支付状态" {...formItemLayout}>
+                {this.props.form.getFieldDecorator('status', {
+                  initialValue: '1',
+                  rules: rules([{
+                    required: true,
+                  }]),
+                })(
+                  <Select >
+                    <Select.Option key="1" value="1">已支付</Select.Option>
+                  </Select>
+                )}
+              </Form.Item>
+              <Form.Item label="支付流水号" {...formItemLayout}>
+                {this.props.form.getFieldDecorator('thirdPartTransactionId', {
+                  initialValue: modifyItem?.thirdPartTransactionId,
+                  rules: rules([{
+                    required: true, message: '请输入支付流水号',
+                  }]),
+                })(
+                  <MonitorInput maxLength={100} />
+                )}
+              </Form.Item>
+              <Form.Item label="支付时间" {...formItemLayout}>
+                {this.props.form.getFieldDecorator('payTime', {
+                  rules: rules([{
+                    required: true, message: '请输入支付时间',
+                  }]),
+                })(
+                  <DatePicker
+                    style={{ width: '60%' }}
+                    showTime
+                    format="YYYY-MM-DD HH:mm:ss"
+                    placeholder="请选择时间"
+                  />
+                )}
+              </Form.Item>
+              <Form.Item label="备注" {...formItemLayout}>
+                {this.props.form.getFieldDecorator('remark', {
+                  initialValue: modifyItem?.remark,
+                  rules: rules([{
+                    required: true, message: '请输入备注',
+                  }]),
+                })(
+                  <MonitorTextArea rows={6} maxLength={200} form={this.props.form} datakey="remarks" />)}
+              </Form.Item>
+            </Form>
+          </Modal>
+          <Modal
+            title="查看修改日志"
+            visible={modalLogVisible}
+            onOk={this.modalLogCancel}
+            onCancel={this.modalLogCancel}
+            width="80%"
+          >
+            <Table
+              columns={logcolumns()}
+              disableRowSelection
+              dataSource={logResult}
+              loading={loading}
+              rowKey="transactionId"
+              pagination={false}
+            />
+          </Modal>
 
-          <ModalAudit
-            ref={(inst) => { this.modalAuditRef = inst; }}
-            visible={modalAuditVisible}
-            onCancel={this.modalAuditCancel}
-            onOk={this.modalAuditOk}
-          />
         </Card>
       </PageHeaderLayout>
     );

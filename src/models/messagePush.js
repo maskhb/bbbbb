@@ -16,12 +16,21 @@ export default {
         },
       });
     },
-    *detail({ payload }, { call, put }) {
-      const response = yield call(messagePush.detail, payload);
+    *rePush({ payload }, { call, put }) {
+      const response = yield call(messagePush.rePush, payload);
       yield put({
         type: 'save',
         payload: {
-          detail: response,
+          rePush: response,
+        },
+      });
+    },
+    *recordList({ payload }, { call, put }) {
+      const response = yield call(messagePush.recordList, payload);
+      yield put({
+        type: 'save',
+        payload: {
+          recordList: response,
         },
       });
     },
@@ -31,42 +40,6 @@ export default {
         type: 'save',
         payload: {
           add: response,
-        },
-      });
-    },
-    *edit({ payload }, { call, put }) {
-      const response = yield call(messagePush.edit, payload);
-      yield put({
-        type: 'save',
-        payload: {
-          edit: response,
-        },
-      });
-    },
-    *remove({ payload }, { call, put }) {
-      const response = yield call(messagePush.remove, payload);
-      yield put({
-        type: 'save',
-        payload: {
-          remove: response,
-        },
-      });
-    },
-    *audit({ payload }, { call, put }) {
-      const response = yield call(messagePush.audit, payload);
-      yield put({
-        type: 'save',
-        payload: {
-          audit: response,
-        },
-      });
-    },
-    *unit({ payload }, { call, put }) {
-      const response = yield call(messagePush.unit, payload);
-      yield put({
-        type: 'save',
-        payload: {
-          unit: response,
         },
       });
     },

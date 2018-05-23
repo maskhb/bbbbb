@@ -1,5 +1,6 @@
 import _ from 'lodash';
-import * as configs from '../../views/**/view.json';
+import { configs } from '../collectConfigs';
+import { getRealAuthority } from '../utils';
 
 const getLevel = key => key.match(/(\$|\/)/g)?.length || 0;
 const getPath = key => key.replace(/\$/g, '/').toLowerCase();
@@ -24,11 +25,12 @@ function loop(level = 0) {
   }
 
   if (level === 0) {
-    for (const [key, { menu }] of Object.entries(configs)) {
+    for (const [key, { menu, route }] of Object.entries(configs)) {
       if (getLevel(key) === level) {
         const path = getPath(key);
         menus.push({
           ...menu,
+          authority: getRealAuthority(menu.authority || route?.authority),
           level,
           path,
           children: [],
@@ -38,12 +40,13 @@ function loop(level = 0) {
     menus = _.sortBy(menus, 'order');
   } else {
     for (const pMenu of getChildren(menus, level)) {
-      for (const [key, { menu = {} }] of Object.entries(configs)) {
+      for (const [key, { menu = {}, route }] of Object.entries(configs)) {
         if (getLevel(key) === level) {
           const path = getPath(key);
           if (path.substr(0, path.lastIndexOf('/')) === pMenu.path) {
             pMenu.children.push({
               ...menu,
+              authority: getRealAuthority(menu.authority || route?.authority),
               name: menu.name,
               level,
               path,
@@ -53,6 +56,31 @@ function loop(level = 0) {
         }
       }
       pMenu.children = _.sortBy(pMenu.children, 'order');
+      // 把下级菜单的权限纳入上级菜单
+      if (pMenu.authority) {
+        if (Array.isArray(pMenu.authority)) {
+          pMenu.authority = _.uniq(
+            pMenu.authority.concat(_.flatten(
+              pMenu.children.map(menu => menu.authority
+              )))
+          );
+        } else if (typeof pMenu.authority === 'string') {
+          pMenu.authority = _.uniq(
+            [pMenu.authority].concat(_.flatten(
+              pMenu.children.map(menu => menu.authority
+              )))
+          );
+        }
+      } else {
+        const auths = _.uniq(_.flatten(pMenu.children.map(
+          menu => menu.authority
+        )));
+        if (auths.length > 1) {
+          pMenu.authority = auths;
+        } else if (auths.length === 1) {
+          [pMenu.authority] = auths;
+        }
+      }
     }
   }
 

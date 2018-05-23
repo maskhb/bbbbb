@@ -7,7 +7,9 @@
     "name": "批量导入管理",
     "icon": "",
     "order": 0,
-    "authority": ""
+    "authority": ["OPERPORT_JIAJU_BATCHADDING_ADDSHOP", "OPERPORT_JIAJU_BATCHADDING_ADDSHOP",
+      "OPERPORT_JIAJU_BATCHADDING_ADDACCOUN", "OPERPORT_JIAJU_USER_BATCHADD",
+      "OPERPORT_JIAJU_BASICPROPERTYLIST_IMPORT", "OPERPORT_JIAJU_SALESPROPERTYLIST_IMPORT"]
   },
   "model": ["batchImport"]
 }

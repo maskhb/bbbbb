@@ -1,53 +1,44 @@
 import request from '../utils/request';
 
 async function list(params) {
-  return request('/api/goods/propertyValue/queryList', {
+  return request('/mj/ht-mj-goods-server/propertyValue/queryListByPage', {
     method: 'POST',
     body: {
-      ...params,
+      propertyValueVoQ: params,
     },
+    pagination: true,
   });
 }
 
 async function remove(params) {
-  return request('/api/goods/propertyValue/delete', {
+  return request('/mj/ht-mj-goods-server/propertyValue/delete', {
     method: 'POST',
     body: {
-      ...params,
+      propertyValueVoD: params,
     },
   });
 }
 
 async function add(params) {
-  return request('/api/goods/propertyValue/save', {
+  return request('/mj/ht-mj-goods-server/propertyValue/save', {
     method: 'POST',
     body: {
-      ...params,
+      propertyValueVoS: params,
     },
   });
 }
 
 async function edit(params) {
-  return request('/api/goods/propertyValue/update', {
+  return request('/mj/ht-mj-goods-server/propertyValue/update', {
     method: 'POST',
     body: {
-      ...params,
-    },
-  });
-}
-
-async function detail(params) {
-  return request('/api/goods/propertyValue/queryDetail', {
-    method: 'POST',
-    body: {
-      ...params,
+      propertyValueVoU: params,
     },
   });
 }
 
 export default {
   list,
-  detail,
   add,
   edit,
   remove,

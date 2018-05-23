@@ -1,5 +1,6 @@
 import React, { PureComponent } from 'react';
-import { Input, InputNumber, Form } from 'antd';
+import { InputNumber, Form } from 'antd';
+import { MonitorInput } from 'components/input';
 import styles from './styles.less';
 
 class EditableCell extends PureComponent {
@@ -37,17 +38,19 @@ class EditableCell extends PureComponent {
   }
 
   renderInput() {
-    const { value } = this.props;
+    const { value, maxLength } = this.props;
     if (typeof value === 'number') {
       return (
         <InputNumber
-          min="0"
+          min={1}
           onChange={e => this.handleChange(e)}
         />
       );
     } else {
       return (
-        <Input
+        <MonitorInput
+          maxLength={maxLength || 10}
+          simple="true"
           onChange={e => this.handleChange(e)}
         />
       );

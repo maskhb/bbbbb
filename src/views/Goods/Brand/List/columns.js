@@ -1,45 +1,34 @@
 import React from 'react';
-import { Badge, Popconfirm, Popover } from 'antd';
+import { Badge, Popconfirm } from 'antd';
 import moment from 'moment';
+import { OPERPORT_JIAJU_BRANDLIST_ENABLE, OPERPORT_JIAJU_BRANDLIST_DISABLE, OPERPORT_JIAJU_BRANDLIST_DELETE } from 'config/permission';
+import Authorized from 'utils/Authorized';
 import TextBeyond from 'components/TextBeyond';
 import { format } from 'components/Const';
-import { handleRemove, handleUpdate } from 'components/Handle';
-import { ENABLESTATUS, ENABLESTATUSLEVELS } from 'components/Status/enable';
+import { handleRemove, handleOperate } from 'components/Handle';
+import ListImg from 'components/ListImg';
+import ENABLESTATUS from 'components/EnableStatus';
+import ENABLEALLSTATUS from 'components/EnableStatus/ENABLEALLSTATUS';
 
 export default (me, searchDefault) => {
   return [
     {
       title: 'ID',
       dataIndex: 'brandId',
-      render(val) {
-        return <a href={`#/goods/brand/list/detail/${val}`}>{val}</a>;
-      },
     },
     {
-      title: 'Logo',
+      title: 'logo',
       dataIndex: 'brandUrl',
       render(val) {
-        return (
-          <Popover placement="right" title="" content={<img src={val} alt="" />} trigger="hover">
-            <a target="_blank" href={val}>
-              <div style={{
-                width: 80,
-                height: 50,
-                backgroundImage: `url(${val})`,
-                backgroundSize: 'cover',
-                }}
-              />
-            </a>
-          </Popover>
-        );
+        return <ListImg url={val} />;
       },
     },
     {
-      title: '名称',
+      title: '品牌名称',
       dataIndex: 'brandName',
-      render(val) {
+      render(val, record) {
         return (
-          <TextBeyond content={val} maxLength="12" width="300px" />
+          <a target="_blank" href={`#/goods/brand/list/detail/${record.brandId}`}><TextBeyond content={val} maxLength="12" width="300px" /></a>
         );
       },
     },
@@ -50,27 +39,47 @@ export default (me, searchDefault) => {
     {
       title: '状态',
       dataIndex: 'status',
-      filters: Object.values(ENABLESTATUS).map((v, k) => ({ text: v, value: k })),
+      filterMultiple: false,
+      filters: Object.values(ENABLEALLSTATUS),
       filteredValue: String(me.search?.props.stateOfSearch.status || searchDefault.status).split(','),
-      onFilter: (val, record) => record.status === Number(val),
+      onFilter: (val, record) => record.status === Number(val)
+        || Number(val) === ENABLEALLSTATUS.ALL.value,
       render(val, record) {
-        const confirmText = ENABLESTATUS[val === 0 ? 1 : val === 1 ? 2 : val === 2 ? 1 : ''];
+        const current = Object.values(ENABLESTATUS).find(
+          ({ value }) => value === val);
+        // 启用 -> 禁用，禁用、草稿 -> 启用
+        const targetStatus = val === ENABLESTATUS.ENABLE.value
+          ? ENABLESTATUS.DISENABLE.value
+          : ENABLESTATUS.ENABLE.value;
+        const targetText = Object.values(ENABLESTATUS).find(
+          ({ value }) => value === targetStatus).text;
+
         const text = (
           <Popconfirm
             placement="top"
-            title={`确认${confirmText}？`}
+            title={`确认${targetText}？`}
             okText="确认"
             cancelText="取消"
-            onConfirm={handleUpdate.bind(me, {
+            onConfirm={handleOperate.bind(me, {
               brandId: record.brandId,
-              status: val,
-            }, 'goodsBrand', confirmText)}
+              status: targetStatus,
+            }, 'goodsBrand', 'status', targetText)}
           >
-            <a>{ENABLESTATUS[val]}</a>
+            <a>{current?.text}</a>
           </Popconfirm>
         );
 
-        return <Badge status={ENABLESTATUSLEVELS[val]} text={text} />;
+        const permission = targetStatus === ENABLESTATUS.ENABLE.value
+          ? [OPERPORT_JIAJU_BRANDLIST_ENABLE]
+          : targetStatus === ENABLESTATUS.DISENABLE.value
+            ? [OPERPORT_JIAJU_BRANDLIST_DISABLE]
+            : [];
+
+        return (
+          <Authorized authority={permission} noMatch={current?.text}>
+            <Badge status={current?.color} text={text} />
+          </Authorized>
+        );
       },
     },
     {
@@ -84,13 +93,17 @@ export default (me, searchDefault) => {
     },
     {
       title: '操作',
-      render: (val) => {
+      render: (val, record) => {
         return (
-          <div>
-            <Popconfirm placement="top" title="确认删除？" onConfirm={handleRemove.bind(me, { brandId: val.brandId }, 'goodsBrand')} okText="确认" cancelText="取消">
-              <a>删除</a>
-            </Popconfirm>
-          </div>
+          record.status === 3
+            ? (
+              <Authorized authority={[OPERPORT_JIAJU_BRANDLIST_DELETE]}>
+                <Popconfirm placement="top" title="确认删除？" onConfirm={handleRemove.bind(me, { brandId: val.brandId }, 'goodsBrand')} okText="确认" cancelText="取消">
+                  <a>删除</a>
+                </Popconfirm>
+              </Authorized>
+            )
+            : ''
         );
       },
     },

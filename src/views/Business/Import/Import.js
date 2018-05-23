@@ -1,19 +1,18 @@
 import React, { Component } from 'react';
+import UploadFile from 'components/Upload/File';
+// import { Link } from 'dva/router';
+import Download from 'components/Download';
 import { connect } from 'dva';
-import { Form, Card, Upload, Button, Icon, Row, Col } from 'antd';
+import { goTo } from 'utils/utils';
+
+import { Form, Card, message, Button, Row, Col } from 'antd';
 // import { Link } from 'dva/router';
 
 import PageHeaderLayout from 'layouts/PageHeaderLayout';
 import './Import.less';
 
-@connect(({ goods, goodsCategory, goodsBrand, marketingCategory, business, loading }) => ({
-  goods,
-  goodsCategory,
-  goodsBrand,
-  marketingCategory,
-  business,
-  submitting: loading.effects['goods/add'],
-  fetchingBusinessList: loading.effects['business/list'],
+@connect(({ business, loading }) => ({
+  business, loading,
 }))
 @Form.create()
 
@@ -23,10 +22,52 @@ export default class Import extends Component {
     const type = path.split('/')[path.split('/').length - 2];
     if (type === 'importAccount') {
       this.setState({ importAccount: true });
+      console.log(this.props.business.urlRes) //eslint-disable-line
     } else {
       this.setState({ importAccount: false });
     }
   }
+  handleUpload=(fileList) => {
+console.log(fileList) //eslint-disable-line
+    this.setState({ fileList });
+  }
+  handleSubmit=() => {
+    const { fileList, importAccount } = this.state;
+    const [currentFile] = fileList;
+    if (importAccount) {
+      // 批量导入帐号接口
+      this.props.dispatch({
+        type: 'business/importAccount',
+        payload: {
+          BatchImportVo: {
+            fileName: currentFile.originalFileName,
+            fileUrl: currentFile.url,
+          },
+        },
+      }).then((res) => {
+        if (res) {
+          message.success('上传成功');
+        }
+      });
+      /* ; */
+    } else {
+      // 批量导入商家接口
+      this.props.dispatch({
+        type: 'business/importMerchant',
+        payload: {
+          BatchImportVo: {
+            fileName: currentFile.originalFileName,
+            fileUrl: currentFile.url,
+          },
+        },
+      }).then((res) => {
+        if (res) {
+          message.success('上传成功');
+        }
+      });
+    }
+  }
+
 
   render() {
     const { importAccount } = this.state;
@@ -36,19 +77,27 @@ export default class Import extends Component {
         <Card title={title} bordered={false}>
           <p>{`请将需批量导入的商家${importAccount ? '帐号' : ''}按下方模板所示格式上传`}</p>
           <p>
-            <a href="#">
-              {`下载商家${importAccount ? '帐号' : ''}批量导入模板`}
-            </a>
+            <Download
+              baseUrl={
+                importAccount ? (
+                  '/ht-mj-merchant-server/merchantAccount/downloadMerchantAccountTemplate'
+                ) : (
+                  '/ht-mj-merchant-server/merchantBase/downloadMerchantTemplate'
+                )}
+              title={`下载商家${importAccount ? '帐号' : ''}批量导入模板`}
+            />
           </p>
           <br />
           <Row gutter={16}>
             <Col span={3} >{`上传须批量导入的商家${importAccount ? '帐号' : ''}：`}</Col>
             <Col span={3} >
-              <Upload >
-                <Button type="ghost">
-                  <Icon type="upload" /> 点击上传
-                </Button>
-              </Upload>
+
+              <UploadFile
+                uploadType="excel"
+                maxSize={1024 * 5}
+                maxLength={1}
+                onChange={this.handleUpload}
+              />
               <br />
               <span>请选择要上传的文件(.xlsx)</span>
             </Col>
@@ -61,10 +110,15 @@ export default class Import extends Component {
           <br />
           <Row gutter={16}/*  type="flex" justify="start" */>
             <Col span={3} >
-              <Button type="primary">批量导入</Button>
+              <Button type="primary" onClick={this.handleSubmit}>批量导入</Button>
             </Col>
             <Col span={3} >
-              <Button style={{ backgroundColor: '#FF6600', color: '#fff' }}>批量导入管理</Button>
+
+              <Button
+                style={{ backgroundColor: '#FF6600', color: '#fff' }}
+                onClick={() => { goTo('/batchimport/import'); }}
+              >批量导入管理
+              </Button>
               <br />
               <br />
               在此处查看批量导入状态

@@ -1,30 +1,17 @@
-function get(key) {
-  const reg = new RegExp(`(^| )${key}=([^;]*)(;|$)`);
-  const arr = document.cookie.match(reg);
-  if (arr) {
-    return unescape(arr[2]);
-  } else {
-    return null;
-  }
-}
+/**
+ * 原cookie 存在bug, 直接引入第三方库cookies-js 来处理cookie
+ * last-modify: fuanzhao
+ */
+import cookies from 'cookies-js';
 
-function set(key, value) {
-  document.cookie = `${key}=${escape(value)};path=/`;
+function clear() {
+  cookies.expire('x-manager-token');
+  cookies.expire('x-client-id');
+  sessionStorage.clear();
+  localStorage.clear();
 }
-
-function del(key) {
-  const exp = new Date();
-  exp.setTime(exp.getTime() - 1);
-  const val = get(key);
-  if (val !== null) {
-    document.cookie = `${name}=${val};expires=${exp.toGMTString()}`;
-  }
-}
-
-const cookie = {
-  get,
-  set,
-  del,
+export default {
+  ...cookies,
+  del: cookies.expire,
+  clear,
 };
-
-export default cookie;

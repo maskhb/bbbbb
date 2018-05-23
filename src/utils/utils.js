@@ -4,6 +4,7 @@ import store from '../index';
 
 export function goTo(path) {
   store.dispatch(routerRedux.push(path));
+  document.querySelector('body')?.scrollIntoView();
 }
 
 export function fixedZero(val) {
@@ -153,45 +154,66 @@ export function isUrl(path) {
   return reg.test(path);
 }
 
-export function toTreeData(data, keyMap = { id: 'id', pid: 'pid' }) {
-  // return data;
-  const pos = {};
+// 线性数据转化为树。
+export function toTree(data, keyMap = { id: 'id', pid: 'pid' }, parentId = 0, level = 1) {
   const tree = [];
-  let i = 0;
-  while (data.length !== 0) {
-    if (data[i][keyMap.pid] === 0) {
-      tree.push({
-        ...data[i],
-        // children: [],
-      });
-      pos[data[i][keyMap.id]] = [tree.length - 1];
-      data.splice(i, 1);
-      i -= 1;
-    } else {
-      const posArr = pos[data[i][keyMap.pid]];
-      if (posArr !== undefined) {
-        let obj = tree[posArr[0]];
-        for (let j = 1; j < posArr.length; j += 1) {
-          obj = obj.children[posArr[j]];
-        }
+  let temp;
+  for (let i = 0; i < data.length; i += 1) {
+    if (data[i][keyMap.pid] === parentId) {
+      const obj = data[i];
+      obj.level = level;
 
-        if (!Object.prototype.hasOwnProperty.call(obj, 'children')) {
-          obj.children = [];
-        }
-        obj.children.push({
-          ...data[i],
-          // children: [],
-        });
-
-        pos[data[i][keyMap.id]] = posArr.concat([obj.children.length - 1]);
-        data.splice(i, 1);
-        i -= 1;
+      temp = toTree(data, keyMap, data[i][keyMap.id], level + 1);
+      if (temp.length > 0) {
+        obj.children = temp;
       }
-    }
-    i += 1;
-    if (i > data.length - 1) {
-      i = 0;
+      tree.push(obj);
     }
   }
   return tree;
 }
+
+export function toTreeData(data, keyMap = { id: 'id', pid: 'pid' }) {
+  return toTree(data, keyMap);
+}
+
+/**
+ * 根据options的label或value获取optionsItem
+ * @param {*} options
+ * @param {String:[label,value]} keyName
+ * @param {Number|String} keyValue
+ */
+export const getOptionItemForLabelOrValue = (options, keyName, keyValue) => {
+  return (options || []).find((item) => {
+    return `${item[keyName]}` === `${keyValue}`;
+  });
+};
+
+/**
+ * 根据Value获取Label
+ *
+ * 例子: getOptionLabelForValue(options)(value)
+ *
+ * @param {*} options
+ */
+export const getOptionLabelForValue = (options) => {
+  return (value) => {
+    const optionItem = getOptionItemForLabelOrValue(options, 'value', value);
+    return optionItem ? optionItem.label : null;
+  };
+};
+
+/**
+ * 根据Label获取Value
+ *
+ * 例子: getOptionValueForLabel(options)(label)
+ *
+ * @param {*} options
+ */
+export const getOptionValueForLabel = (options) => {
+  return (label) => {
+    const optionItem = getOptionItemForLabelOrValue(options, 'label', label);
+
+    return optionItem ? optionItem.value : null;
+  };
+};

@@ -1,10 +1,12 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'dva';
-import { Card, Table, Button, message, Modal, Form } from 'antd';
+import { Card, Table, Button, message, Modal, Form, InputNumber } from 'antd';
 import ImageUpload from 'components/Upload/Image/ImageUpload';
+import { handleOperate } from 'components/Handle';
 import { MonitorInput, rules } from 'components/input';
 import getColumns from './columns';
 import PageHeaderLayout from '../../../../layouts/PageHeaderLayout';
+
 
 @connect(({ pagetable, loading }) => ({
   pagetable,
@@ -21,7 +23,8 @@ export default class View extends PureComponent {
     list: [],
     modalAddItemVisible: false,
     fileList: [],
-    adItem: {},
+    adItem: null,
+    picUrl: '',
   };
 
   componentDidMount() {
@@ -29,44 +32,50 @@ export default class View extends PureComponent {
   }
 
   setdefault = (adItem) => {
-    const { dispatch } = this.props;
+    const NavDefaultVO = { adItemId: adItem.adItemId, isDefault: 1 };
     Modal.confirm({
-      title: '是否确认删除该导航入口？',
+      title: '是否确认将该栏目设为默认？',
       content: '',
       okText: '确定',
       cancelText: '取消',
-      onOk: () => {
-        dispatch({
-          type: 'pagetable/tabdelete',
-          payload: adItem.adItemId,
-        }).then(() => {
-          const { pagetable } = this.props;
-          console.log(pagetable);
-        });
-      },
+      onOk: handleOperate.bind(this, { NavDefaultVO }, 'pagetable', 'tabdefault', '设为默认', this.refreshList),
     });
+  }
+
+  uploadChange = (value) => {
+    this.state.picUrl = value;
   }
 
   refreshList = () => {
     const { dispatch } = this.props;
+    this.setState({
+      modalAddItemVisible: false,
+    });
     dispatch({
       type: 'pagetable/tablist',
       payload: {},
     }).then(() => {
       const { pagetable } = this.props;
       this.setState({
-        list: pagetable?.list,
+        list: pagetable?.tablist,
       });
     });
   }
 
   modalAddItemShow = (adItem) => {
     this.setState({ modalAddItemVisible: true });
-    if (adItem) {
-      this.state.adItem = adItem;
-      console.log(adItem.picUrl);
-      // this.state.fileList = [adItem.picUrl];
-    }
+    this.setState({
+      adItem,
+    });
+    this.setState({
+      picUrl: adItem?.picUrl,
+    });
+    this.props.form.setFieldsValue({
+      adName: adItem?.adName,
+      linkUrl: adItem?.linkUrl,
+      orderNum: adItem?.orderNum,
+      picUrl: adItem?.picUrl,
+    });
   }
 
   modalAddItemCancel = () => {
@@ -75,28 +84,29 @@ export default class View extends PureComponent {
   modalAddItemOk = () => {
     // 这里写接口
     const { form } = this.props;
-    const { dispatch } = this.props;
+    const { picUrl } = this.state;
     form.validateFields((err, values) => {
       if (!err) {
-        dispatch({
-          type: 'pagetable/tabsave',
-          payload: { bottomNav: { adName: values.adName, linkUrl: values.linkUrl, orderNum: values.orderNum, picUrl: 'https://123.img', isDefault: 0 } },
-        }).then(() => {
-          const { pagetable } = this.props;
-          console.log(pagetable);
-          this.setState({
-            list: pagetable?.list,
-          });
-        });
+        const BottomNavVo = { adName: values.adName,
+          linkUrl: values.linkUrl,
+          orderNum: values.orderNum,
+          picUrl,
+          isDefault: 2 };
+        if (this.state.adItem) {
+          BottomNavVo.adItemId = this.state.adItem.adItemId;
+          handleOperate.call(this, { BottomNavVo }, 'pagetable', 'tabupdate', '更新', this.refreshList);
+        } else {
+          handleOperate.call(this, { BottomNavVo }, 'pagetable', 'tabsave', '添加', this.refreshList);
+        }
       }
     });
   }
 
   addItem = () => {
     if (this.state.list && this.state.list.length >= 5) {
-      message('当前栏目数已达上线，请删除后再添加！');
+      message.error('当前栏目数已达上线，请删除后再添加！');
     } else {
-      this.modalAddItemShow();
+      this.modalAddItemShow(null);
     }
   }
 
@@ -105,28 +115,18 @@ export default class View extends PureComponent {
   }
 
   delete = (adItem) => {
-    const { dispatch } = this.props;
     Modal.confirm({
       title: '是否确认删除该导航入口？',
       content: '',
       okText: '确定',
       cancelText: '取消',
-      onOk: () => {
-        dispatch({
-          type: 'pagetable/tabdelete',
-          payload: adItem.adItemId,
-        }).then(() => {
-          const { pagetable } = this.props;
-          console.log(pagetable);
-        });
-      },
+      onOk: handleOperate.bind(this, { BottomNavVo: adItem }, 'pagetable', 'tabdelete', '删除', this.refreshList),
     });
   }
 
   render() {
     const { form, loading } = this.props;
     const { list, fileList, adItem } = this.state;
-
     const formItemLayout = {
       labelCol: {
         xs: { span: 28 },
@@ -154,11 +154,12 @@ export default class View extends PureComponent {
           title={this.state.modalType === 1 ? '添加栏目' : '编辑栏目'}
           visible={this.state.modalAddItemVisible}
           onOk={this.modalAddItemOk}
+          confirmLoading={loading}
           onCancel={this.modalAddItemCancel}
           okText="保存"
           width="30%"
         >
-          <Form>
+          <Form >
             <Form.Item label="名称：" {...formItemLayout}>
               {form.getFieldDecorator('adName', {
                 initialValue: adItem?.adName,
@@ -186,21 +187,24 @@ export default class View extends PureComponent {
                   required: true, message: '请输入排序',
                 }]),
               })(
-                <MonitorInput />
+                <InputNumber style={{ width: '100%' }} />
               )}
             </Form.Item>
             <Form.Item label="图片：" {...formItemLayout}>
               {form.getFieldDecorator('picUrl', {
                 rules: rules([{
-                  required: false,
+                  required: true,
                 }]),
+                initialValue: fileList,
               })(
                 <ImageUpload
                   exclude={['gif']}
                   maxSize={5120}
                   maxLength={1}
+                  action="/api/upload/img"
                   fileList={fileList}
                   listType="picture-card"
+                  uploadChange={this.uploadChange}
                 />
               )}
             </Form.Item>

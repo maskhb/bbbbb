@@ -2,18 +2,23 @@
  * @Author: wuhao
  * @Date: 2018-04-08 16:18:03
  * @Last Modified by: wuhao
- * @Last Modified time: 2018-04-18 15:44:53
+ * @Last Modified time: 2018-05-08 15:44:34
  *
  * 订单列表操作和过滤组件
  */
 
 
 import React, { PureComponent } from 'react';
-import { Batch } from '../../../../components/PanelList';
+import { Batch } from 'components/PanelList';
 
-import TableSearchFilterBar from '../../../../components/TableSearchFilterBar';
-import ModalExportBusiness from '../../../../components/ModalExport/business';
-import ModalRemarkGoods from './ModalRemarkGoods';
+import TableSearchFilterBar from 'components/TableSearchFilterBar';
+import ModalExportBusiness from 'components/ModalExport/business';
+
+import Authorized from 'utils/Authorized';
+
+import { transformSearchParam } from '../../transform';
+
+import { orderBaseInfo, orderProductInfo, orderInfo } from '../exportField';
 
 class BatchSearchList extends PureComponent {
   static defaultProps = {};
@@ -28,149 +33,57 @@ class BatchSearchList extends PureComponent {
       {
         label: '全部订单',
         value: {
-          orderStatus: '',
+          orderStatus: undefined,
         },
       },
       {
         label: '待支付',
         value: {
-          orderStatus: '1',
+          orderStatus: 1,
         },
       },
       {
         label: '待审核',
         value: {
-          orderStatus: '2',
+          orderStatus: 2,
         },
       },
       {
         label: '待付尾款',
         value: {
-          orderStatus: '3',
+          orderStatus: 3,
         },
       },
       {
         label: '待发货',
         value: {
-          orderStatus: '4',
+          orderStatus: 4,
         },
       },
       {
         label: '待收货',
         value: {
-          orderStatus: '5',
+          orderStatus: 5,
         },
       },
       {
         label: '已完成',
         value: {
-          orderStatus: '6',
+          orderStatus: 6,
         },
       },
       {
         label: '已取消',
         value: {
-          orderStatus: '7',
+          orderStatus: 7,
         },
       },
-      {
-        label: '售后订单',
-        value: {
-          orderStatus: '8',
-        },
-      },
-    ];
-  }
-
-  /**
-   * 获取 订单基本信息 导出字段
-   */
-  getOrderBaseInfoExportField = () => {
-    return [
-      '订单号',
-      '所属商家',
-      '订单生成时间',
-      '收货人姓名',
-      '收货人电话',
-      '收货人地址',
-      '配送地区',
-      '买家账号(用户ID)',
-      '订单总金额',
-      '订单优惠金额',
-      '订单支付方式',
-      '订单处理状态',
-      '订单支付状态',
-      '所属项目',
-      '订单支付信息',
-      '是否异常',
-    ];
-  }
-
-  /**
-   * 获取 订单商品信息 导出字段
-   */
-  getOrderProductInfoExportField = () => {
-    return [
-      '订单号',
-      '所属商家',
-      '订单生成时间',
-      '所属项目',
-      '商品名称',
-      '商品分类',
-      '数量',
-      '买家账号(用户ID)',
-      '商品总价',
-      '处理状态',
-      '支付状态',
-      '收货人姓名',
-      '收货人手机',
-      '收货人地址',
-      '配送地区',
-      '商品单价',
-      '商品规格',
-    ];
-  }
-
-  /**
-   * 获取 订单信息 导出字段
-   */
-  getOrderInfoExportField = () => {
-    return [
-      '订单号',
-      '所属商家',
-      '订单来源',
-      '订单生成时间',
-      '收货人电话',
-      '收货人地址',
-      '收货人姓名',
-      '配送地区',
-      '配送方式',
-      '买家账号(用户ID)',
-      '订单总金额',
-      '物流商',
-      '物流单号',
-      '订单运费',
-      '支付方式',
-      '购物券支付',
-      '订单处理状态',
-      '订单支付状态',
-      '订单完成时间',
-      '所属项目',
-      '发票信息',
-      '商品ID',
-      '商品名称',
-      '商品空间',
-      '数量',
-      '商品单价',
-      '商品总价',
-      '商品规格',
-      '是否赠品',
-      '商品功能',
-      '商品风格',
-      '商品材质',
-      '所属厂商',
-      '是否超额',
-      '流水号',
+      // {
+      //   label: '售后订单',
+      //   value: {
+      //     orderStatus: 8,
+      //   },
+      // },
     ];
   }
 
@@ -181,23 +94,26 @@ class BatchSearchList extends PureComponent {
     return [
       {
         title: '订单基本信息',
-        fields: this.getOrderBaseInfoExportField(),
+        fields: orderBaseInfo,
         params: {
-          code: 1,
+          prefix: 801001,
+          exportType: 0,
         },
       },
       {
         title: '订单商品信息',
-        fields: this.getOrderProductInfoExportField(),
+        fields: orderProductInfo,
         params: {
-          code: 2,
+          prefix: 801002,
+          exportType: 1,
         },
       },
       {
         title: '订单信息',
-        fields: this.getOrderInfoExportField(),
+        fields: orderInfo,
         params: {
-          code: 3,
+          prefix: 801003,
+          exportType: 2,
         },
       },
     ];
@@ -210,18 +126,58 @@ class BatchSearchList extends PureComponent {
     const { dispatch } = this.props;
     return dispatch({
       type: 'orders/list',
-      payload: values,
+      payload: transformSearchParam(values),
     });
   }
 
-  convertExportParam = ({ exportFileName, ...values }) => {
-    const { code } = values;
+  /**
+   * 获取导出条数
+   */
+  converExportTotal = async (reqParam) => {
+    const { dispatch } = this.props;
+    await dispatch({
+      type: 'orders/queryExportTotalCount',
+      payload: reqParam,
+    });
+
+    const { orders } = this.props;
+    const { queryExportTotalCount } = orders || {};
+    return queryExportTotalCount || 0;
+  }
+
+  /**
+   * 导出参数转换
+   */
+  convertExportParam = async ({ exportFileName, prefix, exportType }) => {
+    const { searchDefault, stateOfSearch } = this.props;
+    const { orderQueryVO } = transformSearchParam({ ...searchDefault, ...stateOfSearch });
+    const { pageInfo, ...otherSearch } = orderQueryVO || {};
+
+    const reqParam = {
+      platform: 1,
+      exportType,
+      fileName: exportFileName,
+      orderQueryVO: {
+        ...otherSearch,
+        pageInfo: {
+          currPage: 1,
+          pageSize: 500,
+        },
+      },
+    };
+
+    const exportTotal = await this.converExportTotal(reqParam);
+
     return {
       param: {
-        condition: { userId: '', userType: 1, beanType: 0, bindStatus: -1, enable: '', token: 'i9o64i1se5kiAzzN3VRxSQ%3D%3D' },
+        param: {
+          ...reqParam,
+        },
       },
-      totalCount: 100,
-      sucTitle: code === 2 ? '订单商品' : null,
+      totalCount: exportTotal || 0,
+      sucTitle: prefix === 801002 ? '订单商品' : null,
+      dataUrl: '/ht-mj-order-server/order/admin/exportOrderInfo',
+      prefix,
     };
   }
 
@@ -230,17 +186,15 @@ class BatchSearchList extends PureComponent {
       <Batch {...this.props}>
 
         <div>
-          <ModalExportBusiness
-            {...this.props}
-            title="订单"
-            tabOptions={this.getExportModalOptions()}
-            prefix={124002}
-            dataUrl="http://dev.assets-api.hd/assetsAdmin/exportAccount"
-            convertParam={this.convertExportParam}
-            // routerUrl="/goods/list"
-            // skipUrl="http://www.baidu.com"
-          />
-          <ModalRemarkGoods />
+          <Authorized authority={['OPERPORT_JIAJU_ORDERLIST_EXPORT']}>
+            <ModalExportBusiness
+              {...this.props}
+              title="订单"
+              params={this.getExportModalOptions()}
+              convertParam={this.convertExportParam}
+              exportModalType={1}
+            />
+          </Authorized>
         </div>
 
         <TableSearchFilterBar

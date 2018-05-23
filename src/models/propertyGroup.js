@@ -4,7 +4,6 @@ export default {
   namespace: 'propertyGroup',
 
   state: {
-    list: [],
   },
 
   effects: {
@@ -13,7 +12,7 @@ export default {
       yield put({
         type: 'save',
         payload: {
-          ...response,
+          [`type${payload.type}`]: response,
         },
       });
     },
@@ -22,7 +21,7 @@ export default {
       yield put({
         type: 'save',
         payload: {
-          [`detail${payload.id}`]: response,
+          [`detail${payload.propertyGroupId}`]: response,
         },
       });
     },
@@ -34,6 +33,7 @@ export default {
           add: response,
         },
       });
+      return response;
     },
     *edit({ payload }, { call, put }) {
       const response = yield call(groups.edit, payload);
@@ -43,6 +43,7 @@ export default {
           edit: response,
         },
       });
+      return payload;
     },
     *remove({ payload }, { call, put }) {
       const response = yield call(groups.remove, payload);

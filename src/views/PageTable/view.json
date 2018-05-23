@@ -1,13 +1,13 @@
 {
-    "route": {
-        "params": "",
-        "authority": ""
-    },
-    "menu": {
-        "name": "页面管理",
-        "icon": "appstore",
-        "order": 8,
-        "authority": ""
-    },
-    "model": [""]
+  "route": {
+    "params": "",
+    "authority": ""
+  },
+  "menu": {
+    "name": "页面管理",
+    "icon": "setting",
+    "order": 23,
+    "authority": ""
+  },
+  "model": [""]
 }

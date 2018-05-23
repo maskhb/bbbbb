@@ -9,6 +9,8 @@ import KeyFormModal from './KeyFormModal';
 import ValueListModal from './ValueListModal';
 import ImportModal from './ImportModal';
 
+import styles from './styles.less';
+
 @connect(({ propertyGroup, propertyKey, propertyValue, loading }) => ({
   propertyGroup,
   propertyKey,
@@ -28,9 +30,15 @@ export default class View extends PureComponent {
   componentDidMount() {
     this.initData();
   }
+
   getDetailId() {
     const { match: { params: { id } } } = this.props;
-    return id;
+    return parseInt(id, 10);
+  }
+
+  getCurrentPropertyGroup() {
+    const { propertyGroup } = this.props;
+    return propertyGroup[`detail${this.getDetailId()}`] || {};
   }
 
   initData() {
@@ -38,18 +46,34 @@ export default class View extends PureComponent {
     dispatch({
       type: 'propertyGroup/detail',
       payload: {
-        id: this.getDetailId(),
+        propertyGroupId: this.getDetailId(),
       },
     });
     this.handleSearch();
   }
 
-  handleSearch() {
+  isBaisc = () => {
+    return this.getCurrentPropertyGroup().type === 1;
+  }
+
+  handleSearch(values = {}) {
     const { dispatch } = this.props;
+    let { pageInfo } = values;
+    if (!pageInfo) {
+      const { propertyKey } = this.props;
+      const { pagination = {} } = propertyKey[this.getDetailId()] || {};
+      pageInfo = {
+        currPage: pagination.current || 1,
+        pageSize: pagination.pageSize || 10,
+      };
+    }
+
     dispatch({
       type: 'propertyKey/list',
       payload: {
-        id: this.getDetailId(),
+        propertyGroupId: this.getDetailId(),
+        ...values,
+        pageInfo,
       },
     });
   }
@@ -59,24 +83,31 @@ export default class View extends PureComponent {
     dispatch({
       type: 'propertyKey/remove',
       payload: item,
-    }).then(() => {
-      message.success('删除成功');
-      this.handleSearch();
+    }).then((res) => {
+      if (res !== null) {
+        message.success('删除成功');
+        this.handleSearch();
+      }
     });
   }
 
   handleModalSubmit = (item) => {
     const { dispatch } = this.props;
     dispatch({
-      type: item.id ? 'propertyKey/update' : 'propertyKey/add',
-      payload: item,
-    }).then(() => {
-      message.success(item.id ? '编辑成功' : '新增成功');
-      this.handleSearch();
-      this.setState({
-        modalFormVisible: false,
-        item: null,
-      });
+      type: item.propertyKeyId ? 'propertyKey/edit' : 'propertyKey/add',
+      payload: {
+        propertyGroupId: this.getDetailId(),
+        ...item,
+      },
+    }).then((res) => {
+      if (res != null) {
+        message.success(item.propertyKeyId ? '编辑成功' : '新增成功');
+        this.handleSearch();
+        this.setState({
+          modalFormVisible: false,
+          item: null,
+        });
+      }
     });
   }
 
@@ -95,6 +126,7 @@ export default class View extends PureComponent {
   }
 
   handleModalValueCancel = () => {
+    this.handleSearch();
     this.setState({
       modalValueVisible: false,
       modalValuePropertyId: null,
@@ -102,16 +134,9 @@ export default class View extends PureComponent {
   }
 
   handleModalValueShow = (val) => {
-    const { dispatch } = this.props;
-    dispatch({
-      type: 'propertyValue/list',
-      payload: {
-        propertyId: val,
-      },
-    });
     this.setState({
       modalValueVisible: true,
-      modalValuePropertyId: val,
+      modalValuePropertyId: val.propertyKeyId,
     });
   }
 
@@ -133,9 +158,62 @@ export default class View extends PureComponent {
     });
   }
 
+  renderKeyFormModal = () => {
+    if (this.state.modalFormVisible) {
+      // const {}
+      return (
+        <KeyFormModal
+          visible={this.state.modalFormVisible}
+          item={this.state.item}
+          type={this.getCurrentPropertyGroup().type}
+          onOk={this.handleModalSubmit.bind(this)}
+          onCancel={this.handleModalCancel}
+        />
+      );
+    }
+  }
+
+  renderValueListModal() {
+    if (this.state.modalValueVisible) {
+      const { dispatch, propertyValue, loading } = this.props;
+      return (
+        <ValueListModal
+          dispatch={dispatch}
+          visible={this.state.modalValueVisible}
+          propertyValue={propertyValue}
+          loading={loading.models.propertyValue}
+          propertyKeyId={this.state.modalValuePropertyId}
+          onCancel={this.handleModalValueCancel}
+        />
+      );
+    }
+  }
+
+  renderImportVisibleModal = () => {
+    if (this.state.modalImportVisible) {
+      const detail = this.getCurrentPropertyGroup();
+      return (
+        <ImportModal
+          propertyGroupId={this.getDetailId()}
+          prefixBusinessType={(detail.type || 1) + 1}
+          onCancel={this.handleModalImprtCancel}
+          visible={this.state.modalImportVisible}
+          onOk={this.handleImport}
+          onSuccess={() => {
+            this.setState({
+              modalImportVisible: false,
+            });
+            this.handleSearch();
+          }}
+        />
+      );
+    }
+  }
+
   render() {
-    const { loading, propertyGroup, propertyKey, propertyValue, dispatch } = this.props;
-    const detail = propertyGroup[`detail${this.getDetailId()}`] || {};
+    const { loading, propertyKey } = this.props;
+    const data = propertyKey[this.getDetailId()] || {};
+    const detail = this.getCurrentPropertyGroup();
 
     return (
       <PageHeaderLayout>
@@ -151,34 +229,27 @@ export default class View extends PureComponent {
             </Batch>
 
             <Table
+              className={styles.value_table}
               loading={loading.models.propertyKey}
               columns={columns.key(this)}
-              dataSource={propertyKey.list}
-              pagination={propertyKey.pagination}
+              dataSource={data.list}
+              pagination={data.pagination}
+              onChange={(pagination) => {
+                this.handleSearch({
+                  pageInfo: {
+                    currPage: pagination.current,
+                    pageSize: pagination.pageSize,
+                  },
+                });
+                // console.log(pagination);
+              }}
               disableRowSelection
-              rowKey="id"
+              rowKey="propertyKeyId"
             />
           </PanelList>
-          <KeyFormModal
-            visible={this.state.modalFormVisible}
-            item={this.state.item}
-            type={1}
-            onOk={this.handleModalSubmit.bind(this)}
-            onCancel={this.handleModalCancel}
-          />
-          <ValueListModal
-            dispatch={dispatch}
-            visible={this.state.modalValueVisible}
-            propertyValue={propertyValue}
-            loading={loading.models.propertyValue}
-            propertyId={this.state.modalValuePropertyId}
-            onCancel={this.handleModalValueCancel}
-          />
-          <ImportModal
-            onCancel={this.handleModalImprtCancel}
-            visible={this.state.modalImportVisible}
-            onOk={this.handleImport}
-          />
+          {this.renderKeyFormModal()}
+          {this.renderValueListModal()}
+          {this.renderImportVisibleModal()}
         </Card>
       </PageHeaderLayout>
     );

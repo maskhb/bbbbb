@@ -7,6 +7,21 @@ export default class MonitorInput extends Component {
     currNum: 0,
   }
 
+  componentWillReceiveProps(nextProps) {
+    if ('value' in nextProps) {
+      const { value } = nextProps;
+      if (value) {
+        this.setState({
+          currNum: value.length,
+        });
+      } else {
+        this.setState({
+          currNum: 0,
+        });
+      }
+    }
+  }
+
   handleChange(e) {
     const { value } = e.target;
     this.setState({

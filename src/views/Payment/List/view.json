@@ -7,7 +7,7 @@
     "name": "支付记录列表",
     "icon": "",
     "order": 0,
-    "authority": ""
+    "authority": "OPERPORT_JIAJU_PAYRECORDLIST_LIST"
   },
   "model": ["payment"]
 }

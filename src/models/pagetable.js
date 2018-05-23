@@ -15,7 +15,7 @@ export default {
       yield put({
         type: 'save',
         payload: {
-          list: response.data.result,
+          tablist: response,
         },
       });
     },
@@ -24,7 +24,7 @@ export default {
       yield put({
         type: 'save',
         payload: {
-          save: response,
+          tabsave: response,
         },
       });
     },
@@ -33,7 +33,7 @@ export default {
       yield put({
         type: 'save',
         payload: {
-          edit: response,
+          tabdefault: response,
         },
       });
     },
@@ -42,7 +42,7 @@ export default {
       yield put({
         type: 'save',
         payload: {
-          remove: response,
+          tabupdate: response,
         },
       });
     },
@@ -51,7 +51,115 @@ export default {
       yield put({
         type: 'save',
         payload: {
-          deleteStatus: response,
+          tabdelete: response,
+        },
+      });
+    },
+    *commonlist({ payload }, { call, put }) {
+      const response = yield call(pagetable.commonlist, payload);
+      yield put({
+        type: 'save',
+        payload: {
+          commonlist: response,
+        },
+      });
+    },
+    *commonsave({ payload }, { call, put }) {
+      const response = yield call(pagetable.commonsave, payload);
+      yield put({
+        type: 'save',
+        payload: {
+          commonsave: response,
+        },
+      });
+    },
+    *commonupdate({ payload }, { call, put }) {
+      const response = yield call(pagetable.commonupdate, payload);
+      yield put({
+        type: 'save',
+        payload: {
+          commonupdate: response,
+        },
+      });
+    },
+    *commondelete({ payload }, { call, put }) {
+      const response = yield call(pagetable.commondelete, payload);
+      yield put({
+        type: 'save',
+        payload: {
+          commondelete: response,
+        },
+      });
+    },
+    *homegettitle({ payload }, { call, put }) {
+      const response = yield call(pagetable.homegettitle, payload);
+      yield put({
+        type: 'save',
+        payload: {
+          homegettitle: response,
+        },
+      });
+    },
+    *homeupdatetitle({ payload }, { call, put }) {
+      const response = yield call(pagetable.homeupdatetitle, payload);
+      yield put({
+        type: 'save',
+        payload: {
+          homeupdatetitle: response,
+        },
+      });
+    },
+    *mallpagetitle({ payload }, { call, put }) {
+      const response = yield call(pagetable.mallpagetitle, payload);
+      yield put({
+        type: 'save',
+        payload: {
+          mallpagetitle: response,
+        },
+      });
+    },
+    *mallupdatetitle({ payload }, { call, put }) {
+      const response = yield call(pagetable.mallupdatetitle, payload);
+      yield put({
+        type: 'save',
+        payload: {
+          mallupdatetitle: response,
+        },
+      });
+    },
+    *mallNavList({ payload }, { call, put }) {
+      const response = yield call(pagetable.mallNavList, payload);
+      yield put({
+        type: 'save',
+        payload: {
+          mallNavList: response,
+        },
+      });
+    },
+    *mallsaveNav({ payload }, { call, put }) {
+      const response = yield call(pagetable.mallsaveNav, payload);
+      yield put({
+        type: 'save',
+        payload: {
+          mallsaveNav: response,
+        },
+      });
+    },
+    *mallupdateNav({ payload }, { call, put }) {
+      const response = yield call(pagetable.mallupdateNav, payload);
+      yield put({
+        type: 'save',
+        payload: {
+          mallupdateNav: response,
+        },
+      });
+    },
+    *malldeleteNav({ payload }, { call, put }) {
+      const response = yield call(pagetable.malldeleteNav, payload);
+      yield put({
+        type: 'save',
+        payload: {
+          malldeleteNav: response,
         },
       });
     },

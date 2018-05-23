@@ -1,13 +1,14 @@
 {
-    "route": {
-        "params": "",
-        "authority": ""
-    },
-    "menu": {
-        "name": "营销工具",
-        "icon": "setting",
-        "order": 5,
-        "authority": ""
-    },
-    "model": [""]
+  "route": {
+    "params": "",
+    "authority": ""
+  },
+  "menu": {
+    "name": "营销工具",
+    "icon": "setting",
+    "order": 21,
+    "authority": "",
+    "hideInMenu": true
+  },
+  "model": [""]
 }

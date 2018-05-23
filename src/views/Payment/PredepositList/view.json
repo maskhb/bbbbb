@@ -7,7 +7,9 @@
     "name": "预存款管理",
     "icon": "",
     "order": 2,
-    "authority": ""
+    "authority": ["OPERPORT_JIAJU_PREDEPOSITLIST_LIST",
+      "OPERPORT_JIAJU_PREDEPOSITTRADELIST_LIST",
+      "OPERPORT_JIAJU_PREDEPOSITLOG_LIST"]
   },
   "model": ["predeposit"]
 }

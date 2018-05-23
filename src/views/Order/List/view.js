@@ -1,39 +1,34 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'dva';
 import { Card } from 'antd';
+import classNames from 'classnames';
 import TableOrderList from 'components/TableOrderList';
 
-import PageHeaderLayout from '../../../layouts/PageHeaderLayout';
-import PanelList from '../../../components/PanelList';
+import PageHeaderLayout from 'layouts/PageHeaderLayout';
+import PanelList from 'components/PanelList';
 
 import SearchHeader from './components/SearchHeader';
 import BatchSearchList from './components/BatchSearchList';
 
 import getColumns from './columns';
-import { getStartTimeAndEndTimeFor6Months } from './attr';
+import { getStartTimeAndEndTimeFor6Months } from '../attr';
+import { transformOrderList, transformExpandEdRowKey } from '../transform';
 
+import styles from './index.less';
 
-@connect(({ orders, exports, loading }) => ({
+@connect(({ orders, propertyKey, goods, loading }) => ({
   orders,
-  exports,
+  propertyKey,
+  goods,
   loading: loading.models.orders,
 }))
 export default class View extends PureComponent {
   static defaultProps = {
     searchDefault: {
-      needInvoice: '',
-      // orderSource: '',
-      // orderStatus: '',
-      // payStatus: '',
-      // payType: '',
-      shipType: '',
-      invoiceType: '',
-      excess: '',
-      address: '',
-      projectName: '',
-      createTime: getStartTimeAndEndTimeFor6Months(),
-      payTime: getStartTimeAndEndTimeFor6Months(),
-      finishTime: getStartTimeAndEndTimeFor6Months(),
+      orderTime: getStartTimeAndEndTimeFor6Months(),
+      pageInfo: {
+        pageSize: 20,
+      },
     },
   };
 
@@ -41,7 +36,7 @@ export default class View extends PureComponent {
     const { orders, loading, searchDefault } = this.props;
 
     return (
-      <PageHeaderLayout>
+      <PageHeaderLayout wrapperClassName={classNames(styles.view_order_list)}>
         <Card>
 
           <PanelList>
@@ -54,12 +49,19 @@ export default class View extends PureComponent {
             />
 
             <TableOrderList
+              {...this.props}
               isExpanded
               loading={loading}
               searchDefault={searchDefault}
               columns={getColumns(this, searchDefault)}
-              dataSource={orders?.list?.list}
+              dataSource={transformOrderList(orders?.list?.list)}
               pagination={orders?.list?.pagination}
+              initExpandEdRowKey={(dataSource) => {
+                return transformExpandEdRowKey(dataSource);
+              }}
+              rowKey="orderId"
+              expandedRowKey="orderGoodsId"
+              expandedTotal={orders?.queryOrdeListTotalCount || 0}
             />
 
           </PanelList>

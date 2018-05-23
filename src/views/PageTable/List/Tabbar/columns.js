@@ -15,10 +15,10 @@ export default (me) => {
         switch (row) {
           case 1:
             return '是';
-          case 0:
+          case 2:
             return '否';
           default:
-            break;
+            return '否';
         }
       },
     },
@@ -31,7 +31,7 @@ export default (me) => {
         return (
           <a target="_blank" href={row}>
             <div style={{
-              width: 80,
+              width: 50,
               height: 50,
               backgroundImage: `url(${row})`,
               backgroundSize: 'cover',
@@ -62,10 +62,10 @@ export default (me) => {
             <Divider type="vetical" />
             <a onClick={() => me.delete(record)}>删除</a>
             {
-              record.isDefault === 0 ? (<Divider type="vetical" />) : ''
+              record.isDefault !== 1 ? (<Divider type="vetical" />) : ''
             }
             {
-              record.isDefault === 0 ? (<a onClick={() => me.setdefault(record)}>设为默认</a>) : ''
+              record.isDefault !== 1 ? (<a onClick={() => me.setdefault(record)}>设为默认</a>) : ''
             }
           </div>
         );

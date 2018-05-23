@@ -1,5 +1,7 @@
-import { queryNotices } from '../services/api';
+import AUDITSTATUS from 'components/AuditStatus';
 import common from '../services/common';
+import global from '../services/global';
+import goods from '../services/goods';
 
 export default {
   namespace: 'global',
@@ -11,15 +13,54 @@ export default {
   },
 
   effects: {
+    *globalSettingDetail({ payload }, { call, put }) {
+      const response = yield call(global.globalSettingDetail, payload);
+      yield put({
+        type: 'save',
+        payload: {
+          globalSettingDetail: response,
+        },
+      });
+    },
+    *globalSettingAdd({ payload }, { call, put }) {
+      const response = yield call(global.globalSettingAdd, payload);
+      yield put({
+        type: 'save',
+        payload: {
+          globalSettingAdd: response,
+        },
+      });
+    },
     *fetchNotices(_, { call, put }) {
-      const data = yield call(queryNotices);
+      const pageInfo = {
+        pageSize: 1,
+        currPage: 1,
+      };
+
+      const response0 = yield call(goods.list, {
+        auditStatus: [AUDITSTATUS.WAIT.value],
+        pageInfo,
+      });
+
+      const response1 = yield call(goods.list, {
+        auditStatus: [AUDITSTATUS.FAIL.value],
+        pageInfo,
+      });
+
+      const goodsListAuditWaitTotal = response0?.pagination?.total || 0;
+      const goodsListAuditFailTotal = response1?.pagination?.total || 0;
+
       yield put({
         type: 'saveNotices',
-        payload: data,
+        payload: [
+          goodsListAuditWaitTotal,
+          goodsListAuditFailTotal,
+        ],
       });
+
       yield put({
         type: 'user/changeNotifyCount',
-        payload: data.length,
+        payload: goodsListAuditWaitTotal + goodsListAuditFailTotal,
       });
     },
     *clearNotices({ payload }, { put, select }) {
@@ -64,6 +105,12 @@ export default {
       };
     },
     saveCommunities(state, action) {
+      return {
+        ...state,
+        ...action.payload,
+      };
+    },
+    save(state, action) {
       return {
         ...state,
         ...action.payload,

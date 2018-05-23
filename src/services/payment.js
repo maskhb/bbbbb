@@ -13,15 +13,15 @@ async function searchPayOrderHis(params) {
     body: {
       ...params,
     },
+    transformResponse(response) {
+      return response?.data?.result;
+    },
   });
 }
 
-/*
- * 支付配置相关
- */
-// 获取支付方式列表
-async function searchPayTypeAndInfoList(params) {
-  return request('/payment/paybehind/searchPayTypeAndInfoList', {
+// 导出查询的支付记录
+async function exportPayOrderHis(params) {
+  return request('/json/payment-api/paybehind/exportPayOrderHis/asynExportMJPayBills', {
     method: 'POST',
     body: {
       ...params,
@@ -29,9 +29,49 @@ async function searchPayTypeAndInfoList(params) {
   });
 }
 
+// 保存人工修改的支付记录
+async function saveManualTransaction(params) {
+  return request('/json/payment-api/paybehind/saveManualTransaction', {
+    method: 'POST',
+    body: {
+      ...params,
+    },
+  });
+}
+
+// 查询人工修改的支付流水
+async function searchTransactionManualLogList(params) {
+  return request('/json/payment-api/paybehind/searchTransactionManualLogList', {
+    method: 'POST',
+    body: {
+      ...params,
+    },
+    transformResponse(response) {
+      return response?.data?.result;
+    },
+  });
+}
+
+
+/*
+ * 支付配置相关
+ */
+// 获取支付方式列表
+async function searchPayTypeAndInfoList(params) {
+  return request('/json/payment-api/paybehind/searchPayTypeAndInfoList', {
+    method: 'POST',
+    body: {
+      ...params,
+    },
+    transformResponse(response) {
+      return response?.data?.result;
+    },
+  });
+}
+
 // 更新支付方式信息
 async function modifyPayTypeAndInfo(params) {
-  return request('/payment/paybehind/modifyPayTypeAndInfo', {
+  return request('/json/payment-api/paybehind/modifyPayTypeAndInfo', {
     method: 'POST',
     body: {
       ...params,
@@ -41,6 +81,9 @@ async function modifyPayTypeAndInfo(params) {
 
 export default {
   searchPayTypeAndInfoList,
+  exportPayOrderHis,
+  saveManualTransaction,
+  searchTransactionManualLogList,
   modifyPayTypeAndInfo,
   searchPayOrderHis,
 };

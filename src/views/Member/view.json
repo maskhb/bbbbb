@@ -5,8 +5,8 @@
     },
     "menu": {
         "name": "会员管理",
-        "icon": "user",
-        "order": 9,
+        "icon": "setting",
+        "order": 33,
         "authority": ""
     },
     "model": [""]

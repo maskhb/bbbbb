@@ -1,4 +1,4 @@
-import { IsPositive, IsUrl, IsDate, IsString } from 'class-validator';
+import { IsPositive, IsNumber, IsUrl, IsDate, IsString } from 'class-validator';
 import { Type } from 'class-transformer';
 import PaginationList from './PaginationList';
 
@@ -18,10 +18,10 @@ export default class GoodsBrand {
   @IsString()
   brandName: string = '';
 
-  @IsUrl()
+  @IsString()
   brandHomeUrl?: string;
 
-  @IsPositive()
+  @IsNumber()
   orderNum: number = 0;
 
   status: Status = Status.DRAFT;
@@ -32,7 +32,7 @@ export default class GoodsBrand {
 
   createdName?: string;
 
-  @IsUrl()
+  @IsString()
   brandUrl?: string;
 }
 

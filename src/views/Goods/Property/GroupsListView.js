@@ -1,11 +1,14 @@
 import React, { PureComponent } from 'react';
 import { Input, Button, message } from 'antd';
-import PanelList, { Search, Batch, Table } from '../../../components/PanelList';
+import Authorized from 'utils/Authorized';
+import * as P from 'config/permission';
 
+import PanelList, { Search, Batch, Table } from 'components/PanelList';
 import columns from './columns';
 import ModalPropertyForm from './ModalPropertyForm';
 
-import ProjectInput from '../../../components/ProjectInput';
+
+// import ProjectInput from '../../../components/ProjectInput';
 
 export default class View extends PureComponent {
   state = {
@@ -14,17 +17,16 @@ export default class View extends PureComponent {
   }
 
   componentDidMount() {
-    this.handleSearch();
+    this.search.handleSearch();
   }
 
-  handleSearch = (values = {}) => {
-    const { dispatch } = this.props;
+  handleSearch = (values) => {
+    // console.log(values);
+    const { dispatch, type } = this.props;
     return dispatch({
       type: 'propertyGroup/list',
       payload: {
-        type: this.props.type || 1,
-        currentPage: 1,
-        pageSize: 20,
+        type,
         ...values,
       },
     });
@@ -35,12 +37,15 @@ export default class View extends PureComponent {
     dispatch({
       type: 'propertyGroup/edit',
       payload: {
-        id: record.propertyGroupId,
+        propertyGroupId: record.propertyGroupId,
+        // propertyGroupName: record.propertyGroupName,
         status,
       },
-    }).then(() => {
-      message.success(`${confirmText}成功`);
-      this.handleSearch();
+    }).then((res) => {
+      if (res !== null) {
+        message.success(`${confirmText}成功`);
+        this.search.handleSearch();
+      }
     });
   }
 
@@ -48,25 +53,35 @@ export default class View extends PureComponent {
     const { dispatch } = this.props;
     dispatch({
       type: 'propertyGroup/remove',
-      payload: item,
-    }).then(() => {
-      message.success('删除成功');
-      this.handleSearch();
+      payload: {
+        propertyGroupId: item.propertyGroupId,
+      },
+    }).then((res) => {
+      if (res !== null) {
+        message.success('删除成功');
+        this.search.handleSearch();
+      }
     });
   }
 
   handleModalSubmit = (item) => {
-    const { dispatch } = this.props;
+    const { dispatch, type } = this.props;
+    const data = { ...item };
+    if (!data.propertyGroupId) {
+      data.type = type;
+    }
     dispatch({
       type: item.propertyGroupId ? 'propertyGroup/edit' : 'propertyGroup/add',
-      payload: item,
-    }).then(() => {
-      message.success(item.propertyGroupId ? '编辑成功' : '新增成功');
-      this.handleSearch();
-      this.setState({
-        modalFormVisible: false,
-        item: null,
-      });
+      payload: data,
+    }).then((res) => {
+      if (!res !== null) {
+        message.success(item.propertyGroupId ? '编辑成功' : '新增成功');
+        this.search.handleSearch();
+        this.setState({
+          modalFormVisible: false,
+          item: null,
+        });
+      }
     });
   }
 
@@ -85,7 +100,8 @@ export default class View extends PureComponent {
   }
 
   render() {
-    const { loading, propertyGroup } = this.props;
+    const { loading, propertyGroup, type } = this.props;
+    const data = propertyGroup[`type${type}`];
     return (
       <div>
         <PanelList>
@@ -96,17 +112,8 @@ export default class View extends PureComponent {
             <Search.Item label="属性组名称" simple>
               {
                 ({ form }) => (
-                  form.getFieldDecorator('name')(
+                  form.getFieldDecorator('propertyGroupName')(
                     <Input />
-                  )
-                )
-              }
-            </Search.Item>
-            <Search.Item label="项目选择" simple>
-              {
-                ({ form }) => (
-                  form.getFieldDecorator('project')(
-                    <ProjectInput />
                   )
                 )
               }
@@ -114,26 +121,35 @@ export default class View extends PureComponent {
           </Search>
 
           <Batch>
-            <Button icon="plus" type="primary" onClick={() => this.handleModalShow()}>
-              新建
-            </Button>
+            <Authorized authority={
+              type === 1 ?
+               P.OPERPORT_JIAJU_BASICPROPERTYLIST_ADD : P.OPERPORT_JIAJU_SALESPROPERTYLIST_ADD
+              }
+            >
+              <Button icon="plus" type="primary" onClick={() => this.handleModalShow()}>
+                新建
+              </Button>
+            </Authorized>
           </Batch>
 
           <Table
             loading={loading}
             columns={columns.basic(this)}
-            dataSource={propertyGroup.list}
-            pagination={propertyGroup.pagination}
+            dataSource={data?.list}
+            pagination={data?.pagination}
             disableRowSelection
             rowKey="propertyGroupId"
           />
+
         </PanelList>
-        <ModalPropertyForm
-          visible={this.state.modalFormVisible}
-          item={this.state.item}
-          onOk={this.handleModalSubmit}
-          onCancel={this.handleModalCancel}
-        />
+        {this.state.modalFormVisible && (
+          <ModalPropertyForm
+            visible={this.state.modalFormVisible}
+            item={this.state.item}
+            onOk={this.handleModalSubmit}
+            onCancel={this.handleModalCancel}
+          />
+        )}
       </div>
     );
   }

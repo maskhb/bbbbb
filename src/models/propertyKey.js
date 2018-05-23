@@ -12,7 +12,7 @@ export default {
       yield put({
         type: 'save',
         payload: {
-          ...response,
+          [payload.propertyGroupId]: { ...response },
         },
       });
     },
@@ -33,6 +33,7 @@ export default {
           add: response,
         },
       });
+      return response;
     },
     *edit({ payload }, { call, put }) {
       const response = yield call(keys.edit, payload);
@@ -42,6 +43,7 @@ export default {
           edit: response,
         },
       });
+      return response;
     },
     *remove({ payload }, { call, put }) {
       const response = yield call(keys.remove, payload);
@@ -51,6 +53,7 @@ export default {
           remove: response,
         },
       });
+      return response;
     },
   },
 

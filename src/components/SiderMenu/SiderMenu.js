@@ -195,9 +195,11 @@ export default class SiderMenu extends PureComponent {
     };
     // if pathname can't match, use the nearest parent's key
     let selectedKeys = this.getSelectedMenuKeys(pathname);
+    // 菜单选中状态：菜单中如果没有匹配项，匹配二级菜单
     if (!selectedKeys.length) {
-      selectedKeys = [openKeys[openKeys.length - 1]];
+      selectedKeys = openKeys.filter(k => k.match(/\//g)?.length === 1);
     }
+
     return (
       <Sider
         trigger={null}
@@ -207,6 +209,9 @@ export default class SiderMenu extends PureComponent {
         onCollapse={onCollapse}
         width={256}
         className={styles.sider}
+        style={{
+          width: 256,
+        }}
       >
         <div className={styles.logo} key="logo">
           <Link to="/">
@@ -221,7 +226,10 @@ export default class SiderMenu extends PureComponent {
           {...menuProps}
           onOpenChange={this.handleOpenChange}
           selectedKeys={selectedKeys}
-          style={{ padding: '16px 0', width: '100%' }}
+          style={{
+            padding: '16px 0',
+            width: '100%',
+          }}
         >
           {this.getNavMenuItems(this.menus)}
         </Menu>

@@ -13,7 +13,10 @@ export default {
       yield put({
         type: 'save',
         payload: {
-          current: response,
+          current: {
+            ...response,
+            name: response?.loginName || '账号信息',
+          },
         },
       });
     },
@@ -24,6 +27,12 @@ export default {
       return {
         ...state,
         ...action.payload,
+      };
+    },
+    changeNotifyCount(state, action) {
+      return {
+        ...state,
+        notifyCount: action.payload,
       };
     },
   },

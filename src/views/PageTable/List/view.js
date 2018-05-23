@@ -1,6 +1,7 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'dva';
 import { Card, Table } from 'antd';
+import { toFullPath } from 'utils/request/utils';
 import getColumns from './columns';
 import PageHeaderLayout from '../../../layouts/PageHeaderLayout';
 
@@ -24,16 +25,16 @@ export default class View extends PureComponent {
   edit = (key) => {
     switch (key) {
       case 1:
-        window.open('/#/pagetable/list/tabbar');
+        window.open(toFullPath('/#/pagetable/list/tabbar'));
         break;
       case 2:
-        window.open('/#/pagetable/list/homepage');
+        window.open(toFullPath('/#/pagetable/list/homepage'));
         break;
       case 3:
-        window.open('/#/pagetable/list/mallhome');
+        window.open(toFullPath('/#/pagetable/list/mallhome'));
         break;
       case 4:
-        window.open('/#/pagetable/list/navItem');
+        window.open(toFullPath('/#/pagetable/list/navItem'));
         break;
       default:
         break;

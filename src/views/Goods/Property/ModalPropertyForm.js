@@ -1,5 +1,6 @@
 import React, { PureComponent } from 'react';
-import { Input, Modal, Form } from 'antd';
+import { Modal, Form } from 'antd';
+import { MonitorInput } from 'components/input';
 
 class ModalPropertyForm extends PureComponent {
   formItemLayout = {
@@ -8,18 +9,18 @@ class ModalPropertyForm extends PureComponent {
   };
 
   handleOk = () => {
-    const { onOk, form } = this.props;
+    const { onOk, item = {}, form } = this.props;
     form.validateFields((err, values) => {
       if (!err) {
         if (onOk) {
-          onOk(values);
+          onOk({ propertyGroupId: item.propertyGroupId, ...values });
         }
       }
     });
   }
   renderTitle() {
     const { item } = this.props;
-    const title = item ? '添加属性组' : '编辑属性组';
+    const title = item ? '编辑属性组' : '添加属性组';
     return title;
   }
   render() {
@@ -36,14 +37,14 @@ class ModalPropertyForm extends PureComponent {
           label="属性组名称"
           {...this.formItemLayout}
         >
-          {getFieldDecorator('name', {
-            initialValue: item ? item.name : '',
+          {getFieldDecorator('propertyGroupName', {
+            initialValue: item ? item.propertyGroupName : '',
             rules: [
               { required: true, message: '属性组名称不允许为空!' },
               { max: 50, message: '属性组名称不允许超过50个字符!' },
             ],
           })(
-            <Input />
+            <MonitorInput maxLength={50} simple="true" />
           )}
         </Form.Item>
       </Modal>

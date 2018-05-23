@@ -36,8 +36,11 @@ class TableStandard extends PureComponent {
     const params = {
       ...stateOfSearch,
       ...filters,
-      currentPage: pagination.current,
-      pageSize: pagination.pageSize,
+      // 兼容,不单只有列表页的table,还有许多非列表页的table
+      pageInfo: {
+        currPage: pagination.currentPage || pagination.current,
+        pageSize: pagination.pageSize,
+      },
     };
 
     if (sorter.field) {
@@ -74,7 +77,7 @@ class TableStandard extends PureComponent {
 
     const footer = () => (
       <span>
-        共搜索到<span styleName="bold">{pagination?.total || 0}</span>条数据
+        共搜索到<span styleName="bold">{(pagination?.total || this.props.totalCount) || 0}</span>条数据
       </span>
     );
 

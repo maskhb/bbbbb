@@ -9,5 +9,5 @@
     "order": 0,
     "authority": ""
   },
-  "model": ["goodsCategory"]
+  "model": ["goodsCategory", "propertyGroup"]
 }

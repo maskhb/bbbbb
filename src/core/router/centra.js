@@ -1,5 +1,5 @@
-import * as views from '../../views/**/view.js';
-import * as configs from '../../views/**/view.json';
+import { views, configs } from '../collectConfigs';
+import { getRealAuthority } from '../utils';
 
 export default () => {
   const routes = {};
@@ -12,7 +12,7 @@ export default () => {
       filePath: key.replace(/\$/g, '/'),
       default: val,
       model: model.filter(v => !!v),
-      authority,
+      authority: getRealAuthority(authority),
     };
 
     // 面包屑数据来自于此

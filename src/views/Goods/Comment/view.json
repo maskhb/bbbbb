@@ -1,13 +1,14 @@
 {
   "route": {
     "params": "",
-    "authority": ""
+    "authority": "temp"
   },
   "menu": {
     "name": "商品评论",
     "icon": "",
-    "order": 0,
-    "authority": ""
+    "order": 3,
+    "authority": "temp",
+    "hideInMenu": true
   },
   "model": [""]
 }

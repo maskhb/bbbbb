@@ -5,8 +5,8 @@
   },
   "menu": {
     "name": "导出管理",
-    "icon": "appstore",
-    "order": 11,
+    "icon": "setting",
+    "order": 42,
     "authority": ""
   },
   "model": [""]

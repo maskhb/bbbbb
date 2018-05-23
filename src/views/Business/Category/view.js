@@ -1,187 +1,252 @@
-import React, { PureComponent } from 'react';
+import React, { Component } from 'react';
+import Authorized from 'utils/Authorized';
+import PageHeaderLayout from 'layouts/PageHeaderLayout';
+import { MonitorInput, MonitorTextArea } from 'components/input';
+import TableOrderList from 'components/TableOrderList';
 import { connect } from 'dva';
-import { Card, Table, Input, Button, message, Select } from 'antd';
+import { Card, Button, message, Radio, Modal, Form } from 'antd';
 import getColumns from './columns';
 
-const EditableCell = ({ editable, value, onChange }) => (
-  <div>
-    {editable
-      ? <Input style={{ margin: '-5px 0' }} value={value} onChange={e => onChange(e.target.value)} />
-      : value
-    }
-  </div>
-);
-
-const EditableCellSelect = ({ editable, value, onChange }) => {
-  const status = ['启用', '禁用'];
-
-  return (
-    <div>
-      {editable
-        ? (
-          <Select defaultValue={value} onChange={onChange}>
-            <Select.Option key="0" value={0}>{status[0]}</Select.Option>
-            <Select.Option key="1" value={1}>{status[1]}</Select.Option>
-          </Select>
-        )
-        : status[value]
-      }
-    </div>
-  );
-};
-
-@connect(({ business, loading }) => ({
-  business,
-  loading: loading.models.business,
+const RadioGroup = Radio.Group;
+@connect(({ businessClass, loading }) => ({
+  businessClass,
+  loading: loading.models.businessClass,
 }))
-export default class View extends PureComponent {
+@Form.create()
+
+export default class View extends Component {
   static defaultProps = {
   };
 
   state = {
-    list: [],
+    modalAddVisible: false,
   };
 
+
   componentDidMount() {
-    const { dispatch } = this.props;
-    dispatch({
-      type: 'business/list',
-      payload: {},
-    }).then(() => {
-      const { business } = this.props;
-      this.setState({
-        list: business?.list?.list,
-      });
+    this.query();
+  }
+
+  query = () => {
+    this.props.dispatch({
+      type: 'businessClass/queryList',
+      payload: {
+        merchantCategoryVoCondition: {},
+      },
     });
   }
 
-  edit(key) {
-    const newList = [...this.state.list];
-    const target = newList.filter(item => key === item.key)[0];
-    if (target) {
-      target.editable = true;
-      this.setState({ list: newList });
-    }
+  modalAddShow = () => {
+    this.setState({ modalAddVisible: true });
   }
 
-  cancel(key) {
-    const newList = [...this.state.list];
-    const target = newList.filter(item => key === item.key)[0];
-    if (target) {
-      Object.assign(target, this.cacheData?.filter(item => key === item.key)[0]);
-      delete target.editable;
-      this.setState({ list: newList });
-    }
+  modalAddCancel = () => {
+    this.setState({
+      modalAddVisible: false,
+      record: null,
+    });
   }
 
-  save(key) {
+  // 判断是哪个分类
+  checkRecordType=() => {
+    let upName;
+    let upId;
+    const { modalType, record, parentRecord } = this.state;
+    if (modalType === 'add1') {
+      // 新增一级分类
+      upName = '根目录';
+      upId = 0;
+    } else if (modalType === 'add2') {
+      // 新增二级分类
+      upName = record.categoryName;
+      upId = record.categoryId;
+    } else if (modalType === 'edit') {
+      // 编辑
+      if (parentRecord) {
+        // 编辑二级分类
+        upName = parentRecord.categoryName;
+        upId = parentRecord.categoryId;
+      } else {
+        // 编辑一级分类
+        upName = '根目录';
+        upId = 0;
+      }
+    }
+
+
+    return [upName, upId];
+  }
+
+
+  modalAddOk = () => {
+    const { modalType, record } = this.state;
     const { dispatch } = this.props;
-    const target = this.state.list.filter(item => key === item.key)[0];
+    const formData = this.props.form.getFieldsValue();
+    const subtype = (modalType === 'add1' || modalType === 'add2' ? 'add' : 'edit');
+    const merchantCategoryVo = {
+      parentId: this.checkRecordType()[1],
+      ...formData,
+      ...{ categoryId: record?.categoryId },
+    };
+    if (modalType === 'add2') {
+      delete merchantCategoryVo.categoryId;
+    }
     dispatch({
-      type: 'business/edit',
-      payload: {
-        target,
-      },
+      type: `businessClass/${subtype}Classification`,
+      payload: { merchantCategoryVo },
     }).then(() => {
-      const { business: { edit } } = this.props;
-      if (edit.result === 0) {
+      console.log(this.props) //eslint-disable-line
+      if (subtype === 'add' && this.props.businessClass.addClassificationRes) {
         message.success('保存成功');
-        this.cancel(key);
-        dispatch({
-          type: 'business/list',
+        this.props.dispatch({
+          type: 'businessClass/queryList',
           payload: {},
-        }).then(() => {
-          const { business } = this.props;
-          this.setState({
-            list: business?.list?.list,
-          });
         });
-      } else if (edit.result === 1) {
-        message.error(`保存失败, ${edit.msg || '请稍后再试。'}`);
+        this.modalAddCancel();
+      } else if (subtype === 'edit' && this.props.businessClass.editClassification) {
+        message.success('保存成功');
+        this.props.dispatch({
+          type: 'businessClass/queryList',
+          payload: {},
+        });
+        this.modalAddCancel();
       }
     });
   }
 
-  handleChange(value, key, column) {
-    const newData = [...this.state.list];
-    const target = newData.filter(item => key === item.key)[0];
-    if (target) {
-      target[column] = value;
-      this.setState({ list: newData });
-    }
-  }
+  handleDelete=(record) => {
+    const { dispatch } = this.props;
+    const self = this;
+    Modal.confirm({
+      title: '确定要删除该分类？',
+      content: '删除后该分类将无法找回',
+      okText: '确认',
+      cancelText: '取消',
+      onOk() {
+        dispatch({
+          type: 'businessClass/deleteCategory',
+          payload: { categoryId: record.categoryId },
+        }).then(() => {
+          if (self.props.businessClass.deleteRes === 1) {
+            message.success('删除成功');
+            self.query();
+            return 1;
+          }
+        });
+      },
+      onCancel() {
+        console.log(1) //eslint-disable-line
+      },
 
-  add() {
-    const newList = [...this.state.list];
-    newList.unshift({
-      id: '--',
-      key: '--',
-      parentId: 0,
-      name: '',
-      description: '',
-      time: '--',
-      status: 1,
-      editable: true,
     });
-    this.setState({
-      list: newList,
-    });
-  }
-
-  renderColumns(text, record, column) {
-    const { editable } = record;
-
-    return (
-      <EditableCell
-        editable={editable}
-        value={text}
-        onChange={value => this.handleChange(value, record.key, column)}
-      />
-    );
-  }
-
-  renderColumnsSelect(text, record, column) {
-    const { editable } = record;
-
-    return (
-      <EditableCellSelect
-        editable={editable}
-        value={text}
-        onChange={value => this.handleChange(value, record.key, column)}
-      />
-    );
-  }
+  };
 
   render() {
-    const { loading } = this.props;
-    const { list } = this.state;
-    const first = list.filter(item => item.parentId === 0);
-
-    const expandedRowRender = (record) => {
-      const second = list.filter(item => item.parentId === record.id);
-
-      return (
-        <Table
-          columns={getColumns(this)}
-          dataSource={second}
-          pagination={false}
-          showHeader={false}
-        />
-      );
+    const formItemLayout = {
+      labelCol: {
+        xs: { span: 12 },
+        sm: { span: 7 },
+      },
+      wrapperCol: {
+        xs: { span: 12 },
+        sm: { span: 6 },
+        md: { span: 15 },
+      },
     };
-
+    const { loading, form } = this.props;
+    const { record } = this.state;
     return (
-      <Card>
-        <div style={{ marginBottom: '16px' }}>
-          <Button type="primary" onClick={this.add.bind(this)}>新增一级分类</Button>
-        </div>
-        <Table
-          loading={loading}
-          columns={getColumns(this)}
-          expandedRowRender={expandedRowRender}
-          dataSource={first}
-        />
-      </Card>
+      <PageHeaderLayout >
+
+        <Card>
+          {this.state.modalAddVisible ? (
+
+            <Modal
+              title="新增分类"
+              visible={this.state.modalAddVisible}
+              onOk={this.modalAddOk}
+              onCancel={this.modalAddCancel}
+            >
+
+              <Form
+                ref={(inst) => { this.modalAdd = inst; }}
+              >
+
+                <Form.Item {...formItemLayout} label="上级类目：">
+                  <span>
+                    {
+                    this.checkRecordType()[0]
+
+                  }
+                  </span>
+                </Form.Item>
+
+                <Form.Item {...formItemLayout} label="类目名称：">
+                  {form.getFieldDecorator('categoryName', {
+                  rules: [{
+                    required: true, message: '请输入类目名称',
+                  }],
+                  initialValue: record?.categoryName,
+                })(
+                  <MonitorInput maxLength={10} simple="true" />
+                )}
+                </Form.Item>
+                <Form.Item {...formItemLayout} label="类目说明：">
+                  {form.getFieldDecorator('description', {
+                    initialValue: record?.description,
+                  })(
+                    <MonitorTextArea maxLength={20} datakey="description" simple="true" form={form} rows={5} />
+                  )}
+                </Form.Item>
+
+                <Form.Item {...formItemLayout} label="状态：">
+                  {form.getFieldDecorator('status', {
+                  rules: [{
+                    required: true, message: '请选择状态',
+                  }],
+                  initialValue: record?.status || 0,
+                })(
+                  <RadioGroup onChange={this.handleRadioChange} >
+                    <Radio value={0}>启用</Radio>
+                    <Radio value={1}>禁用</Radio>
+                  </RadioGroup>
+                )}
+                </Form.Item>
+              </Form>
+            </Modal>
+
+          ) : ''}
+
+
+          <div style={{ marginBottom: '16px' }}>
+
+            <Authorized authority={['OPERPORT_JIAJU_SHOPCATEGORY_ADD']}>
+              <Button
+                type="primary"
+                onClick={() => {
+              this.setState({ modalType: 'add1' });
+              this.modalAddShow();
+            }}
+              >新增一级分类
+              </Button>
+            </Authorized>
+          </div>
+
+          <TableOrderList
+            {...this.props}
+            isExpanded
+            isColumnSame
+            rowKey="categoryId"
+            loading={loading}
+            columns={getColumns(this)}
+            dataSource={this.props?.businessClass?.list}
+            pagination={{
+              pageSize: 10,
+              total: this.props?.businessClass?.list?.length,
+            }}
+          />
+        </Card>
+      </PageHeaderLayout>
     );
   }
 }

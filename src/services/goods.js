@@ -1,61 +1,85 @@
 import request from '../utils/request';
 
 async function list(params) {
-  return request('/mj/goods/queryListByPage', {
+  return request('/mj/ht-mj-goods-server/goods/queryListByPage', {
     method: 'POST',
     body: {
-      ...params,
+      goodsBaseVoList: {
+        ...params,
+      },
     },
+    pagination: true,
   });
 }
 
 async function detail(params) {
-  return request('/mj/goods/queryDetail', {
+  return request('/mj/ht-mj-goods-server/goods/queryDetail', {
     method: 'POST',
     body: {
-      ...params,
+      goodsBaseVo: {
+        ...params,
+      },
     },
   });
 }
 
 async function add(params) {
-  return request('/mj/goods/save', {
+  return request('/mj/ht-mj-goods-server/goods/save', {
     method: 'POST',
     body: {
-      ...params,
+      goodsVo: {
+        ...params,
+      },
     },
   });
 }
 
 async function edit(params) {
-  return request('/mj/goods/update', {
+  return request('/mj/ht-mj-goods-server/goods/update', {
     method: 'POST',
     body: {
-      ...params,
+      goodsVo: {
+        ...params,
+      },
     },
   });
 }
 
 async function remove(params) {
-  return request('/mj/goods/delete', {
+  return request('/mj/ht-mj-goods-server/goods/delete', {
     method: 'POST',
     body: {
-      ...params,
+      goodsBaseVo: {
+        ...params,
+      },
     },
   });
 }
 
 async function audit(params) {
-  return request('/mj/goods/updateAuditStatus', {
+  return request('/mj/ht-mj-goods-server/goods/updateAuditStatus', {
     method: 'POST',
     body: {
-      ...params,
+      goodsAuditStatusVo: {
+        ...params,
+      },
     },
   });
 }
 
 async function online(params) {
-  return request('/mj/goods/updateStatus', {
+  return request('/mj/ht-mj-goods-server/goods/updateStatus', {
+    method: 'POST',
+    body: {
+      GoodsStatusVo: {
+        ...params,
+      },
+    },
+  });
+}
+
+async function copy(params) {
+  return request('/mj/ht-mj-goods-server/goods/copy', {
     method: 'POST',
     body: {
       ...params,
@@ -63,12 +87,37 @@ async function online(params) {
   });
 }
 
-async function copy(params) {
-  return request('/mj/goods/copy', {
+async function auditStatusList(params) {
+  return request('/mj/ht-mj-goods-server/goods/queryAuditStatusListByPage', {
     method: 'POST',
     body: {
-      ...params,
+      ...params },
+  });
+}
+
+/**
+ * 查询商品信息--订单
+ * @param {*} param0
+ */
+async function orderGoodsList({ skuIds }) {
+  return request('/mj/ht-mj-goods-server/goods/orderGoodsList', {
+    method: 'POST',
+    body: {
+      skuIds,
     },
+  });
+}
+
+// 商品操作日志
+async function queryLog(params) {
+  return request('/mj/ht-mj-goods-server/goods/queryLogByPage', {
+    method: 'POST',
+    body: {
+      readParamLogPageVo: {
+        ...params,
+      },
+    },
+    pagination: true,
   });
 }
 
@@ -81,4 +130,7 @@ export default {
   audit,
   online,
   copy,
+  auditStatusList,
+  orderGoodsList,
+  queryLog,
 };

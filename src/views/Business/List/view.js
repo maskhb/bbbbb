@@ -1,18 +1,26 @@
+import Authorized from 'utils/Authorized';
 import PageHeaderLayout from 'layouts/PageHeaderLayout';
 import PanelList, { Search, Batch, Table } from 'components/PanelList';
+import ModalExportBusiness from 'components/ModalExport/business';
+import ProjectInput from 'components/ProjectInput/business.js';
+// import { goTo } from 'utils/utils';
 import AsyncCascader from 'components/AsyncCascader';
+import AsyncCascaderNew from 'components/AsyncCascaderNew';
 import React, { PureComponent } from 'react';
 import { connect } from 'dva';
 import { Link } from 'dva/router';
-import { Card, Button, Input, DatePicker, Select, Modal } from 'antd';
+import { Card, Button, Input, DatePicker, Select, Modal, Message, InputNumber } from 'antd';
+import { getStartMillisecond, getEndMillisecond } from 'utils/datetime';
 import getColumns from './columns';
+import { transformCommunityAll } from './utils';
 import './view.less';
 
 const { RangePicker } = DatePicker;
 
-@connect(({ business, loading }) => ({
+@connect(({ business, loading, common }) => ({
   /* redux传入 @:装饰器 */
   business,
+  common,
   loading: loading.models.business,
 }))
 export default class View extends PureComponent {
@@ -22,23 +30,87 @@ export default class View extends PureComponent {
   };
 
   state = {
+
   };
 
   componentDidMount() {
-    this.search.handleSearch();
+    const me = this;
+    const { /* business, dispatch, */ history: { location: { search } } } = this.props;
+    if (search) {
+      this.search.props.setStateOfSearch({
+        merchantId: Number(search.substr(1)),
+      }, () => {
+        me.search.handleSearch();
+      });
+    } else {
+      me.search.handleSearch();
+    }
+  }
+
+  convertExportParam = () => {
+    const { searchDefault, stateOfSearch } = this?.search?.props;
+    const { business } = this?.props;
+    const { pageInfo, ...otherSearch } = stateOfSearch || {};
+    const param = {
+      ...searchDefault,
+      ...otherSearch,
+    };
+    return {
+      param: { param },
+      totalCount: business?.queryListByPageRes?.totalCount,
+      dataUrl: '/ht-mj-merchant-server/merchantBase/exportMerchantList',
+      prefix: '802001',
+    };
   }
 
   handleSearch = (values = {}) => {
-    console.log(values) //eslint-disable-line
-    /* Object.getOwnPropertyNames(values).forEach((key) => {
-      if (Array.isArray(values[key]) && values[key].length === 1) {
-        values[key] = values[key][0];
+    const communityList = this.props?.common?.queryCommunityList?.dataList;
+    /* 格式化数据 */
+    function fmtData(
+      {
+        createDate: [createdTimeBegin, createdTimeEnd] = [],
+        categoryId, operateScopeId, communityIdList,
+        ...others
+      } = {}) {
+      if (Array.isArray(categoryId)) {
+          categoryId = categoryId[0]//eslint-disable-line
       }
-    }); */
+      if (Array.isArray(operateScopeId)) {
+          operateScopeId = operateScopeId[0]//eslint-disable-line
+      }
+
+
+      return {
+        ...others,
+        communityIdList: transformCommunityAll(communityList, communityIdList),
+        categoryId,
+        operateScopeId,
+        createdTimeBegin: getStartMillisecond(createdTimeBegin),
+        createdTimeEnd: getEndMillisecond(createdTimeEnd),
+      };
+    }
+
+    const params = fmtData(values);
     const { dispatch } = this.props;
     return dispatch({
-      type: 'business/list',
-      payload: values,
+      // type: 'business/queryListByPage',
+      type: 'business/queryListByPage',
+      payload: { goodsCategoryVoQ: params },
+    }).then(() => {
+      const res = this.props.business.queryListByPageRes;
+
+      if (res) {
+        this.search?.props?.setSelectedRows([]);
+        const { currPage: current, totalCount: total, pageSize, totalPage } = res;
+        this.setState({
+          pagination: {
+            current,
+            total,
+            pageSize,
+            totalPage,
+          },
+        });
+      }
     });
   }
   handleSearchDateChange=(date, dateString) => {
@@ -48,6 +120,26 @@ export default class View extends PureComponent {
     return rows;
   }
   handleBathOperating=(rows, type) => {
+    const self = this;
+    const { dispatch } = this.props;
+    let updateType;
+    switch (type) {
+      case 'up':
+        updateType = 2;
+        break;
+      case 'down':
+        updateType = 1;
+        break;
+      case 'fz':
+        updateType = 3;
+        break;
+      default:
+        break;
+    }
+    const resArr = [];
+    rows.forEach((item) => {
+      resArr.push(item.merchantId);
+    });
     if (rows.length) {
       Modal.confirm({
         title: '确定要批量操作',
@@ -55,9 +147,15 @@ export default class View extends PureComponent {
         okText: '确定',
         cancelText: '取消',
         onOk() {
-          this.dispatch({
-            type: 'business/list',
-            payload: type,
+          dispatch({
+            type: 'business/updateStatus',
+            payload: { merchantUpdateStatusVo: { merchantIdList: resArr, updateType } },
+          }).then(() => {
+            if (self.props.business.updateStatusRes === 1) {
+              Message.success('保存成功');
+              self.search.handleSearch();
+              self.search?.props?.setSelectedRows([]);
+            }
           });
         },
       });
@@ -72,10 +170,10 @@ export default class View extends PureComponent {
   }
 
   render() {
-    const { loading, business, searchDefault, handleSearchDateChange } = this.props;
+    const { loading, business, searchDefault } = this.props;
     // const { fileList } = this.state;
     const { Option } = Select;
-    const self = this;
+    // const self = this;
     return (
       <PageHeaderLayout>
         <Card>
@@ -89,9 +187,10 @@ export default class View extends PureComponent {
               <Search.Item md={6} label="商家ID" simple className="col-6">
                 {
                 ({ form }) => (
-                  form.getFieldDecorator('businessId', {
+                  form.getFieldDecorator('merchantId', {
+                    initialValue: this.search?.props.stateOfSearch.merchantId || null,
                   })(
-                    <Input placeholder="" />
+                    <InputNumber style={{ width: '100%' }} />
                   )
                 )
               }
@@ -99,17 +198,17 @@ export default class View extends PureComponent {
               <Search.Item md={6} label="商家名称" simple>
                 {
                 ({ form }) => (
-                  form.getFieldDecorator('businessName', {
+                  form.getFieldDecorator('merchantName', {
                   })(
                     <Input placeholder="" />
                   )
                 )
               }
               </Search.Item>
-              <Search.Item md={6} label="关联厂家名称" simple>
+              <Search.Item md={6} label="关联厂商名称" simple>
                 {
                 ({ form }) => (
-                  form.getFieldDecorator('assocName', {
+                  form.getFieldDecorator('unionMerchantName', {
                   })(
                     <Input placeholder="" />
                   )
@@ -123,8 +222,8 @@ export default class View extends PureComponent {
                   })(
                     <Select onChange={() => ''}>
                       <Option value="0">全部</Option>
-                      <Option value="1">经销商</Option>
-                      <Option value="2">厂家</Option>
+                      <Option value="1">厂商</Option>
+                      <Option value="2">经销商</Option>
                       <Option value="3">小商家</Option>
                     </Select>
                   )
@@ -134,14 +233,19 @@ export default class View extends PureComponent {
               <Search.Item md={6} label="商家分类" simple>
                 {
                 ({ form }) => (
-                  form.getFieldDecorator('sort', {
+                  form.getFieldDecorator('categoryId', {
                   })(
-                    <AsyncCascader
+                    <AsyncCascaderNew
                       placeholder="全部"
-                      asyncType="queryCategory"
+                      asyncType="queryTree"
                       param={{ categoryId: 0, parentId: 0 }}
-                      labelParam={{ label: 'categoryName', value: 'categoryId' }}
-                      // filter={res => res.status === 1}
+                      labelParam={
+                        {
+                          label: 'categoryName',
+                          value: 'categoryId',
+                         }
+                      }
+                      filter={res => res.status === 0}
                     />
                   )
                 )
@@ -150,7 +254,7 @@ export default class View extends PureComponent {
               <Search.Item md={6} label="经营范围" simple>
                 {
               ({ form }) => (
-                form.getFieldDecorator('range', {
+                form.getFieldDecorator('operateScopeId', {
                 })(
                   <AsyncCascader
                     placeholder="全部"
@@ -180,9 +284,9 @@ export default class View extends PureComponent {
               <Search.Item md={6} label="关联项目" simple>
                 {
                 ({ form }) => (
-                  form.getFieldDecorator('associate', {
+                  form.getFieldDecorator('communityIdList', {
                   })(
-                    <Input placeholder="全部" />
+                    <ProjectInput style={{ width: '100%' }} />
                   )
                 )
               }
@@ -192,51 +296,33 @@ export default class View extends PureComponent {
                 ({ form }) => (
                   form.getFieldDecorator('createDate', {
                   })(
-                    <RangePicker onChange={handleSearchDateChange} />
+                    <RangePicker onChange={this.handleSearchDateChange.bind(this)} />
                   )
                 )
               }
               </Search.Item>
-              <Button
-                simple
-                type="primary"
-                onClick={
-              () => Modal.confirm({
-                title: '提示',
-                content: (
-                  <div>
-                    <p>为了查询性能及体验，我们对导出功能进行改造；</p>
-                    <p>1.为了保证您的查询性能，两次导出的时间间隔请保持在5分钟以上；</p>
-                    <p>2.本次导出的订单约X条，大概需要在X分钟才能下载；</p>
-                  </div>
-                ),
-                okText: '查看导出结果',
-                cancelText: '取消',
-                onOk() {
-                  // self.search.handleSearch({});
-                  console.log(self.search) //eslint-disable-line
-                  const { stateOfSearch } = self.search.props;
-                  /* TODO: 跳转到异步导出路由 */
-                  self.props.dispatch({
-                    type: 'business/list',
-                    payload: stateOfSearch,
-                  });
-                },
-              })
-              }
-              >导出查询结果
-              </Button>
             </Search>
 
             <Batch>
-
+              <Authorized authority={['OPERPORT_JIAJU_SHOP_EXPORT']}>
+                <ModalExportBusiness
+                  {...this.props}
+                  title="订单"
+                  params={{}}
+                  convertParam={this.convertExportParam}
+                  exportModalType={2}
+                  simple
+                />
+              </Authorized>
               <Batch.Item>
                 {
                   () => {
                     return (
-                      <Link to="/business/list/add/0">
-                        <Button type="primary ">新增商家</Button>
-                      </Link>
+                      <Authorized authority={['OPERPORT_JIAJU_SHOP_ADD']}>
+                        <Link to="/business/list/add/0">
+                          <Button type="primary ">新增商家</Button>
+                        </Link>
+                      </Authorized>
                     );
                   }
                 }
@@ -267,7 +353,9 @@ export default class View extends PureComponent {
                 {
                   ({ rows }) => {
                     return (
-                      <Button type="primary " onClick={this.handleBathOperating.bind(this, rows, 'up')}>批量上架</Button>
+                      <Authorized authority={['OPERPORT_JIAJU_SHOP_BATCHUPDATE']}>
+                        <Button type="primary " onClick={this.handleBathOperating.bind(this, rows, 'up')}>批量上架</Button>
+                      </Authorized>
                     );
                   }
                 }
@@ -276,7 +364,9 @@ export default class View extends PureComponent {
                 {
                   ({ rows }) => {
                     return (
-                      <Button type="primary " onClick={this.handleBathOperating.bind(this, rows, 'down')}>批量下架</Button>
+                      <Authorized authority={['OPERPORT_JIAJU_SHOP_BATCHFROMSALE']}>
+                        <Button type="primary " onClick={this.handleBathOperating.bind(this, rows, 'down')}>批量下架</Button>
+                      </Authorized>
                     );
                   }
                 }
@@ -285,7 +375,9 @@ export default class View extends PureComponent {
                 {
                   ({ rows }) => {
                     return (
-                      <Button type="primary " onClick={this.handleBathOperating.bind(this, rows, 'freeze')}>批量冻结</Button>
+                      <Authorized authority={['OPERPORT_JIAJU_SHOP_BATCHFREEZE']}>
+                        <Button type="primary " onClick={this.handleBathOperating.bind(this, rows, 'fz')}>批量冻结</Button>
+                      </Authorized>
                     );
                   }
                 }
@@ -297,8 +389,8 @@ export default class View extends PureComponent {
               loading={loading}
               searchDefault={searchDefault}
               columns={getColumns(this, searchDefault)}
-              dataSource={business?.list?.list}
-              pagination={business?.list?.pagination}
+              dataSource={business?.queryListByPageRes?.dataList}
+              pagination={this.state?.pagination}
             />
           </PanelList>
         </Card>

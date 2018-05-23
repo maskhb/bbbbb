@@ -4,9 +4,9 @@
     "authority": ""
   },
   "menu": {
-    "name": "批量导入管理",
-    "icon": "appstore",
-    "order": 11,
+    "name": "导入管理",
+    "icon": "setting",
+    "order": 41,
     "authority": ""
   },
   "model": [""]

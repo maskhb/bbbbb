@@ -2,6 +2,7 @@
  * Created by rebecca on 2018/4/3.
  */
 import React from 'react';
+import Authorized from 'utils/Authorized';
 
 export default (me) => {
   return [
@@ -16,7 +17,11 @@ export default (me) => {
       key: 'operation',
       render: (text, record) => {
         return (
-          <div><a onClick={() => me.edit(record.index)}>编辑</a></div>
+          <div>
+            <Authorized authority="OPERPORT_JIAJU_PAGELIST_EDIT">
+              <a onClick={() => me.edit(record.index)}>编辑</a>
+            </Authorized>
+          </div>
         );
       },
     },

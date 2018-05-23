@@ -1,6 +1,8 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'dva';
-import { Form, Card, Select } from 'antd';
+import { parse } from 'qs';
+import { Form, Card, Select, Message, Modal } from 'antd';
+import { goTo } from 'utils/utils';
 import styles from '../../index.less';
 import PageHeaderLayout from '../../../../layouts/PageHeaderLayout';
 import { MonitorTextArea } from '../../../../components/input';
@@ -11,9 +13,9 @@ import messagePushOptions from '../../attr';
 
 const FormItem = Form.Item;
 
-@connect(({ goodsBrand, loading }) => ({
-  goodsBrand,
-  submitting: loading.effects['goodsBrand/add'],
+@connect(({ messagePush, loading }) => ({
+  messagePush,
+  submitting: loading.effects['messagePush/add'],
 }))
 @Form.create()
 export default class View extends PureComponent {
@@ -21,58 +23,79 @@ export default class View extends PureComponent {
   };
 
   state = {
-    pattern: 'detail',
+    pattern: 'add',
+    havePhone: false,
+    phone: '',
+    haveInitPlatformType: false,
+    platformType: '',
   };
 
   componentWillMount() {
-    const { match: { params: { id } } } = this.props;
-    this.setState({
-      pattern: Number(id) === 0 ? 'add' : 'detail',
-    });
-  }
-
-  componentDidMount() {
-    const { dispatch, match: { params: { id } } } = this.props;
-    if (Number(id) !== 0) {
-      dispatch({
-        type: 'goodsBrand/detail',
-        payload: { id, brandId: id },
+    const { location: { search } } = this.props;
+    const { phone, platformType } = parse(search?.substring(1));
+    if (platformType && phone) {
+      this.setState({
+        phone,
+        havePhone: true,
+        haveInitPlatformType: true,
+        platformType,
       });
     }
   }
+  componentDidMount() {}
   handleSubmit = () => {
-    // const { form, dispatch, goodsBrand, match: { params: { id } } } = this.props;
-    const { form } = this.props;
+    const { form, dispatch } = this.props;
     const { validateFieldsAndScroll } = form;
-    // const data = goodsBrand?.[`detail${id}`];
-
-    // validateFieldsAndScroll((error, values) => {
-    validateFieldsAndScroll((error) => {
+    const that = this;
+    validateFieldsAndScroll((error, values) => {
       // 对参数进行处理
       if (!error) {
-        // dispatch({
-        //   type: 'goodsBrand/add',
-        //   payload: {
-        //     brand: {
-        //       brandId: data?.brandId,
-        //       ...values,
-        //       supplierList: data?.supplierList,
-        //       brandDocList: [],
-        //       logo: values.logo?.[0],
-        //     },
-        //   },
-        // }).then(() => {
-        //   const { add } = this.props.goodsBrand;
-        //   if (add.msgCode === 200 && add.data) {
-        //     message.success('提交成功。', 1, () => {
-        //       history.back();
-        //     });
-        //   } else {
-        //     message.error(`提交失败！${add.message}`);
-        //   }
-        // });
+        Modal.confirm({
+          title: '短信内容备案提醒',
+          content: '请确认短信内容已经跟运营商备案，否则可能发不出去。',
+          onOk() {
+            const params = {
+              task: Object.assign({}, values),
+              sendType: values.sendType.sendType,
+            };
+            params.task.targetCondition = {};
+            delete params.task.sendType;
+            params.task.targetType = values.targetType.targetType;
+            if (Number(values.targetType.targetType) === 6) {
+              params.task.targetCondition.phone = values.targetType.phone;
+            } else if (Number(values.targetType.targetType) === 5) {
+              params.task.targetCondition.phoneFileUrl = values.targetType.phoneFileUrl;
+            }
+            dispatch({
+              type: 'messagePush/add',
+              payload: params,
+            }).then(() => {
+              const { add } = that.props.messagePush;
+              if (add) {
+                Message.success('提交成功。', 1, () => {
+                  goTo('/messagepush/pushlist');
+                });
+              } else {
+                Message.error(`提交失败！${add?.message}`);
+              }
+            });
+          },
+        });
       }
     });
+  };
+  handlePlatformChange = (value) => {
+    const { form, location: { search } } = this.props;
+    const { phone, platformType } = parse(search?.substring(1));
+    if (phone && platformType && Number(platformType) === Number(value)) {
+      form.setFieldsValue({
+        targetType: 6,
+      });
+    } else {
+      form.setFieldsValue({
+        targetType: 0,
+      });
+    }
   };
   handlePatternChange = () => {
     const { pattern } = this.state;
@@ -81,23 +104,30 @@ export default class View extends PureComponent {
     });
   };
   render() {
-    const that = this;
-    const { form, submitting, goodsBrand, match: { params: { id } } } = that.props;
-    const { pattern } = that.state;
+    const { form, submitting } = this.props;
+    console.log(this.props);
+    const { pattern, havePhone, phone, haveInitPlatformType, platformType } = this.state;
     const disabled = pattern === 'detail';
-    const data = goodsBrand?.[`detail${id}`];
+    const pType = Number(form.getFieldValue('platformType'));
+    const tType = form.getFieldValue('targetType');
+    const showTips = (Number(tType) === 5 || tType?.targetType === 5);
     const selectOptions = { // CheckboxCascade组件的入参集合
-      url: [
-        { value: 1, label: '单个用户', key: 1, childrenType: 1, childrenName: 'cname1', childrenProps: { placeholder: '第一个' } },
-        { value: 2, label: '指定手机列表', key: 2, childrenType: 3, childrenName: 'cname2', childrenProps: { min: 2, max: 10, defaultValue: 5 } },
-        { value: 3, label: '日期时间选择框', key: 3, childrenType: 4, childrenName: 'cname3' },
-        { value: 4, label: '日期范围选择框', key: 4, childrenType: 5, childrenName: 'cname4', childrenProps: { placeholder: ['开始时间', '结束时间'], showTime: true, format: 'YYYY-MM-DD HH:mm:ss' } },
+      targetType: [
+        { value: 6, label: '单个用户', key: 1, childrenType: 1, childrenName: 'phone', childrenProps: { placeholder: '用户手机号' }, initValue: havePhone ? phone : '' },
+        { value: 5, label: '指定手机列表', key: 2, childrenType: 2, childrenName: 'phoneFileUrl', childrenProps: { uploadType: 'excel' } },
+        { value: 7, label: '全部家居用户', key: 3, childrenType: 0, childrenName: 'fakeName' },
       ],
       sendType: [
         { value: 1, label: '立即推送', key: 1, childrenType: 0, childrenName: 'fakeName' },
-        { value: 2, label: '定时推送', key: 2, childrenType: 4, childrenName: 'cname4', childrenProps: { min: 2, max: 10, defaultValue: 5 } },
+        { value: 2, label: '定时推送', key: 2, childrenType: 4, childrenName: 'executeTime', childrenProps: { showTime: true, format: 'YYYY-MM-DD HH:mm:ss' } },
       ],
     };
+    const targetType = [
+      { value: 6, label: '单个用户', key: 1, childrenType: 1, childrenName: 'phone', childrenProps: { placeholder: '用户手机号' }, initValue: havePhone ? phone : '' },
+      { value: 5, label: '指定手机列表', key: 2, childrenType: 2, childrenName: 'phoneFileUrl', childrenProps: { uploadType: 'excel' } },
+      { value: 1, label: '全部密蜜注册用户', key: 3, childrenType: 0, childrenName: 'fakeName' },
+      { value: 2, label: '全部密蜜认证用户', key: 4, childrenType: 0, childrenName: 'fakeName' },
+    ];
 
     const formItemLayout = {
       labelCol: {
@@ -114,15 +144,20 @@ export default class View extends PureComponent {
     return (
       <PageHeaderLayout>
         <Card bordered={false}>
-          <Form onSubmit={this.handleSubmit} style={{ marginTop: 8 }}>
+          <Form
+            onSubmit={this.handleSubmit}
+            style={{ marginTop: 8 }}
+          >
             <FormItem {...formItemLayout} label="业务类型">
-              {form.getFieldDecorator('name', {
+              {form.getFieldDecorator('platformType', {
                 rules: [{
                   required: true, message: '请选择业务类型',
                 }],
-                initialValue: data?.name,
+                initialValue: haveInitPlatformType ? platformType : null,
               })(
-                <Select>
+                <Select
+                  onChange={this.handlePlatformChange}
+                >
                   {messagePushOptions.YWLX.map(v =>
                     <Select.Option key={v.key} value={v.value}>{v.label}</Select.Option>
                   )}
@@ -131,38 +166,63 @@ export default class View extends PureComponent {
             </FormItem>
             <div className={styles.formTips}>根据业务类型，会自动在短信内容前面添加标签：家居对应【密蜜家居】，密蜜对应【恒腾密蜜】</div>
             <FormItem {...formItemLayout} label="推送内容">
-              {form.getFieldDecorator('category', {
+              {form.getFieldDecorator('content', {
                 rules: [{
                   required: true, message: '必填，最多70个字',
                 }, {
                   max: 70,
                 }],
-                initialValue: data?.category,
               })(
-                <MonitorTextArea datakey="category" rows={3} maxLength={70} form={form} disabled={disabled} />
+                <MonitorTextArea datakey="content" rows={3} maxLength={70} form={form} disabled={disabled} />
               )}
             </FormItem>
-            <FormItem {...formItemLayout} label="目标用户">
-              {form.getFieldDecorator('url', {
-                rules: [{
-                  required: true, message: '请选择目标用户',
-                }],
-              })(
-                <CheckboxCascade
-                  name="url"
-                  selectOptions={selectOptions.url}
-                />
-              )}
-            </FormItem>
+            {
+              (pType === 1) ? (
+                <FormItem {...formItemLayout} label="目标用户">
+                  {form.getFieldDecorator('targetType', {
+                    rules: [{
+                      required: true, message: '请选择目标用户',
+                    }],
+                    initialValue: havePhone ? 6 : null,
+                  })(
+                    <CheckboxCascade
+                      name="targetType"
+                      selectOptions={selectOptions.targetType}
+                    />
+                  )}
+                </FormItem>
+              ) : ''
+            }
+            {
+              (pType === 2) ? (
+                <FormItem {...formItemLayout} label="目标用户">
+                  {form.getFieldDecorator('targetType', {
+                    rules: [{
+                      required: true, message: '请选择目标用户',
+                    }],
+                    initialValue: havePhone ? 6 : null,
+                  })(
+                    <CheckboxCascade
+                      name="targetType"
+                      selectOptions={targetType}
+                    />
+                  )}
+                </FormItem>
+              ) : ''
+            }
+            {
+              showTips ? (
+                <div className={styles.formTips}>文件格式要求：一行一个手机号，xls或xlsx格式文件</div>
+              ) : ''
+            }
             <FormItem {...formItemLayout} label="用户说明">
-              {form.getFieldDecorator('orderNum', {
+              {form.getFieldDecorator('userDesc', {
                 rules: [{
                   max: 70,
                 }],
-                initialValue: data?.orderNum,
               })(
                 <MonitorTextArea
-                  datakey="orderNum"
+                  datakey="userDesc"
                   rows={3}
                   maxLength={200}
                   form={form}
@@ -176,7 +236,6 @@ export default class View extends PureComponent {
                 rules: [{
                   required: true, message: '请选择推送时间',
                 }],
-                initialValue: data?.url,
               })(
                 <CheckboxCascade
                   name="sendType"
@@ -185,9 +244,8 @@ export default class View extends PureComponent {
               )}
             </FormItem>
             <FormItem {...formItemLayout} label="优先级">
-              {form.getFieldDecorator('first', {
+              {form.getFieldDecorator('priority', {
                 rules: [],
-                initialValue: data?.first,
               })(
                 <Select>
                   {messagePushOptions.YXJ.map(v =>

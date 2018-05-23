@@ -2,7 +2,7 @@
  * @Author: wuhao
  * @Date: 2018-04-17 15:20:39
  * @Last Modified by: wuhao
- * @Last Modified time: 2018-04-17 16:26:29
+ * @Last Modified time: 2018-05-12 13:08:05
  *
  * 商品规格选择
  */
@@ -25,16 +25,22 @@ class PopconfirmSelectGoodsSpec extends PureComponent {
     return [
       {
         title: '规格',
-        dataIndex: 'spec',
+        dataIndex: 'propertyValue',
       },
       {
         title: '库存',
-        dataIndex: 'stock',
+        dataIndex: 'remainNum',
       },
     ];
   }
 
   handleTableSelectRowKeysChange = (selectedRowKeys, selectedRows) => {
+    const [rowObj] = selectedRows;
+    const { status } = rowObj || {};
+    if (status !== 2) {
+      message.error('非上架状态不能选择');
+      return;
+    }
     this.setState({
       selectedRowKeys,
       selectedRows,
@@ -51,7 +57,7 @@ class PopconfirmSelectGoodsSpec extends PureComponent {
     }
 
     if (onConfirm) {
-      onConfirm(selectedRows);
+      onConfirm(selectedRows?.[0]);
     }
 
     this.setState({
@@ -87,6 +93,7 @@ class PopconfirmSelectGoodsSpec extends PureComponent {
         visible={visible}
         title={(
           <Table
+            key="jj_cc_psfs_table"
             dataSource={dataSource}
             columns={columns}
             pagination={false}

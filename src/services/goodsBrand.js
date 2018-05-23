@@ -1,46 +1,68 @@
 import request from '../utils/request';
 
 async function list(params) {
-  return request('/api/brand/queryListByPage', {
+  return request('/mj/ht-mj-goods-server/brand/queryListByPage', {
     method: 'POST',
     body: {
-      ...params,
+      brandVoQ: {
+        ...params,
+      },
     },
+    pagination: true,
   });
 }
 
 async function detail(params) {
-  return request('/api/brand/queryDetail', {
+  return request('/mj/ht-mj-goods-server/brand/queryDetail', {
     method: 'POST',
     body: {
-      ...params,
+      brandVoQ: {
+        ...params,
+      },
     },
   });
 }
 
 async function add(params) {
-  return request('/api/brand/save', {
+  return request('/mj/ht-mj-goods-server/brand/save', {
     method: 'POST',
     body: {
-      ...params,
+      brandVoS: {
+        ...params,
+      },
     },
   });
 }
 
 async function remove(params) {
-  return request('/api/brand/delete', {
+  return request('/mj/ht-mj-goods-server/brand/delete', {
     method: 'POST',
     body: {
-      ...params,
+      brandVoD: {
+        ...params,
+      },
+    },
+  });
+}
+
+async function edit(params) {
+  return request('/mj/ht-mj-goods-server/brand/update', {
+    method: 'POST',
+    body: {
+      brandVoU: {
+        ...params,
+      },
     },
   });
 }
 
 async function status(params) {
-  return request('/api/brand/update', {
+  return request('/mj/ht-mj-goods-server/brand/update', {
     method: 'POST',
     body: {
-      ...params,
+      brandVoU: {
+        ...params,
+      },
     },
   });
 }
@@ -49,6 +71,7 @@ export default {
   list,
   detail,
   add,
+  edit,
   remove,
   status,
 };

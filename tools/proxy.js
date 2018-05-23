@@ -2,8 +2,10 @@ const path = require('path');
 const Builder = require('htlib/src/builder/config-builder');
 const _ = require('lodash');
 
+
 const builder = new Builder();
 builder.willCreateConfigJsonFile = true;
+
 builder
   .output(path.resolve(__dirname, './proxy-configs'))
   .envMap({
@@ -68,17 +70,17 @@ builder
         proxy_pass ${img}/$1;
         proxy_set_header Host ${imgHost};
       }
-      
-      location /mj {
-        proxy_pass http://${mj}; 
-        proxy_set_header Host ${mj};
-      }
 
       location / {
         root ${config.locationRoot};
         index index.html index.htm;
         try_files $uri $uri/ /index.html;
         add_header Cache-Control no-store;
+      }
+
+      location /download/ {
+        proxy_pass http://${mj}/;
+        proxy_set_header Host ${mj};
       }
 
       location ~* .(js|css|png|jpg)$ {
@@ -94,9 +96,12 @@ builder
       '/api/system/private': `${pre('sys-privilege-api')}`,
       '/api/system/user': `${pre('sys-user-api')}`,
       '/api/pay': `${pre('payment-api')}`,
-      '/api/upload': `${pre('upload-api')}`,
-      '/api/excel': `${pre('supplier-api')}`,
-      '/api/download': `${pre('pub-export-api')}`,
+      '/api/upload': `${pre('upload-api')}/upload`,
+      '/api/captcha': `${pre('verify-api')}/captcha`,
+      '/api/excel/export/getFileWithToken': `${pre('pub-export-api')}/export/getFileWithToken`,
+      '/api/encode-get': `${pre('web-proxy')}/encode-get`,
+      '/mj': `${pre('web-proxy')}/mj`,
+      '/json': `${pre('web-proxy')}/json`,
     };
   });
 

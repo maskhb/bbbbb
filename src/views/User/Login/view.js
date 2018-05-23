@@ -1,20 +1,20 @@
 import React, { Component } from 'react';
 import { connect } from 'dva';
-import { Link } from 'dva/router';
-import { Checkbox, Alert, Icon } from 'antd';
+import { Alert, message, Spin } from 'antd';
 import Login from '../../../components/Login';
 import styles from './view.less';
+// import permission from '../../../services/permission';
 
-const { Tab, UserName, Password, Mobile, Captcha, Submit } = Login;
+const { Tab, UserName, Password, Submit } = Login;
 
 @connect(({ login, loading }) => ({
   login,
-  submitting: loading.effects['login/login'],
+  submitting: loading.effects['login/login'] || loading.effects['permission/current'],
 }))
 export default class LoginPage extends Component {
   state = {
     type: 'account',
-    autoLogin: true,
+    logined: false,
   }
 
   onTabChange = (type) => {
@@ -28,14 +28,20 @@ export default class LoginPage extends Component {
         payload: {
           ...values,
         },
+      }).then((res) => {
+        if (res) {
+          this.setState({
+            logined: true,
+          });
+          message.success('登录成功!');
+          return this.props.dispatch({
+            type: 'permission/current',
+          }).then(() => {
+            window.location.reload();
+          });
+        }
       });
     }
-  }
-
-  changeAutoLogin = (e) => {
-    this.setState({
-      autoLogin: e.target.checked,
-    });
   }
 
   renderMessage = (content) => {
@@ -50,44 +56,25 @@ export default class LoginPage extends Component {
 
     return (
       <div className={styles.main}>
-        <Login
-          defaultActiveKey={type}
-          onTabChange={this.onTabChange}
-          onSubmit={this.handleSubmit}
-        >
-          <Tab key="account" tab="账户密码登录">
-            {
-              login.status === 'error' &&
-              login.type === 'account' &&
-              !login.submitting &&
-              this.renderMessage('账户或密码错误')
-            }
-            <UserName name="username" placeholder="" />
-            <Password name="password" placeholder="" />
-          </Tab>
-          <Tab key="mobile" tab="手机号登录">
-            {
-              login.status === 'error' &&
-              login.type === 'mobile' &&
-              !login.submitting &&
-              this.renderMessage('验证码错误')
-            }
-            <Mobile name="mobile" />
-            <Captcha name="captcha" />
-          </Tab>
-          <div>
-            <Checkbox checked={this.state.autoLogin} onChange={this.changeAutoLogin}>自动登录</Checkbox>
-            <a style={{ float: 'right' }} href="">忘记密码</a>
-          </div>
-          <Submit loading={submitting}>登录</Submit>
-          <div className={styles.other}>
-            其他登录方式
-            <Icon className={styles.icon} type="alipay-circle" />
-            <Icon className={styles.icon} type="taobao-circle" />
-            <Icon className={styles.icon} type="weibo-circle" />
-            <Link className={styles.register} to="/user/register">注册账户</Link>
-          </div>
-        </Login>
+        <Spin spinning={!!submitting || this.state.logined}>
+          <Login
+            defaultActiveKey={type}
+            onTabChange={this.onTabChange}
+            onSubmit={this.handleSubmit}
+          >
+            <Tab key="account" tab="账户密码登录">
+              {
+                login.status === 'error' &&
+                login.type === 'account' &&
+                !login.submitting &&
+                this.renderMessage('账户或密码错误')
+              }
+              <UserName name="username" placeholder="" />
+              <Password name="password" placeholder="" />
+            </Tab>
+            <Submit loading={submitting}>登录</Submit>
+          </Login>
+        </Spin>
       </div>
     );
   }

@@ -7,7 +7,7 @@
     "name": "项目管理",
     "icon": "",
     "order": 1,
-    "authority": ""
+    "authority": "OPERPORT_JIAJU_COMMUNITY_LIST"
   },
   "model": ["garden"]
 }

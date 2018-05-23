@@ -2,7 +2,7 @@
  * @Author: wuhao
  * @Date: 2018-04-09 09:53:46
  * @Last Modified by: wuhao
- * @Last Modified time: 2018-04-09 10:55:53
+ * @Last Modified time: 2018-05-09 14:48:50
  *
  * 表格过滤选择栏
  */
@@ -27,11 +27,17 @@ class TableSearchFilterBar extends PureComponent {
     const radioOptionValue = e.target.value;
 
     const params = radioOptions?.[radioOptionValue]?.value;
+    // eslint-disable-next-line
+    const { pageInfo, ...otherParams} = stateOfSearch;
 
     const values = {
       ...searchDefault,
-      ...stateOfSearch,
+      ...otherParams,
       ...params,
+      pageInfo: {
+        ...pageInfo,
+        currPage: 1,
+      },
     };
 
     setStateOfSearch(values);
@@ -52,7 +58,7 @@ class TableSearchFilterBar extends PureComponent {
         >
           {
             radioOptions.map((item, index) => (
-              <RadioButton value={index}>{item.label}</RadioButton>
+              <RadioButton key={item.label} value={index}>{item.label}</RadioButton>
             ))
           }
         </RadioGroup>

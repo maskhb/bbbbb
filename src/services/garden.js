@@ -1,12 +1,8 @@
-import { stringify } from 'qs';
+// import { stringify } from 'qs';
 import request from '../utils/request';
 
-async function list(params) {
-  return request(`/api/garden/list?${stringify(params)}`);
-}
-
 async function add(params) {
-  return request('/1json/community-api/community/base/batchUpdateOpenPlatform', {
+  return request('/json/community-api/community/base/batchUpdateOpenPlatform', {
     method: 'POST',
     body: {
       ...params,
@@ -14,40 +10,43 @@ async function add(params) {
   });
 }
 
-async function edit(params) {
-  return request('/api/garden/edit', {
+async function merchantCategoryList(params) {
+  return request('/mj/ht-mj-merchant-server/merchantCategory/queryListByOrderNum', {
     method: 'POST',
     body: {
       ...params,
-      method: 'post',
     },
   });
 }
-
-async function remove(params) {
-  return request('/api/garden/remove', {
+async function merchantCategoryOrder(params) {
+  return request('/mj/ht-mj-merchant-server/merchantCommunityRef/globalSetting', {
     method: 'POST',
     body: {
       ...params,
-      method: 'post',
     },
   });
 }
-
-async function update(params) {
-  return request('/api/garden/update', {
+async function merchantOrder(params) {
+  return request('/mj/ht-mj-merchant-server/merchantCommunityRef/customSetting', {
     method: 'POST',
     body: {
       ...params,
-      method: 'post',
+    },
+  });
+}
+async function merchantList(params) {
+  return request('/mj/ht-mj-merchant-server/merchantCommunityRef/queryMerchantCategoryByCommunity', {
+    method: 'POST',
+    body: {
+      ...params,
     },
   });
 }
 
 export default {
-  list,
   add,
-  edit,
-  remove,
-  update,
+  merchantCategoryList,
+  merchantList,
+  merchantCategoryOrder,
+  merchantOrder,
 };

@@ -1,13 +1,13 @@
 {
-    "route": {
-        "params": "",
-        "authority": ""
-    },
-    "menu": {
-        "name": "订单管理",
-        "icon": "appstore",
-        "order": 3,
-        "authority": ""
-    },
-    "model": [""]
+  "route": {
+    "params": "",
+    "authority": ""
+  },
+  "menu": {
+    "name": "订单管理",
+    "icon": "setting",
+    "order": 12,
+    "authority": ""
+  },
+  "model": [""]
 }

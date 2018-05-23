@@ -5,6 +5,7 @@ import PageHeaderLayout from 'layouts/PageHeaderLayout';
 import { MonitorInput, MonitorTextArea } from 'components/input';
 import ImageUpload from 'components/Upload/Image/ImageUpload';
 import DetailFooterToolbar from 'components/DetailFooterToolbar';
+import AssociatedButton from './AssociatedButton';
 
 const FormItem = Form.Item;
 
@@ -20,23 +21,84 @@ export default class View extends PureComponent {
   state = {
     pattern: 'detail',
     fileList: [],
+    parents: '',
   };
 
   componentWillMount() {
-    const { match: { params: { id } } } = this.props;
+    // const { match: { params: { id } } } = this.props;
+    const { dispatch, match: { params: { id, pid } } } = this.props;
+    if (Number(id)) {
+      dispatch({
+        type: 'goodsCategory/detail',
+        payload: { categoryId: Number(id) },
+      }).then(() => {
+        const { parentId } = this.props.goodsCategory?.[`detail${id}`] || {};
+        this.getParents(parentId).then((parents) => {
+          this.setState({ parents: parents.join(' / ') });
+        });
+      });
+    }
     this.setState({
       pattern: !Number(id) ? 'add' : 'edit',
     });
+
+    if (Number(pid)) {
+      this.getParents(pid).then((parents) => {
+        this.setState({ parents: parents.join(' / ') });
+      });
+    }
   }
 
   componentDidMount() {
-    const { dispatch, match: { params: { id } } } = this.props;
-    if (Number(id) !== 0) {
+
+  }
+
+  getParents(parentId, resultArr = []) {
+    const { dispatch } = this.props;
+    const that = this;
+    // if (!parentId) {
+    //   return [];
+    // }
+    // const parent = goodsCategory?.[`detail${parentId}`];
+
+    return new Promise(((resolve) => {
+      if (!parentId) {
+        resolve([]);
+        return;
+      }
       dispatch({
-        type: 'goodsBrand/detail',
-        payload: { id, brandId: id },
+        type: 'goodsCategory/detail',
+        payload: { categoryId: Number(parentId) },
+      }).then(() => {
+        const result = this.props.goodsCategory?.[`detail${parentId}`];
+        // console.log('result', result);
+        if (result) {
+          if (result.parentId) {
+            that.getParents(
+              result.parentId,
+              [result.categoryName, ...resultArr]
+            ).then((parents) => {
+              resolve(parents);
+            });
+          } else {
+            resolve([result.categoryName, ...resultArr]);
+          }
+        } else {
+          resolve([]);
+        }
       });
-    }
+    }));
+
+    // if (parent) {
+    //   return [...this.getParents(parent.parentId), parent.categoryName];
+    // } else {
+    //   return dispatch({
+    //     type: 'goodsCategory/detail',
+    //     payload: { categoryId: Number(parentId) },
+    //   }).then(() => {
+    //     return that.getParents(parentId);
+    //   });
+    // }
   }
 
   handleImageChange = (fileList) => {
@@ -46,33 +108,33 @@ export default class View extends PureComponent {
   }
 
   handleSubmit = () => {
-    const { form, dispatch, goodsBrand, match: { params: { id } } } = this.props;
+    const { form, dispatch, match: { params: { id, pid } } } = this.props;
     const { validateFieldsAndScroll } = form;
-    const data = goodsBrand?.[`detail${id}`];
 
     validateFieldsAndScroll((error, values) => {
-      console.log('values:', values);
+      // console.log('values:', values);
       // 对参数进行处理
+      const newValues = { ...values };
+
+      newValues.status = newValues.status ? 1 : 3;
+      newValues.parentId = pid || 0;
+      newValues.categoryId = id || 0;
+      const type = newValues.categoryId ? 'edit' : 'add';
+      if (type === 'edit') {
+        delete newValues.parentId;
+        delete newValues.status;
+      }
       if (!error) {
         dispatch({
-          type: 'goodsBrand/add',
+          type: `goodsCategory/${type}`,
           payload: {
-            brand: {
-              brandId: data?.brandId,
-              ...values,
-              supplierList: data?.supplierList,
-              brandDocList: [],
-              logo: values.logo?.[0],
-            },
+            ...newValues,
           },
         }).then(() => {
-          const { add } = this.props.goodsBrand;
-          if (add.msgCode === 200 && add.data) {
-            message.success('提交成功。', 1, () => {
-              history.back();
-            });
-          } else {
-            message.error(`提交失败！${add.message}`);
+          const result = this.props.goodsCategory[type];
+          if (result && !result.error) {
+            message.success('保存成功！');
+            history.back();
           }
         });
       }
@@ -87,11 +149,19 @@ export default class View extends PureComponent {
   }
 
   render() {
-    const { form, submitting, goodsBrand, match: { params: { id } } } = this.props;
+    const { form, submitting, goodsCategory, match: { params: { id, pid } } } = this.props;
     const { pattern, fileList } = this.state;
     const disabled = pattern === 'detail';
-    const data = goodsBrand?.[`detail${id}`];
+    const data = goodsCategory?.[`detail${id}`] || {};
 
+    // if (data) {
+    //   data.parents = this.getParents(data.parentId);
+    // }
+    // if (pid) {
+    //   data.parents = this.getParents(pid);
+    // }
+
+    // console.log(goodsCategory);
     const formItemLayout = {
       labelCol: {
         xs: { span: 24 },
@@ -106,15 +176,17 @@ export default class View extends PureComponent {
 
     const options = [
       { label: '是', value: 1 },
-      { label: '否', value: 0 },
+      { label: '否', value: 2 },
     ];
     return (
       <PageHeaderLayout>
         <Card title="基本信息" bordered={false}>
           <Form onSubmit={this.handleSubmit} style={{ marginTop: 8 }}>
-            <FormItem {...formItemLayout} label="上级分类">
-              <div>abc / ddd /ccc</div>
-            </FormItem>
+            {(Number(pid) || data?.parentId) ? (
+              <FormItem {...formItemLayout} label="上级分类">
+                <div>{this.state.parents}</div>
+              </FormItem>
+            ) : ''}
             <FormItem {...formItemLayout} label="分类名称">
               {form.getFieldDecorator('categoryName', {
                 rules: [{
@@ -143,10 +215,10 @@ export default class View extends PureComponent {
                 <InputNumber min={0} max={9999} precision={0} disabled={disabled} />
               )}
             </FormItem>
-            <FormItem {...formItemLayout} label="到货天数">
+            <FormItem {...formItemLayout} label="预计到货天数">
               {form.getFieldDecorator('arrivalTime', {
                 rules: [{
-                  required: true, message: '到货天数不能为空',
+                  required: true, message: '预计到货天数不能为空',
                 }],
                 initialValue: data?.arrivalTime || 0,
               })(
@@ -156,7 +228,7 @@ export default class View extends PureComponent {
             <FormItem {...formItemLayout} label="是否允许使用家居券及预存款">
               {form.getFieldDecorator('isAllowUseDiscount', {
                 rules: [],
-                initialValue: data?.isAllowUseDiscount || 0,
+                initialValue: data?.isAllowUseDiscount || 2,
               })(
                 <Radio.Group options={options} disabled={disabled} />
               )}
@@ -164,7 +236,7 @@ export default class View extends PureComponent {
             <FormItem {...formItemLayout} label="是否支持全国配送">
               {form.getFieldDecorator('isArrivalAll', {
                 rules: [],
-                initialValue: data?.isArrivalAll || 0,
+                initialValue: data?.isArrivalAll || 2,
               })(
                 <Radio.Group options={options} disabled={disabled} />
               )}
@@ -172,7 +244,7 @@ export default class View extends PureComponent {
             <FormItem {...formItemLayout} label="分类图片">
               {form.getFieldDecorator('categoryUrl', {
                 rules: [],
-                initialValue: [data?.categoryUrl],
+                initialValue: data?.categoryUrl,
               })(
                 <ImageUpload
                   exclude={['gif']}
@@ -185,11 +257,11 @@ export default class View extends PureComponent {
               )}
             </FormItem>
             <FormItem {...formItemLayout} label="描述">
-              {form.getFieldDecorator('brandDesc', {
+              {form.getFieldDecorator('categoryDesc', {
                 rules: [],
-                initialValue: data?.brandDesc || '',
+                initialValue: data?.categoryDesc || '',
               })(
-                <MonitorTextArea datakey="description" rows={5} maxLength={200} form={form} disabled={disabled} />
+                <MonitorTextArea datakey="categoryDesc" rows={5} maxLength={200} form={form} disabled={disabled} />
               )}
             </FormItem>
 
@@ -202,9 +274,9 @@ export default class View extends PureComponent {
                 rules: [{
                   required: true, message: '请选择基本属性组',
                 }],
-                initialValue: data?.name,
+                initialValue: data?.basePropertyGroupId,
               })(
-                <a>请选择</a>
+                <AssociatedButton type="1" groupName={data?.basePropertyGroupName} match={this.props.match} />
               )}
             </FormItem>
             <FormItem {...formItemLayout} label="规格属性组">
@@ -212,28 +284,30 @@ export default class View extends PureComponent {
                 rules: [{
                   required: true, message: '请选择规格属性组',
                 }],
-                initialValue: data?.name,
+                initialValue: data?.propertyGroupId,
               })(
-                <a>请选择</a>
+                <AssociatedButton type="2" groupName={data?.propertyGroupName} match={this.props.match} />
               )}
             </FormItem>
           </Form>
         </Card>
-        <Card title="" style={{ marginTop: '15px' }} bordered>
-          <Form onSubmit={this.handleSubmit} style={{ marginTop: 8 }}>
-            <div>
-              <Row>
-                <Col span={8} offset={10}>
-                  {form.getFieldDecorator('status', {
-                    initialValue: false,
-                  })(
-                    <Checkbox>保存后立即启用</Checkbox>
-                  )}
-                </Col>
-              </Row>
-            </div>
-          </Form>
-        </Card>
+        {pattern === 'add' ? (
+          <Card title="" style={{ marginTop: '15px' }} bordered>
+            <Form onSubmit={this.handleSubmit} style={{ marginTop: 8 }}>
+              <div>
+                <Row>
+                  <Col span={8} offset={10}>
+                    {form.getFieldDecorator('status', {
+                      initialValue: data?.status,
+                    })(
+                      <Checkbox>保存后立即启用</Checkbox>
+                    )}
+                  </Col>
+                </Row>
+              </div>
+            </Form>
+          </Card>
+        ) : ''}
         <DetailFooterToolbar
           form={form}
           // fieldLabels={{}}

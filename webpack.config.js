@@ -56,7 +56,7 @@ module.exports = (webpackConfig) => {
   });
 
   // 公共资源路径
-  webpackConfig.output.publicPath = process.env.NODE_ENV === 'production' ? '/jj-platform' : '';
+  webpackConfig.output.publicPath = process.env.NODE_ENV === 'production' ? '/jj-platform/' : '';
 
   webpackConfig.plugins = webpackConfig.plugins.concat([
     // 定义全局变量

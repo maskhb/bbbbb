@@ -88,3 +88,17 @@
   color: @text-color-secondary;
   font-style: normal;
 }
+
+:global {
+  .ant-checkbox-wrapper {
+    margin-right: 8px;
+  }
+
+  .ant-checkbox-wrapper + .ant-checkbox-wrapper {
+    margin-left: 0;
+  }
+  .ant-table-fixed {
+    position: relative;
+    z-index: 10;
+  }
+}

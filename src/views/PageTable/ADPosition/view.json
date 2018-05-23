@@ -1,7 +1,7 @@
 {
   "route": {
     "params": "",
-    "authority": ""
+    "authority": "OPERPORT_JIAJU_BANNERPOSITIONLIST_LIST"
   },
   "menu": {
     "name": "广告位列表",
@@ -9,5 +9,5 @@
     "order": 3,
     "authority": ""
   },
-  "model": [""]
+  "model": ["adPos"]
 }

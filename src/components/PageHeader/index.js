@@ -2,6 +2,7 @@ import React, { PureComponent, createElement } from 'react';
 import PropTypes from 'prop-types';
 import { Breadcrumb, Tabs } from 'antd';
 import classNames from 'classnames';
+import { configs } from '../../core/collectConfigs';
 import styles from './index.less';
 
 const { TabPane } = Tabs;
@@ -92,9 +93,16 @@ export default class PageHeader extends PureComponent {
       );
     } else if (location && location.pathname) {
       const pathSnippets = location.pathname.split('/').filter(i => i);
+
       const extraBreadcrumbItems = pathSnippets.map((_, index) => {
         const url = `/${pathSnippets.slice(0, index + 1).join('/')}`;
         const currentBreadcrumb = getBreadcrumb(breadcrumbNameMap, url);
+
+        // 如果是一级菜单，从菜单里 匹配菜单名称 到面包屑
+        const name = url.match(/\//g)?.length === 1
+          ? configs[url.split('/')[1].toLowerCase().replace(/( |^)[a-z]/g, v => v.toUpperCase())]?.menu?.name
+          : null;
+
         const isLinkable = (index !== pathSnippets.length - 1) && currentBreadcrumb.component;
         return currentBreadcrumb.name && !currentBreadcrumb.hideInBreadcrumb ? (
           <Breadcrumb.Item key={url}>
@@ -102,6 +110,14 @@ export default class PageHeader extends PureComponent {
               isLinkable ? linkElement : 'span',
               { [linkElement === 'a' ? 'href' : 'to']: url },
               currentBreadcrumb.name,
+            )}
+          </Breadcrumb.Item>
+        ) : name ? (
+          <Breadcrumb.Item key={url}>
+            {createElement(
+              'span',
+              {},
+              name,
             )}
           </Breadcrumb.Item>
         ) : null;

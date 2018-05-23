@@ -1,4 +1,4 @@
-import { login } from '../services/login';
+import { login, logout } from '../services/login';
 import { setAuthority } from '../utils/authority';
 import cookie from '../utils/cookie';
 
@@ -15,7 +15,7 @@ export default {
       const response = yield call(login, payload);
       if (response && response.msgCode === 200) {
         cookie.set('x-manager-token', response.data.result);
-
+        // console.log(JSON.stringify(response));
         yield put({
           type: 'changeLoginStatus',
           payload: {
@@ -23,15 +23,18 @@ export default {
             currentAuthority: 'user',
           },
         });
-
-        window.location.reload();
+        return response;
+        // message.success('登录成功!');
+        // window.location.reload();
       }
     },
-    *logout(_, { put, select }) {
+    *logout(_, { call, put, select }) {
       try {
         // 记录当前页面，再次登录后跳转回
+        yield call(logout);
         const urlParams = new URL(window.location.href);
         const pathname = yield select(state => state.routing.location.pathname);
+        cookie.clear();
         urlParams.searchParams.set('redirect', pathname);
         window.history.replaceState(null, 'login', urlParams.href);
       } finally {
