@@ -15,15 +15,11 @@ export default class Item extends PureComponent {
     } = this.props;
 
     return (
-      expand || simple
-        ? (
-          <Col md={md} sm={sm} styleName="item">
-            <Form.Item label={label}>
-              {children({ form })}
-            </Form.Item>
-          </Col>
-        )
-        : ''
+      <Col md={md} sm={sm} styleName="item" style={{ display: (expand || simple) ? '' : 'none' }}>
+        <Form.Item label={label}>
+          {children({ form })}
+        </Form.Item>
+      </Col>
     );
   }
 }

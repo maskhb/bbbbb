@@ -11,6 +11,17 @@ async function list(params) {
     pagination: true,
   });
 }
+async function recoveryList(params) {
+  return request('/mj/ht-mj-goods-server/goods/queryRecoveryListByPage', {
+    method: 'POST',
+    body: {
+      goodsBaseVoList: {
+        ...params,
+      },
+    },
+    pagination: true,
+  });
+}
 
 async function detail(params) {
   return request('/mj/ht-mj-goods-server/goods/queryDetail', {
@@ -121,6 +132,37 @@ async function queryLog(params) {
   });
 }
 
+// 计算导出数据总数
+async function queryCount(params) {
+  return request('/mj/ht-mj-goods-server/exportTemplate/goods/queryCount', {
+    method: 'POST',
+    body: {
+      ...params,
+    },
+  });
+}
+
+/* 批量回收/还原-后台(批量) */
+async function recovery(params) {
+  return request('/mj/ht-mj-goods-server/goods/recoveryBatch', {
+    method: 'POST',
+    body: {
+      GoodsRecoveryVo: {
+        ...params,
+      },
+    },
+  });
+}
+/* 删除商品-后台(批量) */
+async function removeBatch(params) {
+  return request('/mj/ht-mj-goods-server/goods/deleteBatch', {
+    method: 'POST',
+    body: {
+      goodsIds: params,
+    },
+  });
+}
+
 export default {
   list,
   detail,
@@ -133,4 +175,8 @@ export default {
   auditStatusList,
   orderGoodsList,
   queryLog,
+  queryCount,
+  recovery,
+  removeBatch,
+  recoveryList,
 };

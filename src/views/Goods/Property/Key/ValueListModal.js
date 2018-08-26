@@ -45,7 +45,8 @@ class ValueListModal extends Component {
     this.setState({ tmps });
   }
 
-  handleSubmitAdd = () => {
+  handleSubmitAdd = (e) => {
+    e.preventDefault();
     const { dispatch, propertyKeyId, form: { resetFields } } = this.props;
     this.props.form.validateFields((err, values) => {
       if (!err) {
@@ -111,11 +112,17 @@ class ValueListModal extends Component {
         }
         dispatch({
           type: 'propertyValue/edit',
-          payload: { propertyValueId: property.propertyValueId, ...propertyValue },
+          payload: {
+            propertyValueId: property.propertyValueId,
+            propertyValue: property.propertyValue,
+            orderNum: property.orderNum,
+            ...propertyValue,
+          },
         }).then(() => {
           this.setState({
             editableIds: this.state.editableIds.filter(id => id !== list[index].propertyValueId),
           });
+          delete tmps[property.propertyValueId];
           this.setState({ tmps });
           this.handleSearch();
         });
@@ -165,6 +172,21 @@ class ValueListModal extends Component {
                   { required: true, message: '属性值不允许为空!' },
                   // { pattern: (/\,|，/g), message: '不允许输入中英文逗号!' }, // esline-disable-line
                 ],
+                getValueFromEvent(e) {
+                  let value;
+                  if (!e || !e.target) {
+                    value = e;
+                  } else {
+                    const { target } = e;
+                    // eslint-disable-next-line
+                    value =  target.type === 'checkbox' ? target.checked : target.value;
+                  }
+                  // eslint-disable-next-line
+                  if (value.__proto__ === String.prototype) {
+                    return value.replace(/,|，/g, '');
+                  }
+                  return value;
+                },
               })(
                 <MonitorInput maxLength={10} simple="true" placeholder="输入属性值" />
               )
@@ -177,7 +199,7 @@ class ValueListModal extends Component {
                   { required: true, message: '排序值不允许为空!' },
                 ],
               })(
-                <InputNumber min={0} placeholder="输入排序" />
+                <InputNumber min={1} max={9999} placeholder="输入排序" />
             )}
           </Form.Item>
           <Form.Item >

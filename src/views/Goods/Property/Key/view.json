@@ -1,13 +1,12 @@
 {
-  "route": {
-    "params": "/:id",
-    "authority": ["OPERPORT_JIAJU_SALESPROPERTYLIST_SETVALUE", "OPERPORT_JIAJU_BASICPROPERTYLIST_SETVALUE"]
-  },
-  "breadcrumb": {
-    "name": "管理属性",
-    "icon": "",
-    "order": 0,
-    "authority": ""
-  },
-  "model": ["propertyGroup", "propertyKey", "propertyValue"]
+    "route": {
+        "params": "/:id",
+        "authority": ["OPERPORT_JIAJU_BASICPROPERTYLIST_SETPROPERTY", "OPERPORT_JIAJU_SALESPROPERTYLIST_SETPROPERTY"]
+    },
+    "breadcrumb": {
+        "name": "管理属性",
+        "icon": "",
+        "order": 0
+    },
+    "model": ["propertyGroup", "propertyKey", "propertyValue"]
 }

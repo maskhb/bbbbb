@@ -156,7 +156,7 @@ export default class View extends PureComponent {
       });
     });
 
-    this.setState({ defaultValue });
+    this.setState({ defaultValue, checkedRoleList: defaultValue });
 
     setTimeout(() => {
       this.handleBusinessRoleChange();

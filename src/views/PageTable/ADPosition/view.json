@@ -7,7 +7,7 @@
     "name": "广告位列表",
     "icon": "",
     "order": 3,
-    "authority": ""
+    "authority": "OPERPORT_JIAJU_BANNERPOSITIONLIST_LIST"
   },
   "model": ["adPos"]
 }

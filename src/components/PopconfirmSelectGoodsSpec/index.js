@@ -2,7 +2,7 @@
  * @Author: wuhao
  * @Date: 2018-04-17 15:20:39
  * @Last Modified by: wuhao
- * @Last Modified time: 2018-05-12 13:08:05
+ * @Last Modified time: 2018-06-04 11:28:25
  *
  * 商品规格选择
  */
@@ -30,8 +30,15 @@ class PopconfirmSelectGoodsSpec extends PureComponent {
       {
         title: '库存',
         dataIndex: 'remainNum',
+        width: '60px',
       },
     ];
+  }
+
+  getCheckboxProps = (record) => {
+    return {
+      disabled: record?.status !== 2,
+    };
   }
 
   handleTableSelectRowKeysChange = (selectedRowKeys, selectedRows) => {
@@ -104,6 +111,7 @@ class PopconfirmSelectGoodsSpec extends PureComponent {
               selections: true,
               selectedRowKeys,
               onChange: this.handleTableSelectRowKeysChange,
+              getCheckboxProps: this.getCheckboxProps,
             }}
           />
         )}

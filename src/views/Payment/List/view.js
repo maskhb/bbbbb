@@ -1,6 +1,7 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'dva';
 import { Card, Modal, DatePicker, Select, Form, Table } from 'antd';
+import moment from 'moment';
 // import _ from 'lodash';
 import { MonitorInput, rules, MonitorTextArea } from 'components/input';
 import { handleOperate } from 'components/Handle';
@@ -12,6 +13,7 @@ import PanelList, { Search, Batch } from '../../../components/PanelList';
 import CheckboxCascade from '../../../components/CheckBoxCascade';
 import getColumns, { payTypeArr, logcolumns } from './columns';
 import { mul } from '../../../utils/number';
+import { fenToYuan } from '../../../utils/money';
 
 @connect(({ payment, loading }) => ({
   payment,
@@ -41,9 +43,7 @@ export default class List extends PureComponent {
   convertExportParam = () => {
     const { searchparam, searchResult } = this.state;
     return {
-      param: {
-        ...searchparam?.condition,
-      },
+      param: { param: { ...searchparam?.condition } },
       totalCount: searchResult?.totalCount,
       dataUrl: '/pay/paybehind/exportPayOrderHis/asynExportMJPayBills',
       oldServiceUrl: 'payment-api',
@@ -57,10 +57,15 @@ export default class List extends PureComponent {
     const searchparam = Object.assign({}, searchDefault);
     searchparam.condition.payTypeKey = values?.payTypeKey;
     searchparam.condition.payState = values.payState;
-    if (values?.createTime instanceof Array) {
+
+    if (values?.createTime && values?.createTime instanceof Array) {
       searchparam.condition.startTime = new Date(values?.createTime[0]).getTime();
       searchparam.condition.endTime = new Date(values?.createTime[1]).getTime();
+    } else {
+      delete searchparam.condition.startTime;
+      delete searchparam.condition.endTime;
     }
+
     if (!values?.condition?.url || values?.condition?.url !== this.state.searchparam.url) {
       delete searchparam.condition.payOrderId;
       delete searchparam.condition.outOrderId;
@@ -121,7 +126,7 @@ export default class List extends PureComponent {
     });
     this.props.form.setFieldsValue({
       thirdPartTransactionId: '',
-      payTime: '',
+      payTime: moment(new Date(), 'HH:mm:ss'),
       remark: '',
     });
   }
@@ -174,7 +179,7 @@ export default class List extends PureComponent {
       url: [
         { value: 1, label: '支付单号', key: 1, childrenType: 1, childrenName: 'payOrderId', childrenProps: { placeholder: '请输入' } },
         { value: 2, label: '订单编号', key: 2, childrenType: 1, childrenName: 'outOrderId', childrenProps: { placeholder: '请输入' } },
-        { value: 3, label: '交易流水号', key: 3, childrenType: 1, childrenName: 'thirdPartTransactionId', childrenProps: { placeholder: '请输入' } },
+        { value: 3, label: '第三方交易流水号', key: 3, childrenType: 1, childrenName: 'thirdPartTransactionId', childrenProps: { placeholder: '请输入' } },
       ],
     };
     const formItemLayout = {
@@ -254,7 +259,7 @@ export default class List extends PureComponent {
                   ({ form }) => (
                     form.getFieldDecorator('createTime', {
                     })(
-                      <DatePicker.RangePicker format="YYYY-MM-DD HH:mm:ss" />
+                      <DatePicker.RangePicker style={{ width: '100%' }} format="YYYY-MM-DD HH:mm:ss" />
                     )
                   )
                 }
@@ -309,7 +314,7 @@ export default class List extends PureComponent {
                 {this.props.form.getFieldDecorator('totalAmount', {
                   initialValue: modifyItem?.totalFee,
               })(
-                <span>{modifyItem?.totalFee}</span>
+                <span>{`￥${fenToYuan(mul(parseFloat(modifyItem?.totalFee), 100))}`}</span>
               )}
               </Form.Item>
               <Form.Item label="支付状态" {...formItemLayout}>
@@ -355,7 +360,7 @@ export default class List extends PureComponent {
                     required: true, message: '请输入备注',
                   }]),
                 })(
-                  <MonitorTextArea rows={6} maxLength={200} form={this.props.form} datakey="remarks" />)}
+                  <MonitorTextArea rows={6} maxLength={200} form={this.props.form} datakey="remark" />)}
               </Form.Item>
             </Form>
           </Modal>

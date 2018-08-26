@@ -1,0 +1,23 @@
+{
+  "route": {
+    "params": "/:id",
+    "authority": ""
+  },
+  "breadcrumb": {
+    "name": "商品详情",
+    "icon": "",
+    "order": 0,
+    "authority": ""
+  },
+  "model": [
+    "user",
+    "goods",
+    "goodsCategory",
+    "goodsBrand",
+    "marketingCategory",
+    "business",
+    "propertyKey",
+    "space",
+    "goodsCategoryBrand"
+  ]
+}

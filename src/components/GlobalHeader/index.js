@@ -4,7 +4,12 @@ import { Layout, Menu, Icon, Tag, Dropdown, Avatar } from 'antd';
 import groupBy from 'lodash/groupBy';
 import Debounce from 'lodash-decorators/debounce';
 // import { Link } from 'dva/router';
+import { OPERPORT_JIAJU_TOAPPROVEPROLIST_APPROVE,
+  OPERPORT_JIAJU_UNAPPROVEDPROLIST_LIST,
+  OPERPORT_JIAJU_TOAPPRPACKLIST_LIST,
+  OPERPORT_JIAJU_UNAPPRPACKLIST_LIST } from 'config/permission';
 import { goTo } from 'utils/utils';
+import checkPermission from 'components/Authorized/CheckPermissions';
 import AUDITSTATUS from 'components/AuditStatus';
 import NoticeIcon from '../NoticeIcon';
 // import HeaderSearch from '../HeaderSearch';
@@ -12,10 +17,9 @@ import styles from './index.less';
 
 const { Header } = Layout;
 
-@connect(({ goods, goodsPackage, loading, user }) => ({
+@connect(({ goods, goodsPackage, loading }) => ({
   goods,
   goodsPackage,
-  user,
   loading,
 }))
 export default class GlobalHeader extends PureComponent {
@@ -32,58 +36,87 @@ export default class GlobalHeader extends PureComponent {
       doing: 'gold',
     });
 
-    const newNotices = [
-      {
-        id: '000000001',
-        key: '000000001',
-        title: '商品列表 - 待审核',
-        description: '',
-        extra: <Tag color={color.doing} style={{ marginRight: 0 }}>{notices?.[0] || 0}</Tag>,
-        type: '待办',
-        url: '/goods/list',
-        linkState: {
-          auditStatus: AUDITSTATUS.WAIT.value,
-        },
-      },
-      {
-        id: '000000002',
-        key: '000000002',
-        title: '商品列表 - 审核不通过',
-        description: '',
-        extra: <Tag color={color.todo} style={{ marginRight: 0 }}>{notices?.[1] || 0}</Tag>,
-        type: '待办',
-        url: '/goods/list',
-        linkState: {
-          auditStatus: AUDITSTATUS.FAIL.value,
-        },
-      },
-      {
-        id: '000000003',
-        key: '000000003',
-        title: '套餐列表 - 待审核',
-        description: '',
-        extra: <Tag color={color.doing} style={{ marginRight: 0 }}>{notices?.[2] || 0}</Tag>,
-        type: '待办',
-        url: '/goods/package',
-        linkState: {
-          auditStatus: AUDITSTATUS.WAIT.value - 1,
-        },
-      },
-      {
-        id: '000000004',
-        key: '000000004',
-        title: '套餐列表 - 审核不通过',
-        description: '',
-        extra: <Tag color={color.todo} style={{ marginRight: 0 }}>{notices?.[3] || 0}</Tag>,
-        type: '待办',
-        url: '/goods/package',
-        linkState: {
-          auditStatus: AUDITSTATUS.FAIL.value - 1,
-        },
-      },
-    ];
+    const newNotices = [];
 
-    return groupBy(newNotices, 'type');
+    const notice1 = {
+      id: '000000001',
+      key: '000000001',
+      title: '商品列表 - 待审核',
+      description: '',
+      extra: <Tag color={color.doing} style={{ marginRight: 0 }}>{notices?.[0] || 0}</Tag>,
+      type: '待办',
+      url: '/goods/listwaitaudit',
+      linkState: {
+        auditStatus: AUDITSTATUS.WAIT.value,
+      },
+    };
+    const notice2 = {
+      id: '000000002',
+      key: '000000002',
+      title: '商品列表 - 审核不通过',
+      description: '',
+      extra: <Tag color={color.todo} style={{ marginRight: 0 }}>{notices?.[1] || 0}</Tag>,
+      type: '待办',
+      url: '/goods/listfailaudit',
+      linkState: {
+        auditStatus: AUDITSTATUS.FAIL.value,
+      },
+    };
+    const notice3 = {
+      id: '000000003',
+      key: '000000003',
+      title: '套餐列表 - 待审核',
+      description: '',
+      extra: <Tag color={color.doing} style={{ marginRight: 0 }}>{notices?.[2] || 0}</Tag>,
+      type: '待办',
+      url: '/goods/packagewaitaudit',
+      linkState: {
+        auditStatus: AUDITSTATUS.WAIT.value - 1,
+      },
+    };
+    const notice4 = {
+      id: '000000004',
+      key: '000000004',
+      title: '套餐列表 - 审核不通过',
+      description: '',
+      extra: <Tag color={color.todo} style={{ marginRight: 0 }}>{notices?.[3] || 0}</Tag>,
+      type: '待办',
+      url: '/goods/packagefailaudit',
+      linkState: {
+        auditStatus: AUDITSTATUS.FAIL.value - 1,
+      },
+    };
+
+    let count = 0;
+
+    if (checkPermission(OPERPORT_JIAJU_TOAPPROVEPROLIST_APPROVE)) {
+      newNotices.push(notice1);
+
+      count += notices?.[0] || 0;
+    }
+
+    if (checkPermission(OPERPORT_JIAJU_UNAPPROVEDPROLIST_LIST)) {
+      newNotices.push(notice2);
+
+      count += notices?.[1] || 0;
+    }
+
+    if (checkPermission(OPERPORT_JIAJU_TOAPPRPACKLIST_LIST)) {
+      newNotices.push(notice3);
+
+      count += notices?.[2] || 0;
+    }
+
+    if (checkPermission(OPERPORT_JIAJU_UNAPPRPACKLIST_LIST)) {
+      newNotices.push(notice4);
+
+      count += notices?.[3] || 0;
+    }
+
+    return {
+      noticeData: groupBy(newNotices, 'type'),
+      notifyCount: count,
+    };
   }
   toggle = () => {
     const { collapsed, onCollapse } = this.props;
@@ -111,7 +144,7 @@ export default class GlobalHeader extends PureComponent {
 
   render() {
     const {
-      user, current, collapsed, // isMobile, logo,
+      current, collapsed, // isMobile, logo,
       onMenuClick,
 
       fetchingNotices,
@@ -128,7 +161,7 @@ export default class GlobalHeader extends PureComponent {
         <Menu.Item key="logout"><Icon type="logout" />退出登录</Menu.Item>
       </Menu>
     );
-    const noticeData = this.getNoticeData();
+    const { notifyCount, noticeData } = this.getNoticeData();
 
     return (
       <Header className={styles.header}>
@@ -161,7 +194,7 @@ export default class GlobalHeader extends PureComponent {
           /> */}
           <NoticeIcon
             className={styles.action}
-            count={user?.notifyCount}
+            count={notifyCount}
             onItemClick={(item) => {
               this.handleNoticeItemClick(item);
             }}

@@ -2,7 +2,8 @@ import React from 'react';
 import { Badge, Popconfirm } from 'antd';
 import moment from 'moment';
 import { OPERPORT_JIAJU_PRODUCTLIST_PUBLISH, OPERPORT_JIAJU_PRODUCTLIST_UNPUBLISH,
-  OPERPORT_JIAJU_PRODUCTLIST_DELETE, OPERPORT_JIAJU_TOAPPROVEPROLIST_APPROVE } from 'config/permission';
+  OPERPORT_JIAJU_PRODUCTLIST_DELETE, OPERPORT_JIAJU_TOAPPROVEPROLIST_APPROVE,
+  OPERPORT_JIAJU_UNAPPROVEDPROLIST_DELETE } from 'config/permission';
 import Authorized from 'utils/Authorized';
 import { format } from 'components/Const';
 import { handleOperate, handleRemove } from 'components/Handle';
@@ -12,7 +13,40 @@ import ListImg from 'components/ListImg';
 import ONLINESTATUS from 'components/OnlineStatus';
 import AUDITSTATUS from 'components/AuditStatus';
 
-export default (me, searchDefault) => {
+export default (me, searchDefault, audit) => {
+  const operateFields = audit === AUDITSTATUS.WAIT.value
+    ? []
+    : [{
+      title: '操作',
+      render: (record) => {
+        return (
+          record.status !== ONLINESTATUS.ON.value
+            ? (
+              <Authorized authority={[
+                audit === AUDITSTATUS.FAIL.value
+                  ? OPERPORT_JIAJU_UNAPPROVEDPROLIST_DELETE
+                  : OPERPORT_JIAJU_PRODUCTLIST_DELETE,
+                ]}
+              >
+                <Popconfirm
+                  placement="top"
+                  title="确认删除？"
+                  disabled
+                  onConfirm={handleRemove.bind(me, {
+                    goodsId: record.goodsId,
+                  }, 'goods')}
+                  okText="确认"
+                  cancelText="取消"
+                >
+                  <a>删除</a>
+                </Popconfirm>
+              </Authorized>
+            )
+            : ''
+        );
+      },
+    }];
+
   return [
     {
       title: 'ID',
@@ -30,7 +64,13 @@ export default (me, searchDefault) => {
       dataIndex: 'goodsName',
       render(val, record) {
         return (
-          <a target="_blank" href={`#/goods/list/detail/${record.goodsId}`}><TextBeyond content={val} maxLength="12" width="300px" /></a>
+          <a
+            rel="noopener noreferrer"
+            target="_blank"
+            href={`#/goods/list/${audit === AUDITSTATUS.WAIT.value ? 'detailwaitaudit' : 'detail'}/${record.goodsId}`}
+          >
+            <TextBeyond content={val} maxLength="20" width="300px" />
+          </a>
         );
       },
     },
@@ -76,7 +116,9 @@ export default (me, searchDefault) => {
         );
 
         const auditStatusArray = [AUDITSTATUS.WAIT.value, AUDITSTATUS.SUCCESS.value];
-        const fText = auditStatusArray.includes(record.auditStatus) ? text : current?.text;
+        const fText = !audit && auditStatusArray.includes(record.auditStatus)
+          ? text
+          : current?.text;
 
         const permission = targetStatus === ONLINESTATUS.ON.value
           ? [OPERPORT_JIAJU_PRODUCTLIST_PUBLISH]
@@ -94,7 +136,7 @@ export default (me, searchDefault) => {
     {
       title: '审核状态',
       dataIndex: 'auditStatus',
-      filters: Object.values(AUDITSTATUS),
+      filters: Object.values(AUDITSTATUS).filter(v => (audit ? audit === v : true)),
       filteredValue: String(me.search?.props.stateOfSearch.auditStatus || searchDefault.auditStatus).split(','),
       render(val, record) {
         const current = Object.values(AUDITSTATUS).find(
@@ -103,7 +145,8 @@ export default (me, searchDefault) => {
         let { text } = current;
 
         // 待审核 + 非复制商品
-        if (val === AUDITSTATUS.WAIT.value && record.isCopy === 1) {
+        if (val === AUDITSTATUS.WAIT.value && record.isCopy === 1 &&
+          (audit === AUDITSTATUS.WAIT.value || !audit)) {
           text = (
             <Authorized
               authority={[OPERPORT_JIAJU_TOAPPROVEPROLIST_APPROVE]}
@@ -134,30 +177,6 @@ export default (me, searchDefault) => {
       dataIndex: 'createdTime',
       render: val => <span>{moment(val).format(format)}</span>,
     },
-    {
-      title: '操作',
-      render: (record) => {
-        return (
-          record.status !== ONLINESTATUS.ON.value
-            ? (
-              <Authorized authority={[OPERPORT_JIAJU_PRODUCTLIST_DELETE]}>
-                <Popconfirm
-                  placement="top"
-                  title="确认删除？"
-                  disabled
-                  onConfirm={handleRemove.bind(me, {
-                    goodsId: record.goodsId,
-                  }, 'goods')}
-                  okText="确认"
-                  cancelText="取消"
-                >
-                  <a>删除</a>
-                </Popconfirm>
-              </Authorized>
-            )
-            : ''
-        );
-      },
-    },
+    ...operateFields,
   ];
 };

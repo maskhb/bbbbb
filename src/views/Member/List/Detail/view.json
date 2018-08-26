@@ -1,0 +1,13 @@
+{
+    "route": {
+        "params": "/:id",
+        "authority": "OPERPORT_JIAJU_USER_DETAILS"
+    },
+    "breadcrumb": {
+        "name": "会员详情",
+        "icon": "",
+        "order": 0,
+        "authority": "OPERPORT_JIAJU_USER_DETAILS"
+    },
+    "model": ["member", "wallet", "predeposit"]
+}

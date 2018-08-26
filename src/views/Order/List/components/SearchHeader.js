@@ -2,18 +2,19 @@
  * @Author: wuhao
  * @Date: 2018-04-08 16:17:48
  * @Last Modified by: wuhao
- * @Last Modified time: 2018-05-18 14:54:16
+ * @Last Modified time: 2018-07-05 15:12:55
  *
  * 订单列表搜索组件
  */
 
 import React, { PureComponent } from 'react';
-import { Input, Select, DatePicker } from 'antd';
+import { Select, DatePicker } from 'antd';
 import { parse } from 'qs';
 import moment from 'moment';
 import ProjectInput from 'components/ProjectInput/business';
 import SelectPaymentMethod from 'components/SelectPaymentMethod/business';
 import SelectRegion from 'components/SelectRegion/business';
+import Input from 'components/input/DecorateInput';
 
 import { Search } from 'components/PanelList';
 
@@ -25,6 +26,8 @@ import {
   // deliveryMethodOptions,
   needInvoiceTypeOptions,
   whenExcessTypeOptions,
+
+  // getStartTimeAndEndTimeFor6Months,
 } from '../../attr';
 
 import { transformSearchParam } from '../../transform';
@@ -94,6 +97,18 @@ class SearchHeader extends PureComponent {
   }
 
   /**
+   * 重置
+   */
+  // handleFormReset = (form) => {
+  //   form.resetFields();
+  //   form.setFields({ orderTime: {
+  //     value: getStartTimeAndEndTimeFor6Months(),
+  //   } });
+
+  //   this.search.handleSearch();
+  // }
+
+  /**
    * 校验 -- 时间不能超过6个月
    */
   validatorLimit6Months = (rule, value, callback) => {
@@ -104,6 +119,17 @@ class SearchHeader extends PureComponent {
       if (months > 6) {
         callback('每次可搜索6个月订单记录，请重新选择');
       }
+    }
+    callback();
+  }
+
+  /**
+   * 校验 -- 选择所在项目
+   */
+  validatorProjectSelect = (rule, value, callback) => {
+    const [,, projectId] = value || [];
+    if (value && value.length > 0 && !projectId) {
+      callback('请选择所在项目');
     }
     callback();
   }
@@ -122,6 +148,7 @@ class SearchHeader extends PureComponent {
         ref={(inst) => { this.search = inst; }}
         searchDefault={searchDefault}
         onSearch={this.handleSearch}
+        // onFormReset={this.handleFormReset}
       >
 
         <SearchItem {...labelCol} label="订单号" simple>
@@ -195,6 +222,9 @@ class SearchHeader extends PureComponent {
           {
             ({ form }) => (
               form.getFieldDecorator('project', {
+                rules: [
+                  { validator: this.validatorProjectSelect },
+                ],
               })(
                 <ProjectInput style={{ width: '100%' }} placeholder="全部项目" />
               )
@@ -240,9 +270,9 @@ class SearchHeader extends PureComponent {
             ({ form }) => (
               form.getFieldDecorator('orderTime', {
                 initialValue: searchDefault.orderTime,
-                rules: [{
-                  validator: this.validatorLimit6Months,
-                }],
+                rules: [
+                  // { required: true, message: '请选择下单时间' },
+                  { validator: this.validatorLimit6Months }],
               })(
                 <RangePicker
                   {...rangePickerStyle}

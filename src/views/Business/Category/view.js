@@ -184,7 +184,7 @@ export default class View extends Component {
                 <Form.Item {...formItemLayout} label="类目名称：">
                   {form.getFieldDecorator('categoryName', {
                   rules: [{
-                    required: true, message: '请输入类目名称',
+                    required: true, whitespace: true, message: '请输入类目名称',
                   }],
                   initialValue: record?.categoryName,
                 })(
@@ -202,7 +202,7 @@ export default class View extends Component {
                 <Form.Item {...formItemLayout} label="状态：">
                   {form.getFieldDecorator('status', {
                   rules: [{
-                    required: true, message: '请选择状态',
+                    required: true, whitespace: true, message: '请选择状态',
                   }],
                   initialValue: record?.status || 0,
                 })(

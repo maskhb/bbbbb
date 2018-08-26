@@ -64,6 +64,9 @@ export const getRouterData = (app) => {
     '/user': {
       component: dynamicWrapper(app, ['login', 'permission'], () => import('../../layouts/UserLayout')),
     },
+    '/print': {
+      component: dynamicWrapper(app, ['user', 'permission', 'common', 'login'], () => import('../../layouts/PrintLayout')),
+    },
   };
 
   const views = centra();

@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import cookie from 'cookies-js';
 
-const AUTHORITYKEY = 'ht-authority';
+const AUTHORITYKEY = 'permission';
 let CURRENT_PERMISSIONS = [];
 let readStorage = false;
 
@@ -12,9 +12,18 @@ export function getAuthority() {
       readStorage = true;
       CURRENT_PERMISSIONS.push('user');
       // 兼容旧运营平台
-      const lsAuth = _.compact(JSON.parse(
-        localStorage.getItem(AUTHORITYKEY) || localStorage.getItem('permission')
-      ));
+      const pmsStr = localStorage.getItem(AUTHORITYKEY);
+      let lsAuth;
+      if (pmsStr) {
+        lsAuth = _.compact(JSON.parse(
+          localStorage.getItem(AUTHORITYKEY)
+        ));
+      }
+      if (!lsAuth || lsAuth.length === 0) {
+        lsAuth = _.compact(JSON.parse(
+          localStorage.getItem('authority')
+        ));
+      }
       CURRENT_PERMISSIONS = _.uniq(_.concat(CURRENT_PERMISSIONS, lsAuth));
     } catch (e) {
       // setAuthority(auth);

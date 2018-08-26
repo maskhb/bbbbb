@@ -2,7 +2,7 @@
  * @Author: wuhao
  * @Date: 2018-04-08 16:18:03
  * @Last Modified by: wuhao
- * @Last Modified time: 2018-05-08 15:44:34
+ * @Last Modified time: 2018-07-10 14:05:54
  *
  * 订单列表操作和过滤组件
  */
@@ -34,56 +34,65 @@ class BatchSearchList extends PureComponent {
         label: '全部订单',
         value: {
           orderStatus: undefined,
+          orderSource: undefined,
         },
       },
       {
         label: '待支付',
         value: {
           orderStatus: 1,
+          orderSource: undefined,
         },
       },
       {
         label: '待审核',
         value: {
           orderStatus: 2,
+          orderSource: undefined,
         },
       },
       {
         label: '待付尾款',
         value: {
           orderStatus: 3,
+          orderSource: undefined,
         },
       },
       {
         label: '待发货',
         value: {
           orderStatus: 4,
+          orderSource: undefined,
         },
       },
       {
         label: '待收货',
         value: {
           orderStatus: 5,
+          orderSource: undefined,
         },
       },
       {
         label: '已完成',
         value: {
           orderStatus: 6,
+          orderSource: undefined,
         },
       },
       {
         label: '已取消',
         value: {
           orderStatus: 7,
+          orderSource: undefined,
         },
       },
-      // {
-      //   label: '售后订单',
-      //   value: {
-      //     orderStatus: 8,
-      //   },
-      // },
+      {
+        label: '售后订单',
+        value: {
+          orderStatus: undefined,
+          orderSource: 3,
+        },
+      },
     ];
   }
 
@@ -122,11 +131,19 @@ class BatchSearchList extends PureComponent {
   /**
    * tab更改后回调
    */
-  handleChange = (values) => {
+  handleChange = async (values) => {
     const { dispatch } = this.props;
-    return dispatch({
+
+    const params = transformSearchParam(values);
+
+    await dispatch({
       type: 'orders/list',
-      payload: transformSearchParam(values),
+      payload: params,
+    });
+
+    await dispatch({
+      type: 'orders/queryOrdeListTotalCount',
+      payload: params,
     });
   }
 

@@ -71,6 +71,9 @@ builder
         proxy_set_header Host ${imgHost};
       }
 
+      gzip on;
+      gzip_min_length 2048;
+      gzip_types text/plain application/x-javascript application/javascript text/css text/javascript;
       location / {
         root ${config.locationRoot};
         index index.html index.htm;

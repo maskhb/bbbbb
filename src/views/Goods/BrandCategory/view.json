@@ -1,0 +1,13 @@
+{
+  "route": {
+    "params": "",
+    "authority": "OPERPORT_JIAJU_BRANDCATEGORYLIST_LIST"
+  },
+  "menu": {
+    "name": "品牌分类管理",
+    "icon": "",
+    "order": 8,
+    "authority": "OPERPORT_JIAJU_BRANDCATEGORYLIST_LIST"
+  },
+  "model": ["brandCategory"]
+}

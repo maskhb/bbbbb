@@ -1,0 +1,13 @@
+{
+  "route": {
+    "params": "",
+    "authority": "OPERPORT_JIAJU_PACKAGELIST_LIST"
+  },
+  "menu": {
+    "name": "套餐列表",
+    "icon": "",
+    "order": 4,
+    "authority": "OPERPORT_JIAJU_PACKAGELIST_LIST"
+  },
+  "model": ["goodsPackage"]
+}

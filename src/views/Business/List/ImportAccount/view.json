@@ -1,13 +1,13 @@
 {
   "route": {
     "params": "/:id",
-    "authority": ""
+    "authority": "OPERPORT_JIAJU_BATCHADDING_ADDACCOUN"
   },
   "breadcrumb": {
-    "name": "导入帐号",
+    "name": "导入账号",
     "icon": "",
     "order": 0,
-    "authority": ""
+    "authority": "OPERPORT_JIAJU_BATCHADDING_ADDACCOUN"
   },
   "model": ["business"]
 }

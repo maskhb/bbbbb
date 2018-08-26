@@ -4,11 +4,10 @@
     "authority": ""
   },
   "menu": {
-    "name": "营销工具",
+    "name": "促销工具",
     "icon": "setting",
-    "order": 21,
-    "authority": "",
-    "hideInMenu": true
+    "order": 14,
+    "authority": ""
   },
   "model": [""]
 }

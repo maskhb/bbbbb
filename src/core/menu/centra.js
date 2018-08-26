@@ -25,12 +25,12 @@ function loop(level = 0) {
   }
 
   if (level === 0) {
-    for (const [key, { menu, route }] of Object.entries(configs)) {
+    for (const [key, { menu }] of Object.entries(configs)) {
       if (getLevel(key) === level) {
         const path = getPath(key);
         menus.push({
           ...menu,
-          authority: getRealAuthority(menu.authority || route?.authority),
+          authority: getRealAuthority(menu.authority),
           level,
           path,
           children: [],
@@ -40,13 +40,13 @@ function loop(level = 0) {
     menus = _.sortBy(menus, 'order');
   } else {
     for (const pMenu of getChildren(menus, level)) {
-      for (const [key, { menu = {}, route }] of Object.entries(configs)) {
+      for (const [key, { menu = {} }] of Object.entries(configs)) {
         if (getLevel(key) === level) {
           const path = getPath(key);
           if (path.substr(0, path.lastIndexOf('/')) === pMenu.path) {
             pMenu.children.push({
               ...menu,
-              authority: getRealAuthority(menu.authority || route?.authority),
+              authority: getRealAuthority(menu.authority),
               name: menu.name,
               level,
               path,

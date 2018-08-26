@@ -6,8 +6,8 @@
   "menu": {
     "name": "商品分类管理",
     "icon": "",
-    "order": 7,
-    "authority": ""
+    "order": 9,
+    "authority": "OPERPORT_JIAJU_PROCATEGORYLIST_LIST"
   },
   "model": ["goodsCategory"]
 }

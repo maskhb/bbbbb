@@ -1,6 +1,5 @@
 import DetailFooterToolbar from 'components/DetailFooterToolbar';
 import React, { Component } from 'react';
-import { Link } from 'dva/router';
 import { connect } from 'dva';
 import { Card, Form, Tabs, Message } from 'antd';
 import PageHeaderLayout from 'layouts/PageHeaderLayout';
@@ -19,23 +18,35 @@ export default class Detail extends Component {
   state = {
     pattern: 'add',
     projectNames: null,
+    loading: false,
   };
 
   componentWillMount() {
+    this.setState({ fmtData: {} });
+  }
+  componentDidMount() {
     this.query();
+  }
+  componentWillUnmount() {
+    this.setState({ fmtData: {} });
   }
   onChange=(value) => {
     console.log(value) //eslint-disable-line
     return '';
   }
   query = () => {
-    const { match: { path, params: { merchantId } } } = this.props;
+    let {dispatch, match: { path, params: { merchantId } } } = this.props; //eslint-disable-line
     const pattern = path.split('/')[path.split('/').length - 2].toLowerCase();
     this.setState({ pattern, merchantId });
-
-    const { dispatch } = this.props;
-
     if (pattern === 'edit' || pattern === 'currdetail') {
+      if (pattern === 'edit' && merchantId.length && merchantId.indexOf('&') > 0) {
+        const c = merchantId;
+        const arr = c.split('&');
+        merchantId = arr[0];//eslint-disable-line
+        document.querySelector(`#${arr[1]}`).scrollIntoView(true);
+      }
+
+      console.log("merchantId===========",merchantId) //eslint-disable-line
       dispatch({
         type: 'business/queryDetailAll',
         payload: { merchantId },
@@ -52,13 +63,13 @@ export default class Detail extends Component {
               regArr.push(v.regionId);
               regionName += v.regionName;
             });
-            console.log(regArr) //eslint-disable-line
             const fmtData = unFormatData(this.props.business.details, regArr);
             this.setState({
               fmtData,
               regionName,
               merchantType: fmtData.merchantBaseVo.merchantType,
               useTicket: fmtData.merchantBaseVo.predepositCouponSwitch,
+              checkAll: fmtData.merchantBaseVo.allCommunity === 1,
             });
           });
         } else {
@@ -68,6 +79,7 @@ export default class Detail extends Component {
             fmtData,
             merchantType: fmtData.merchantBaseVo.merchantType,
             useTicket: fmtData.merchantBaseVo.predepositCouponSwitch,
+            checkAll: fmtData.merchantBaseVo.allCommunity === 1,
           });
         }
       });
@@ -99,6 +111,7 @@ export default class Detail extends Component {
       if (err) {
         console.log('Received values of form: ', values);//eslint-disable-line
       } else {
+        this.setState({ loading: true });
         const params = formatData(values, this.state);
         const type = (pattern === 'add' ? 'business/saveNewMerchant' : 'business/updateMerchant');
         dispatch({
@@ -106,6 +119,7 @@ export default class Detail extends Component {
           payload: { merchantIntegrationVo: params },
         }).then(() => {
           const { business } = this.props;
+          this.setState({ loading: false });
           if (business.saveRes) {
             Message.success('提交成功。', 1, () => {
               history.back();
@@ -133,11 +147,10 @@ export default class Detail extends Component {
   handleUseTicketChange=(e) => {
     this.setState({ useTicket: e.target.value });//eslint-disable-line
   }
-  /* render各个部分的函数 */
 
 
   render() {
-    const { form } = this.props;
+    const { form, match: { params: { merchantId = '0' } } } = this.props;
     const { pattern } = this.state;
     const { TabPane } = Tabs;
     switch (pattern) {
@@ -157,7 +170,7 @@ export default class Detail extends Component {
 
             <DetailFooterToolbar
               form={form}
-              submitting={false}
+              submitting={this.state.loading}
               handleSubmit={this.handleSubmit}
             />
           </PageHeaderLayout>
@@ -183,8 +196,18 @@ export default class Detail extends Component {
                 {renderContact(this)}
               </TabPane>
               <TabPane tab="合同信息" key="5">
-                <Card title="合同信息" className={styles.card} bordered={false}>
-                  <Link to="/">查看该商家的合同</Link>
+                <Card
+                  title="合同信息"
+                  className={styles.card}
+                  bordered={false}
+                >
+                  <a
+                    rel="noopener noreferrer"
+                    href={`/2.0/balance/balance-set/little-setting?id=${merchantId}`}
+                    target="_blank"
+                  >
+                    查看该商家的合同
+                  </a>
                 </Card>
               </TabPane>
               <TabPane tab="操作日志" key="6">

@@ -1,14 +1,18 @@
 {
   "route": {
     "params": "",
-    "authority": "temp"
+    "authority": "OPERPORT_JIAJU_PRORECYCLEBIN_LIST"
   },
   "menu": {
     "name": "商品回收站",
     "icon": "",
-    "order": 4,
-    "authority": "temp",
-    "hideInMenu": true
+    "order": 100,
+    "authority": "OPERPORT_JIAJU_PRORECYCLEBIN_LIST"
   },
-  "model": [""]
+  "model": [
+    "user",
+    "goods",
+    "goodsCategory",
+    "business"
+  ]
 }

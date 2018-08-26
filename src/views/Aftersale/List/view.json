@@ -1,13 +1,15 @@
 {
   "route": {
     "params": "",
-    "authority": ""
+    "authority": "OPERPORT_JIAJU_AFTERSERVICELIST_LIST"
   },
   "menu": {
     "name": "售后申请列表",
     "icon": "",
     "order": 0,
-    "authority": ""
+    "authority": "OPERPORT_JIAJU_AFTERSERVICELIST_LIST"
   },
-  "model": [""]
+  "model": [
+    "aftersale"
+  ]
 }

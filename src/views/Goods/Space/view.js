@@ -1,6 +1,7 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'dva';
-import { Card, Button, Message, Modal, Transfer, Form, Input, Checkbox } from 'antd';
+import { Card, Button, Message, Modal, Transfer, Form, Checkbox } from 'antd';
+import Input from 'components/input/DecorateInput';
 import Authorized from 'utils/Authorized';
 import PanelList, { Batch, Table } from '../../../components/PanelList';
 import PageHeaderLayout from '../../../layouts/PageHeaderLayout';

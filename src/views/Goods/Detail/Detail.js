@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'dva';
 import { Card, Form, Col, Row, Cascader, Select, message, Spin, Icon, Checkbox } from 'antd';
-import draftToHtml from 'draftjs-to-html';
 import uuidv4 from 'uuid/v4';
 import _ from 'lodash';
 import { OPERPORT_JIAJU_PRODUCTLIST_EDIT } from 'config/permission';
@@ -10,12 +9,14 @@ import PageHeaderLayout from 'layouts/PageHeaderLayout';
 import flat2nested from 'components/Flat2nested';
 import { d3Col0, d3Col1, d3Col2 } from 'components/Const';
 import { MonitorInput, rules } from 'components/input';
+import MonitorInputGoods from 'components/input/MonitorInputGoods';
 import Editor from 'components/Editor';
 import DetailFooterToolbar from 'components/DetailFooterToolbar';
 import { GoodsType } from 'components/Enum/GoodsType';
 import { listToOptions, optionsToHtml, enumToHtml } from 'components/DataTransfer';
 import SelectSearchConnectFactory from 'components/SelectSearchConnect/Factory';
 import SelectSearchConnectMerchant from 'components/SelectSearchConnect/MerchantNoSearch';
+import AUDITSTATUS from 'components/AuditStatus';
 import InputSelectGroup from './InputSelectGroup';
 import BasePropsCard from './BasePropsCard';
 import SkuCard from './SkuCard';
@@ -38,7 +39,7 @@ const CheckboxGroup = Checkbox.Group;
   marketingCategory,
   space,
   loading,
-  submitting: loading.effects['goods/add'],
+  submitting: loading.effects['goods/add'] || loading.effects['goods/edit'],
   fetchingBusinessList: loading.effects['business/queryList'],
 }))
 @Form.create()
@@ -99,7 +100,7 @@ export default class Detail extends Component {
         },
       });
 
-      me.handleFactoryChange(detail?.factoryId); // 选中厂家
+      me.handleFactoryChange(detail?.factoryId, false); // 选中厂家
 
       // 商家
       dispatch({
@@ -110,7 +111,7 @@ export default class Detail extends Component {
         },
       });
 
-      me.handleMemchantChange(detail?.merchantId); // 选中商家
+      me.handleMemchantChange(detail?.merchantId, false); // 选中商家
 
       // 全部商品分类
       await dispatch({
@@ -122,7 +123,8 @@ export default class Detail extends Component {
 
       const values = [];
       const loop = (loopId) => {
-        const result = _.find(goodsCategory?.list || [], v => v.categoryId === loopId);
+        const result = _.find(goodsCategory?.list || [],
+          v => v.categoryId === loopId);
 
         if (result) {
           values.push(result.categoryId);
@@ -179,129 +181,137 @@ export default class Detail extends Component {
     const businessList = _.compact(_.concat(business?.queryUnionMerchantList?.list,
       business?.[`queryMerchantOfUnionList${currentFactoryId}`]?.list)) || [];
 
-    import('draft-js').then((raw) => {
-      const { convertToRaw } = raw;
+    const goodsDetail = this.editor.getCurrentContent();
 
-      const goodsDetail = draftToHtml(
-        convertToRaw(this.editor.state.editorState.getCurrentContent())
-      );
+    // 排除验证字段：sku属性
+    const fileds = Object.keys(form.getFieldsValue()).filter(f => !(f.match(/skuProp_/) || f.match(/fileList_/)));
+    validateFieldsAndScroll(fileds, (error, values) => {
+      const params = {
+        ...values,
+        goodsDetail,
+        goodsName: _.trim(values.goodsName),
+        factoryId: values.factoryId ? Number(values.factoryId) : undefined,
+        merchantId: values.merchantId ? Number(values.merchantId) : undefined,
+        merchantName: businessList?.find(v => v?.merchantId === values.merchantId)?.merchantName,
+        goodsCategoryId: values.goodsCategoryId?.[values.goodsCategoryId.length - 1],
+        marketingCategoryId: values.marketingCategoryId?.[values.marketingCategoryId.length - 1],
+        serviceTime: values.afterSaleServiceTime?.number,
+        serviceType: values.afterSaleServiceTime?.unit,
+        basePropertyGroupId: currentGoodsCategory?.basePropertyGroupId,
+        propertyGroupId: currentGoodsCategory?.propertyGroupId,
+      };
 
-      // 排除验证字段：sku属性
-      const fileds = Object.keys(form.getFieldsValue()).filter(f => !(f.match(/skuProp_/) || f.match(/fileList_/)));
-      validateFieldsAndScroll(fileds, (error, values) => {
-        const params = {
-          goodsDetail,
-          ...values,
-          factoryId: values.factoryId ? Number(values.factoryId) : undefined,
-          merchantId: values.merchantId ? Number(values.merchantId) : undefined,
-          merchantName: businessList?.find(v => v?.merchantId === values.merchantId)?.merchantName,
-          goodsCategoryId: values.goodsCategoryId?.[values.goodsCategoryId.length - 1],
-          marketingCategoryId: values.marketingCategoryId?.[values.marketingCategoryId.length - 1],
-          serviceTime: values.afterSaleServiceTime?.number,
-          serviceType: values.afterSaleServiceTime?.unit,
-          basePropertyGroupId: currentGoodsCategory?.basePropertyGroupId,
-          propertyGroupId: currentGoodsCategory?.propertyGroupId,
-        };
+      if (params.goodsCategoryId instanceof Array) {
+        // eslint-disable-next-line
+        params.goodsCategoryId = params.goodsCategoryId[0];
+      }
 
-        delete params.afterSaleServiceTime;
+      delete params.afterSaleServiceTime;
 
-        // 处理基本属性
-        const goodsPropertyRelationVoSList = [];
-        for (const [key, value] of Object.entries(values)) {
-          const matchKey = key.match(/baseProp_(\w+)/);
-          if (matchKey) {
-            goodsPropertyRelationVoSList.push({
-              // 属性组ID
-              propertyGroupId: currentGoodsCategory?.basePropertyGroupId,
-              // 属性ID
-              propertyKeyId: Number(matchKey[1]),
-              // 属性名称
-              // propertyKey: '',
-              // 属性值id
-              propertyValueId: typeof value === 'number' || typeof value === 'string'
-                ? [value].join()
-                : value?.constructor?.name === 'Array'
-                  ? value.join()
-                  : '',
-              // 属性值名称
-              // propertyValue: '',
-            });
-            delete params[key];
-          }
-        }
-        params.goodsPropertyRelationVoSList = goodsPropertyRelationVoSList;
-        delete params.basePropList;
-        // 对参数进行处理
-
-        // 处理图片
-        params.goodsImgGroupVoList = params.goodsImgGroupVoList?.imageGroups.map((img) => {
-          const r = { ...img };
-          r.id = r.imgGroupId;
-          r.imgGroupId = 0;
-          r.goodsImgVoList = r.goodsImgVoList.map((i) => { return { imgUrl: i, isMain: 0 }; });
-          delete r.enableDelete;
-          return r;
-        });
-
-        params.delSkuIds = params.goodsSkuVoList?.delSkuIds;
-
-        // 处理sku
-        params.goodsSkuVoList = params.goodsSkuVoList?.goodsSkuVoList.map((v) => {
-          const r = {};
-
-          for (const [key, val] of Object.entries(v)) {
-            if (!key.match(/skuProp_/)) {
-              r[key] = val;
-            }
-          }
-          r.id = r.imgGroupId;
-
-          delete r.imgGroupId;
-          if (typeof r.skuId === 'string' && r.skuId.match('-')) {
-            delete r.skuId;
-          }
-
-          r.supplyPrice *= 100;
-          r.discountPrice *= 100;
-          r.salePrice *= 100;
-          r.marketPrice *= 100;
-
-          return r;
-        });
-
-        if (pattern === 'edit') {
-          params.goodsId = Number(id);
-        }
-
-        if (!error) {
-          dispatch({
-            type: pattern === 'add' ? 'goods/add' : 'goods/edit',
-            payload: params,
-          }).then((res) => {
-            if (res) {
-              message.success('提交成功。', 0.4, () => {
-                goTo('/goods/list');
-              });
-            }
+      // 处理基本属性
+      const goodsPropertyRelationVoSList = [];
+      for (const [key, value] of Object.entries(values)) {
+        const matchKey = key.match(/baseProp_(\w+)/);
+        if (matchKey) {
+          goodsPropertyRelationVoSList.push({
+            // 属性组ID
+            propertyGroupId: currentGoodsCategory?.basePropertyGroupId,
+            // 属性ID
+            propertyKeyId: Number(matchKey[1]),
+            // 属性名称
+            // propertyKey: '',
+            // 属性值id
+            propertyValueId: typeof value === 'number' || typeof value === 'string'
+              ? [value].join()
+              : value?.constructor?.name === 'Array'
+                ? value.join()
+                : '',
+            // 属性值名称
+            // propertyValue: '',
           });
+          delete params[key];
         }
+      }
+      params.goodsPropertyRelationVoSList = goodsPropertyRelationVoSList;
+      delete params.basePropList;
+      // 对参数进行处理
+
+      // 处理图片
+      params.goodsImgGroupVoList = params.goodsImgGroupVoList?.imageGroups.map((img) => {
+        const r = { ...img };
+        r.id = r.imgGroupId;
+        r.imgGroupId = 0;
+        r.goodsImgVoList = r.goodsImgVoList.map((i) => { return { imgUrl: i, isMain: 0 }; });
+        delete r.enableDelete;
+        return r;
       });
+
+      params.delSkuIds = params.goodsSkuVoList?.delSkuIds;
+
+      // 处理sku
+      params.goodsSkuVoList = params.goodsSkuVoList?.goodsSkuVoList.map((v) => {
+        const r = {};
+
+        for (const [key, val] of Object.entries(v)) {
+          if (!key.match(/skuProp_/)) {
+            r[key] = val;
+          }
+        }
+        r.id = r.imgGroupId;
+
+        delete r.imgGroupId;
+        if (typeof r.skuId === 'string' && r.skuId.match('-')) {
+          delete r.skuId;
+        }
+
+        r.supplyPrice *= 100;
+        r.discountPrice *= 100;
+        r.salePrice *= 100;
+        r.marketPrice *= 100;
+
+        return r;
+      });
+
+      if (_.find(params.goodsSkuVoList, (v) => {
+        return !(v.supplyPrice <= v.discountPrice
+          && v.discountPrice <= v.salePrice
+          && v.salePrice <= v.marketPrice);
+      })) {
+        message.error('供货价<=折扣价<=售价<=市场价!');
+        return;
+      }
+
+      if (pattern === 'edit') {
+        params.goodsId = Number(id);
+      }
+      if (!error) {
+        dispatch({
+          type: pattern === 'add' ? 'goods/add' : 'goods/edit',
+          payload: params,
+        }).then((res) => {
+          if (res) {
+            message.success('提交成功。');
+            goTo('/goods/list');
+          }
+        });
+      }
     });
   }
 
   // 选中 - 厂家
-  handleFactoryChange = async (value) => {
+  handleFactoryChange = async (value, reset = true) => {
     this.setState({
       currentFactoryId: Number(value),
     });
 
     const { dispatch, form } = this.props;
-
     // 清空 - 商家
-    form.resetFields('merchantId');
-    form.setFieldsValue({
-      merchantId: null,
-    });
+    if (reset) {
+      form.resetFields('merchantId');
+      form.setFieldsValue({
+        merchantId: null,
+      });
+    }
     // 清空 - 商家 搜索数据
 
     // this.merchantRef?.reset();
@@ -311,10 +321,12 @@ export default class Detail extends Component {
     // 商家变动的联动效果
 
     // 清空 - 商品分类
-    form.resetFields('goodsCategoryId');
-    form.setFieldsValue({
-      goodsCategoryId: null,
-    });
+    if (reset) {
+      form.resetFields('goodsCategoryId');
+      form.setFieldsValue({
+        goodsCategoryId: null,
+      });
+    }
 
     await dispatch({
       type: 'business/queryMerchantOfUnionList',
@@ -341,14 +353,16 @@ export default class Detail extends Component {
   }
 
   // 选中 - 商家
-  handleMemchantChange = (value) => {
+  handleMemchantChange = (value, reset = true) => {
     const { dispatch, form } = this.props;
 
     // 清空 - 营销分类
-    form.resetFields('marketingCategoryId');
-    form.setFieldsValue({
-      marketingCategoryId: null,
-    });
+    if (reset) {
+      form.resetFields('marketingCategoryId');
+      form.setFieldsValue({
+        marketingCategoryId: null,
+      });
+    }
 
     // 获取所属商家下的 - 营销分类
     dispatch({
@@ -366,7 +380,8 @@ export default class Detail extends Component {
     // 选中的最后一级分类
     const goodsCategoryId = value[value.length - 1];
     // 选中的最后一级分类 - 对象
-    const currentGoodsCategory = _.find(goodsCategory?.list, v => v.categoryId === goodsCategoryId);
+    const currentGoodsCategory = _.find(goodsCategory?.list,
+      v => v.categoryId === goodsCategoryId);
 
     this.setState({ currentGoodsCategory });
 
@@ -407,35 +422,39 @@ export default class Detail extends Component {
       });
 
       // 获取分类下的 - 基本属性组的全部属性
-      dispatch({
-        type: 'propertyKey/list',
-        payload: {
-          propertyGroupId: currentGoodsCategory.basePropertyGroupId,
-          pageInfo: {
-            currPage: 1,
-            pageSize: 9999,
+      if (currentGoodsCategory?.basePropertyGroupId) {
+        dispatch({
+          type: 'propertyKey/list',
+          payload: {
+            propertyGroupId: currentGoodsCategory?.basePropertyGroupId,
+            pageInfo: {
+              currPage: 1,
+              pageSize: 9999,
+            },
           },
-        },
-      });
+        });
+      }
 
       // 获取分类下的 - 规格属性组的全部属性
-      dispatch({
-        type: 'propertyKey/list',
-        payload: {
-          propertyGroupId: currentGoodsCategory.propertyGroupId,
-          pageInfo: {
-            currPage: 1,
-            pageSize: 9999,
+      if (currentGoodsCategory?.propertyGroupId) {
+        dispatch({
+          type: 'propertyKey/list',
+          payload: {
+            propertyGroupId: currentGoodsCategory?.propertyGroupId,
+            pageInfo: {
+              currPage: 1,
+              pageSize: 9999,
+            },
           },
-        },
-      });
+        });
+      }
     }
   }
 
   render() {
     const { form, loading, submitting, user, goods, business,
       goodsCategoryBrand, propertyKey, goodsCategory, marketingCategory, space,
-      match: { params: { id } } } = this.props;
+      match: { params: { id } }, audit } = this.props;
     const { pattern, currentGoodsCategory, currentFactoryId } = this.state;
     const disabled = pattern === 'detail';
     const detail = goods?.[`detail${id}`];
@@ -449,6 +468,7 @@ export default class Detail extends Component {
     const userMerchantId = user?.merchant?.merchantId; // 登录用户的商家id
     const userMerchantType = user?.merchant?.merchantType; // 登录用户的商家id
     const isFactory = userMerchantId && userMerchantType === 1; // 是厂家
+    const partEdit = detail?.isCopy === 2; // 部分编辑
 
     // 厂家可以给自己新建商品
     if (currentFactoryId &&
@@ -518,7 +538,7 @@ export default class Detail extends Component {
     // 商品分类 - id集合
     const idsByFactory = business?.details?.merchantOperateScopeVoList?.map(v => v.goodsCategoryId);
     // 商品分类 - 含子级
-    const goodsCategoryCascaderOptions = flat2nested(goodsCategory?.list || [], { id: 'categoryId', parentId: 'parentId' })
+    const goodsCategoryCascaderOptions = flat2nested(goodsCategory?.list || [], { id: 'categoryId', parentId: 'parentId' }, item => item.status !== 1)
       .filter(v => idsByFactory?.includes(v.categoryId));
     // 商品分类 - 名称
     const goodsCategoryName = getCategoryName(goodsCategory?.list || [], 'goodsCategoryId');
@@ -550,8 +570,8 @@ export default class Detail extends Component {
 
     // 售后服务时间
     const numberUnit = {
-      number: detail?.serviceTime,
-      unit: detail?.serviceType,
+      number: detail?.serviceTime || '',
+      unit: detail?.serviceType || '',
     };
 
     // 售后服务时间 - 名称
@@ -567,9 +587,10 @@ export default class Detail extends Component {
     );
 
     // 基本属性 - 可选列表
-    const basePropChoiceList = basePropsListByCategory.filter(
+    const basePropChoiceList = _.orderBy(basePropsListByCategory.filter(
       item => item.propertyGroupId === currentGoodsCategory?.basePropertyGroupId
-        || detail?.basePropertyGroupId);
+        || detail?.basePropertyGroupId), ['orderNum', 'propertyKeyId'], ['desc', 'asc']);
+
     // 基本属性 - 当前值
     const basePropList = detail?.goodsPropertyRelationVoSList || [];
     // 基本属性
@@ -579,7 +600,7 @@ export default class Detail extends Component {
     };
 
     // sku属性 - 可选列表
-    const skuPropsChiceList = skuPropsListByCategory.filter(item =>
+    const skuPropsChiceList = _.sortBy(skuPropsListByCategory.filter(item =>
       item.propertyGroupId === currentGoodsCategory?.propertyGroupId
       || detail?.propertyGroupId)?.map(((p) => {
       const r = p;
@@ -591,7 +612,7 @@ export default class Detail extends Component {
       }
 
       return r;
-    }));
+    })), ['propertyKeyId']);
 
     const skuProp = {
       goodsSkuVoList: [
@@ -602,6 +623,7 @@ export default class Detail extends Component {
             discountPrice: sku.discountPrice / 100,
             salePrice: sku.salePrice / 100,
             marketPrice: sku.marketPrice / 100,
+            skuPropertyRelationVoSList: _.sortBy(sku.skuPropertyRelationVoSList, ['propertyKeyId']),
           };
         }) || [],
       ],
@@ -626,6 +648,8 @@ export default class Detail extends Component {
             || !!loading.effects['business/queryUnionMerchantList']
             || !!loading.effects['business/queryMerchantOfUnionList']
             || !!loading.effects['goodsCategoryBrand/listOnlyBond']
+            || !!loading.effects['business/queryDetailAll']
+            || !!loading.effects['goodsCategory/list']
             || !!loading.effects['marketingCategory/list']
             || !!loading.effects['space/listByCategoryId'])}
         >
@@ -645,13 +669,12 @@ export default class Detail extends Component {
                     }],
                     initialValue: detail?.factoryId,
                   })(
-                    pattern === 'detail' || isFactory
+                    pattern === 'detail' || pattern === 'edit' || isFactory
                       ? <span>{factoryName}</span>
                       : (
                         <SelectSearchConnectFactory
                           dataSource={unionBusinessList}
                           onChange={this.handleFactoryChange}
-                          disabled={pattern === 'detail' || pattern === 'edit'}
                         />
                       )
                   )}
@@ -671,13 +694,12 @@ export default class Detail extends Component {
                     }],
                     initialValue: detail?.merchantId,
                   })(
-                    pattern === 'detail'
+                    pattern === 'detail' || pattern === 'edit' || !(currentFactoryId || detail?.factoryId)
                       ? <span>{merchantName}</span>
                       : (
                         <SelectSearchConnectMerchant
                           unionMerchantId={currentFactoryId}
                           dataSource={businessList}
-                          disabled={pattern === 'detail' || pattern === 'edit' || !(currentFactoryId || detail?.factoryId)}
                           placeholder={!currentFactoryId ? '请先选择厂家' : ''}
                           onChange={this.handleMemchantChange}
                         />
@@ -699,7 +721,7 @@ export default class Detail extends Component {
                     }],
                     initialValue: goodsCategoryIds || null,
                   })(
-                    pattern === 'detail'
+                    pattern === 'detail' || pattern === 'edit' || !(currentFactoryId || detail?.factoryId)
                       ? <span>{goodsCategoryName}</span>
                       : (
                         <Cascader
@@ -707,7 +729,6 @@ export default class Detail extends Component {
                           placeholder={!currentFactoryId ? '请先选择厂家' : ''}
                           onChange={this.handleGoodsCategoryChange}
                           changeOnSelect
-                          disabled={pattern === 'detail' || pattern === 'edit' || !(currentFactoryId || detail?.factoryId)}
                         />
                       )
                   )}
@@ -729,10 +750,13 @@ export default class Detail extends Component {
                     }],
                     initialValue: detail?.brandId,
                   })(
-                    pattern === 'detail'
+                    pattern === 'detail' || (pattern === 'edit' && partEdit)
                       ? <span>{goodsBrandName}</span>
                       : (
                         <Select
+                          showSearch
+                          filterOption={(input, option) =>
+                            option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}
                           placeholder={!goodsCategoryBrandList.length ? '请先选择商品分类' : ''}
                           disabled={!goodsCategoryBrandList.length || disabled}
                         >
@@ -750,7 +774,7 @@ export default class Detail extends Component {
                   })(
                     pattern === 'detail'
                       ? <span>{goodsTypeName}</span>
-                      : <Select disabled={disabled}>{goodsTypeOptionsHtml}</Select>
+                      : <Select disabled={pattern === 'detail' || pattern === 'edit'}>{goodsTypeOptionsHtml}</Select>
                   )}
                 </Form.Item>
               </Col>
@@ -760,13 +784,21 @@ export default class Detail extends Component {
                     rules: rules([{
                       required: true, message: '请输入商品标题',
                     }, {
-                      max: 60,
+                      whitespace: true, message: '请输入商品标题',
+                    }, {
+                      max: 200,
                     }]),
                     initialValue: detail?.goodsName,
                   })(
-                    pattern === 'detail'
-                      ? <span>{detail?.goodsName}</span>
-                      : <MonitorInput maxLength={60} disabled={disabled} />
+                    pattern === 'detail' || (pattern === 'edit' && partEdit)
+                      ? (
+                        <span
+                          dangerouslySetInnerHTML={{
+                          __html: detail?.goodsName.replace(/\s/g, '&nbsp;'),
+                        }}
+                        />
+                      )
+                      : <MonitorInputGoods maxLength={200} disabled={disabled} />
                   )}
                 </Form.Item>
               </Col>
@@ -776,13 +808,13 @@ export default class Detail extends Component {
                 <Form.Item label="商品卖点">
                   {form.getFieldDecorator('goodsSellingPoint', {
                     rules: rules([{
-                      max: 50,
+                      max: 250,
                     }]),
                     initialValue: detail?.goodsSellingPoint,
                   })(
-                    pattern === 'detail'
+                    pattern === 'detail' || (pattern === 'edit' && partEdit)
                       ? <span>{detail?.goodsSellingPoint}</span>
-                      : <MonitorInput maxLength={50} disabled={disabled} />
+                      : <MonitorInput maxLength={250} disabled={disabled} />
                   )}
                 </Form.Item>
               </Col>
@@ -794,7 +826,7 @@ export default class Detail extends Component {
                     }]),
                     initialValue: detail?.goodsCode,
                   })(
-                    pattern === 'detail'
+                    pattern === 'detail' || (pattern === 'edit' && partEdit)
                       ? <span>{detail?.goodsCode}</span>
                       : <MonitorInput maxLength={50} disabled={disabled} />
                   )}
@@ -812,7 +844,7 @@ export default class Detail extends Component {
                     rules: [],
                     initialValue: marketingCategoryIds || null,
                   })(
-                    pattern === 'detail'
+                    pattern === 'detail' || (pattern === 'edit' && partEdit)
                       ? <span>{marketingCategoryName}</span>
                       : (
                         <Cascader
@@ -832,7 +864,7 @@ export default class Detail extends Component {
                     rules: [],
                     initialValue: numberUnit,
                   })(
-                    pattern === 'detail'
+                    pattern === 'detail' || (pattern === 'edit' && partEdit)
                       ? <span>{numberUnitName}</span>
                       : (
                         <InputSelectGroup disabled={disabled}>
@@ -861,7 +893,7 @@ export default class Detail extends Component {
                           }],
                           initialValue: detail?.spaceIds || [],
                         })(
-                          <CheckboxGroup options={spaceOptions} disabled={disabled} />
+                          <CheckboxGroup options={spaceOptions} disabled={disabled || (pattern === 'edit' && partEdit)} />
                         )}
                       </Form.Item>
                     </Col>
@@ -878,7 +910,7 @@ export default class Detail extends Component {
           })(
             <BasePropsCard
               form={form}
-              disabled={disabled}
+              disabled={disabled || (pattern === 'edit' && partEdit)}
               loading={loading}
               pattern={pattern}
             />
@@ -910,7 +942,7 @@ export default class Detail extends Component {
               })(
                 <ImageCard
                   form={form}
-                  disabled={disabled}
+                  disabled={disabled || (pattern === 'edit' && partEdit)}
                   emitterUid={this.emitterUid}
                   pattern={pattern}
                 />
@@ -958,10 +990,12 @@ export default class Detail extends Component {
                 <SkuCard
                   form={form}
                   disabled={disabled}
-                  propertyGroupId={detail?.propertyGroupId || currentGoodsCategory.categoryId}
+                  partEdit={partEdit}
+                  propertyGroupId={detail?.propertyGroupId || currentGoodsCategory?.categoryId}
                   pattern={pattern}
                   loading={loading}
                   emitterUid={this.emitterUid}
+                  detail={detail}
                 />
               )
             }
@@ -978,7 +1012,8 @@ export default class Detail extends Component {
                   <Editor
                     ref={(inst) => { this.editor = inst; }}
                     maxLength={2}
-                    disabled={disabled}
+                    disabled={disabled || (pattern === 'edit' && partEdit)}
+                    unbind
                   />
                 )
               }
@@ -998,8 +1033,20 @@ export default class Detail extends Component {
           submitting={submitting}
           handleSubmit={this.handleSubmit}
           pattern={pattern}
+          loading={
+            loading.models.user ||
+            loading.models.business ||
+            loading.models.goods ||
+            loading.models.goodsCategory ||
+            loading.models.goodsBrand ||
+            loading.models.goodsCategoryBrand ||
+            loading.models.propertyKey ||
+            loading.models.marketingCategory ||
+            loading.models.space
+          }
           permission={[OPERPORT_JIAJU_PRODUCTLIST_EDIT]}
           handlePatternChange={this.handlePatternChange}
+          hide={audit === AUDITSTATUS.WAIT.value}
         />
       </PageHeaderLayout>
     );

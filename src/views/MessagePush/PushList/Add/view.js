@@ -114,7 +114,7 @@ export default class View extends PureComponent {
     const selectOptions = { // CheckboxCascade组件的入参集合
       targetType: [
         { value: 6, label: '单个用户', key: 1, childrenType: 1, childrenName: 'phone', childrenProps: { placeholder: '用户手机号' }, initValue: havePhone ? phone : '' },
-        { value: 5, label: '指定手机列表', key: 2, childrenType: 2, childrenName: 'phoneFileUrl', childrenProps: { uploadType: 'excel' } },
+        { value: 5, label: '指定手机列表', key: 2, childrenType: 2, childrenName: 'phoneFileUrl', childrenProps: { uploadType: ['txt', 'excel'], maxLength: 1 } },
         { value: 7, label: '全部家居用户', key: 3, childrenType: 0, childrenName: 'fakeName' },
       ],
       sendType: [
@@ -124,7 +124,7 @@ export default class View extends PureComponent {
     };
     const targetType = [
       { value: 6, label: '单个用户', key: 1, childrenType: 1, childrenName: 'phone', childrenProps: { placeholder: '用户手机号' }, initValue: havePhone ? phone : '' },
-      { value: 5, label: '指定手机列表', key: 2, childrenType: 2, childrenName: 'phoneFileUrl', childrenProps: { uploadType: 'excel' } },
+      { value: 5, label: '指定手机列表', key: 2, childrenType: 2, childrenName: 'phoneFileUrl', childrenProps: { uploadType: ['txt', 'excel'], maxLength: 1 } },
       { value: 1, label: '全部密蜜注册用户', key: 3, childrenType: 0, childrenName: 'fakeName' },
       { value: 2, label: '全部密蜜认证用户', key: 4, childrenType: 0, childrenName: 'fakeName' },
     ];
@@ -177,7 +177,7 @@ export default class View extends PureComponent {
               )}
             </FormItem>
             {
-              (pType === 1) ? (
+              (pType === 2) ? (
                 <FormItem {...formItemLayout} label="目标用户">
                   {form.getFieldDecorator('targetType', {
                     rules: [{
@@ -194,7 +194,7 @@ export default class View extends PureComponent {
               ) : ''
             }
             {
-              (pType === 2) ? (
+              (pType === 1) ? (
                 <FormItem {...formItemLayout} label="目标用户">
                   {form.getFieldDecorator('targetType', {
                     rules: [{
@@ -212,7 +212,7 @@ export default class View extends PureComponent {
             }
             {
               showTips ? (
-                <div className={styles.formTips}>文件格式要求：一行一个手机号，xls或xlsx格式文件</div>
+                <div className={styles.formTips}>文件格式要求：支持一行一个手机号，xls、xlsx、txt格式文件</div>
               ) : ''
             }
             <FormItem {...formItemLayout} label="用户说明">

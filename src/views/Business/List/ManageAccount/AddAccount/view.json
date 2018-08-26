@@ -1,0 +1,13 @@
+{
+  "route": {
+    "params": "/:merchantId",
+    "authority": ""
+  },
+  "breadcrumb": {
+    "name": "新增账号",
+    "icon": "",
+    "order": 0,
+    "authority": ""
+  },
+  "model": ["business","businessAccount"]
+}

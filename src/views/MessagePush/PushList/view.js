@@ -1,7 +1,8 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'dva';
-import { Card, Button, Input, DatePicker, Select, Message } from 'antd';
+import { Card, Button, DatePicker, Select, Message } from 'antd';
 import Authorized from 'utils/Authorized';
+import Input from 'components/input/DecorateInput';
 import PageHeaderLayout from '../../../layouts/PageHeaderLayout';
 import PanelList, { Search, Batch, Table } from '../../../components/PanelList';
 import getColumns from './columns';
@@ -13,7 +14,21 @@ import messagePushOptions from '../attr';
 }))
 export default class List extends PureComponent {
   static defaultProps = {};
-
+  static handleTime(type, time) { // type 1:当天0点，2：当天晚上11点59
+    const result = new Date(time);
+    if (type === 1) {
+      result.setHours(0);
+      result.setMinutes(0);
+      result.setSeconds(0);
+      result.setMilliseconds(0);
+    } else if (type === 2) {
+      result.setHours(23);
+      result.setMinutes(59);
+      result.setSeconds(59);
+      result.setMilliseconds(999);
+    }
+    return result.getTime();
+  }
   state = {};
 
   componentDidMount() {
@@ -28,8 +43,8 @@ export default class List extends PureComponent {
         status: values?.status || 4,
         priority: values?.priority,
         targetType: values?.targetType,
-        startTime: values?.sendTime?.[0] ? new Date(values.sendTime[0]).getTime() : null,
-        endTime: values?.sendTime?.[1] ? new Date(values.sendTime[1]).getTime() : null,
+        startTime: values?.sendTime?.[0] ? List.handleTime(1, values.sendTime[0]) : null,
+        endTime: values?.sendTime?.[1] ? List.handleTime(2, values.sendTime[1]) : null,
       },
       pageSize: values?.pageInfo?.pageSize || 10,
       page: values?.pageInfo?.currPage || 1,
@@ -123,7 +138,7 @@ export default class List extends PureComponent {
                     })(
                       <Select>
                         <Select.Option key="7" value={null}>全部</Select.Option>
-                        {messagePushOptions.MBYH.map(v =>
+                        {messagePushOptions.MBYH1.map(v =>
                           <Select.Option key={v.key} value={v.value}>{v.label}</Select.Option>
                         )}
                       </Select>

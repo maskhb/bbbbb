@@ -1,0 +1,13 @@
+{
+  "route": {
+    "params": "",
+    "authority": ["OPERPORT_JIAJU_JIAJUQUANRETURNLIST_LIST", "OPERPORT_JIAJU_JIAJUQUANRETURNLOG_LIST"]
+  },
+  "menu": {
+    "name": "家居券退款申请列表",
+    "icon": "",
+    "order": 11,
+    "authority": ["OPERPORT_JIAJU_JIAJUQUANRETURNLIST_LIST", "OPERPORT_JIAJU_JIAJUQUANRETURNLOG_LIST"]
+  },
+  "model": ["jiajuCoupon"]
+}

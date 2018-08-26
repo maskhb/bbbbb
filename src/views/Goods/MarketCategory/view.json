@@ -6,7 +6,7 @@
   "menu": {
     "name": "营销分类管理",
     "icon": "",
-    "order": 8,
+    "order": 10,
     "authority": "temp",
     "hideInMenu": true
   },

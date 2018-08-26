@@ -7,6 +7,7 @@ import FastClick from 'fastclick';
 import './index.less';
 import history from './utils/history';
 
+window.APP_PREFIX = window.location.pathname.replace(/\/$/, '');
 // 1. Initialize
 const app = dva({
   history,

@@ -439,7 +439,7 @@ export default class SkuCard extends Component {
   }
 
   render() {
-    const { form, disabled, pattern, propertyGroupId } = this.props;
+    const { form, disabled, partEdit, pattern, propertyGroupId, detail } = this.props;
     const { choiceList, goodsSkuVoList, hasSku } = this.state;
 
     const propsDivideByCategoryList = dataDivide(choiceList);
@@ -462,7 +462,7 @@ export default class SkuCard extends Component {
     return (
       <div>
         {
-          !disabled
+          !disabled && !partEdit
             ? (
               <Form layout="vertical">
                 {
@@ -473,9 +473,8 @@ export default class SkuCard extends Component {
                           <Row gutter={16} key={`${i + 1}`}>
                             {skuPropGroup.map((skuProp, index) => {
                               const col = index % 3 === 0 ? d3Col0 : d3Col1;
-                              const { isFilter, isRequired, isCustmer, inputType,
+                              const { isRequired, isCustmer, inputType,
                                 propertyKeyId, propertyName } = skuProp;
-                              const yesno = isFilter === 1;
                               const dynamicInputProps = {
                                 form,
                                 filedId: `skuProp_${propertyKeyId}`,
@@ -489,7 +488,6 @@ export default class SkuCard extends Component {
                                 }),
                                 required: isRequired === 1,
                                 custom: isCustmer === 1,
-                                yesno,
                                 disabled,
                                 onChangeFilters: (filters) => {
                                   const newList = choiceList.map((prop) => {
@@ -515,7 +513,7 @@ export default class SkuCard extends Component {
                               return (
                                 <Col {...col} key={propertyKeyId}>
                                   <Row>
-                                    {yesno || inputType === 1
+                                    {inputType === 1
                                       ? <DynamicRadio {...dynamicInputProps} />
                                       : inputType === 2
                                         ? <DynamicCheckbox {...dynamicInputProps} />
@@ -558,12 +556,13 @@ export default class SkuCard extends Component {
             return (
               <Table
                 bordered
-                columns={skuCardTableColumns(this, v, disabled, form, pattern)}
+                columns={skuCardTableColumns(this, v, disabled, form, pattern, detail, partEdit)}
                 dataSource={v}
                 pagination={false}
                 rowKey="skuId"
                 key={k}
                 style={{ marginTop: 24, marginBottom: 24 }}
+                scroll={{ x: true }}
               />
             );
           })

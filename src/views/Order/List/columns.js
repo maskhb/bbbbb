@@ -7,6 +7,7 @@ import { format } from 'components/Const';
 
 import Authorized from 'utils/Authorized';
 import { fenToYuan } from 'utils/money';
+import { goToNewWin } from 'utils/utils';
 
 import ModalAddRemark from '../components/ModalAddRemark';
 import ModalAuditOrder from '../components/ModalAuditOrder';
@@ -16,6 +17,7 @@ import ModalConfirmShipment from '../components/ModalConfirmShipment';
 import ModalEditLogistics from '../components/ModalEditLogistics';
 import ModalEditMoney from '../components/ModalEditMoney';
 import ModalRemarkGoods from '../components/ModalRemarkGoods';
+import ModalDismantling from '../components/ModalDismantling';
 
 import {
   getOptionLabelForValue,
@@ -28,7 +30,10 @@ import {
   isCustomGoodsOrder,
   IsExcessOrderAmount,
   isSetMealOrderGoodsInfo,
-  isPaidOrder,
+  isSetMealGoodsOrder,
+  isPartialShipments,
+  isAlreadySettled,
+  isAftersaleOrderSource,
 } from '../attr';
 
 import { transformGiftAmount } from '../transform';
@@ -75,6 +80,9 @@ export default () => {
         width: '150px',
         dataIndex: 'goodsNum',
         render: (text, row) => {
+          if (isSetMealOrderGoodsInfo(row.isPackage)) {
+            return `￥${row.marketPriceFormat} x ${row.goodsNum}`;
+          }
           return `￥${row.salePriceFormat} x ${row.goodsNum}`;
         },
       },
@@ -111,19 +119,33 @@ export default () => {
           return {
             children: (
               <div className="order_list_table_money">
-                <span>订单金额：{record.orderTotalFormat}</span>
-                <span>商家优惠：{record.merchantDiscountAmountFormat}</span>
-                {/* <span>满减优惠：{fenToYuan(record.fullDiscountAmount)}</span>
-                <span>优 惠 券：{fenToYuan(record.couponAmount)}</span> */}
+                <span>{isAftersaleOrderSource(record?.orderSource) ? '原订单换货金额' : '订单金额'}：{record.orderTotalFormat}</span>
                 {
-                  giftAmount > 0 && (
+                  isAftersaleOrderSource(record?.orderSource) ? [
+                    <span>原商品售后总额：{record.totalAfterSaleAmountFormat}</span>,
+                    <span>需付金额：{record.needToPayAmountFormat}</span>,
+                  ] : null
+                }
+
+                <span>商家优惠：{record.merchantDiscountAmountFormat}</span>
+                <span>满减优惠：{record.orderFullDiscountAmountFormat}</span>
+                <span>优 惠 券：{record.orderCouponAmountFormat}</span>
+                {
+                  giftAmount < 0 && (
                     orderStatusName === '待发货' ||
                     orderStatusName === '待收货' ||
                     orderStatusName === '已完成' ||
-                    orderStatusName === '已取消'
+                    orderStatusName === '已取消' ||
+                    orderStatusName === '已取消 '
                   ) &&
-                  <span>赠品优惠:{fenToYuan(giftAmount)}</span>
+                  <span>赠品优惠：{fenToYuan(giftAmount)}</span>
                 }
+                {
+                  isSetMealGoodsOrder(record?.orderGoodsType) && (
+                    <span>套餐优惠：{record?.packageDiscountAmountFormat}</span>
+                  )
+                }
+
                 <span>实付金额：{record.orderAmountRealFormat}</span>
 
                 {
@@ -151,25 +173,31 @@ export default () => {
 
                 {
                   (
-                    orderStatusName === '已取消' ||
-                    orderStatusName === '已取消 '
-                  ) &&
-                  (
-                    !(
-                      record.isParentOrder &&
-                      isPaidOrder(record.payStatus)
+                    (
+                      orderStatusName === '已取消' &&
+                      (
+                        record.depositAmountPaid > 0 ||
+                        record.orderAmountPaid > 0 ||
+                        record.remainAmountPaid > 0 ||
+                        IsExcessOrderAmount(record.excessPay)
+                      )
                     )
-                  ) &&
-                  (
-                    record.depositAmountPaid > 0 ||
-                    record.orderAmountPaid > 0 ||
-                    record.remainAmountPaid > 0 ||
-                    IsExcessOrderAmount(record.excessPay)
+                    ||
+                    (
+                      orderStatusName === '已取消 ' &&
+                      IsExcessOrderAmount(record.excessPay)
+                    )
                   ) && [
                     <span key="c_order_intentRefundAmountFormat">需退金额: {record.intentRefundAmountFormat}</span>,
-                    <span key="c_order_hasRefundAmountFormat">已退金额: {record.hasRefundAmountFormat}</span>,
+                    <span key="c_order_hasRefundAmountFormat">已退金额: {record.refundAmountFormat}</span>,
                   ]
 
+                }
+
+                {
+                  orderStatusName === '已完成' && record?.refundAmount > 0 ? (
+                    <span>已退金额：{record?.refundAmountFormat}</span>
+                  ) : null
                 }
               </div>
             ),
@@ -215,14 +243,32 @@ export default () => {
           };
         },
       },
-      // {
-      //   title: '售后',
-      //   dataIndex: 'id',
-      // },
-      // {
-      //   title: '结算状态',
-      //   dataIndex: 'id',
-      // },
+      {
+        title: '售后',
+        width: '100px',
+        dataIndex: 'orderAftersaleOperFormat',
+        render: (text, row, index, record) => {
+          if (record?.isOrderAftersaleFormat) {
+            return <a onClick={() => { goToNewWin(record?.orderAftersaleOperFormat); }}>查看详情</a>;
+          }
+
+          return '';
+        },
+      },
+      {
+        title: '结算状态',
+        width: '100px',
+        dataIndex: 'settleStatusFormat',
+        render: (text, row, index, record) => {
+          return isAlreadySettled(record?.settleStatus) ? (
+            <div>
+              <span>已结算</span>
+              <br />
+              <span>(金额：{record?.settleAmountFormat})</span>
+            </div>
+          ) : '';
+        },
+      },
       {
         title: '操作',
         width: '120px',
@@ -260,6 +306,16 @@ export default () => {
                   )
                 }
                 {
+                  record.isParentOrder && orderStatusName === '待发货' ? (
+                    <ModalDismantling
+                      dispatch={dispatch}
+                      orders={orders}
+                      params={record}
+                      refresh={refreshTableOrderList}
+                    />
+                  ) : null
+                }
+                {
                   record.isParentOrder ? null : [
                     orderStatusName === '待审核' && isCustomGoodsOrder(record?.orderGoodsType) ? (
                       <Authorized key="c_order_auth_check" authority={['OPERPORT_JIAJU_ORDERLIST_CHECK']}>
@@ -281,7 +337,9 @@ export default () => {
                         />
                       </Authorized>
                     ) : null,
-                    orderStatusName === '待发货' && isCustomGoodsOrder(record?.orderGoodsType) ? (
+                    orderStatusName === '待发货' &&
+                    isCustomGoodsOrder(record?.orderGoodsType) &&
+                    !isPartialShipments(record) ? (
                       <Authorized key="c_order_auth_remarkgoods" authority={['OPERPORT_JIAJU_ORDERLIST_REMARKGOODS']}>
                         <ModalRemarkGoods
                           dispatch={dispatch}
@@ -366,7 +424,7 @@ export default () => {
           }
 
           {
-            row.excessPay > 0 && (
+            row.isParentOrder && row.excessPay > 0 && (
               <span>是否超额：{getOptionLabelForValue(whenExcessTypeOptions)(row.excessPay) || '否'}</span>
             )
           }

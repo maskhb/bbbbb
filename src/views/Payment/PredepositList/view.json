@@ -1,7 +1,9 @@
 {
   "route": {
     "params": "",
-    "authority": ""
+    "authority": ["OPERPORT_JIAJU_PREDEPOSITLIST_LIST",
+      "OPERPORT_JIAJU_PREDEPOSITTRADELIST_LIST",
+      "OPERPORT_JIAJU_PREDEPOSITLOG_LIST"]
   },
   "menu": {
     "name": "预存款管理",

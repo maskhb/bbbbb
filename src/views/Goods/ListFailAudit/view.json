@@ -1,0 +1,18 @@
+{
+  "route": {
+    "params": "",
+    "authority": "OPERPORT_JIAJU_UNAPPROVEDPROLIST_LIST"
+  },
+  "menu": {
+    "name": "审核不通过商品列表",
+    "icon": "",
+    "order": 3,
+    "authority": "OPERPORT_JIAJU_UNAPPROVEDPROLIST_LIST"
+  },
+  "model": [
+    "user",
+    "goods",
+    "goodsCategory",
+    "business"
+  ]
+}

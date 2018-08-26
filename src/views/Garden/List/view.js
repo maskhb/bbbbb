@@ -1,7 +1,8 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'dva';
-import { Card, Button, Modal, Input, Message } from 'antd';
+import { Card, Button, Modal, Message } from 'antd';
 import Authorized from 'utils/Authorized';
+import Input from 'components/input/DecorateInput';
 import PanelList, { Search, Batch, Table } from '../../../components/PanelList';
 import LocationStandard from '../../../components/LocationStandard';
 import DragTable from '../../../components/DragTable';
@@ -141,7 +142,7 @@ export default class List extends PureComponent {
     const { dispatch } = this.props;
     const param = {
       queryCondition: {
-        platformField: 3, isOpen: 1, communityName: values?.communityName,
+        platformField: 3, isOpen: 1, communityName: values?.communityName, isVirtual: 0,
       },
       pageSize: values.pageInfo.pageSize || 10,
       currentPage: values.pageInfo.currPage || 1,

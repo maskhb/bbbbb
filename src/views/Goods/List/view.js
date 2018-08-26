@@ -42,11 +42,12 @@ export default class List extends PureComponent {
   };
 
   componentDidMount() {
-    const { goods, dispatch } = this.props;
+    const { goods, dispatch, audit } = this.props;
     const me = this;
 
     this.search.props.setStateOfSearch({
-      auditStatus: Number(goods?.linkState) || Object.values(AUDITSTATUS).map(({ value }) => value),
+      auditStatus: Number(goods?.linkState) ||
+        audit || Object.values(AUDITSTATUS).map(({ value }) => value),
     }, () => {
       dispatch({
         type: 'goods/deleteLinkAuditStatus',
@@ -133,7 +134,7 @@ export default class List extends PureComponent {
       handleOperate.call(this, params, 'goods', 'audit', '审核', () => {
         this.modalAuditCancel();
         this.search?.props?.setSelectedRows([]);
-      });
+      }, true);
     });
   }
 
@@ -188,11 +189,64 @@ export default class List extends PureComponent {
   }
 
   // 导出
-  convertExportParam = ({ exportFileName, prefix, exportType }) => {
+  convertExportParam = async ({ exportFileName, prefix, exportType }) => {
+    const { dispatch, user } = this.props;
     const { stateOfSearch = {} } = this.search.props;
-    const { pagination } = this.props.goods.list;
+    // const { pagination } = this.props.goods.list;
     // eslint-disable-next-line
-    const { pageInfo, ...otherSearch } = stateOfSearch;
+    const { pageInfo, remainNum, ...otherSearch } = stateOfSearch;
+    const userMerchantId = user.merchant?.merchantId; // 登录用户的商家id
+    const userMerchantType = user.merchant?.merchantType; // 登录用户的商家类型
+    const getOneFromStr = (str) => {
+      if (str) {
+        const vals = str.split(',');
+        return vals.length > 1 ? null : vals[0];
+      }
+      return str;
+    };
+    const params = { ...otherSearch };
+    if (otherSearch.createdTime?.[0]) {
+      params.createdTimeStart = moment(otherSearch.createdTime?.[0]).valueOf();
+    }
+    if (otherSearch.createdTime?.[1]) {
+      params.createdTimeEnd = moment(otherSearch.createdTime?.[1] + 1000).valueOf();
+    }
+
+    // eslint-disable-next-line
+    // debugger
+    params.remainNumMin = remainNum?.min;
+    params.remainNumMax = remainNum?.max;
+    // delete params.remainNum;
+    delete params.createdTime;
+
+    const param = {
+      prefix: 804001,
+      ...params,
+      status: Array.isArray(
+        otherSearch.status
+      ) ? (
+          otherSearch.status.length > 1 ? null : otherSearch.status[0]
+        ) : getOneFromStr(otherSearch.status),
+      auditStatus: Array.isArray(
+        otherSearch.auditStatus
+      ) ? (
+          otherSearch.auditStatus.length > 1 ? null : otherSearch.auditStatus[0]
+        ) : getOneFromStr(otherSearch.auditStatus),
+      // remainNumMin: remainNum?.min,
+      // remainNumMax: remainNum?.max,
+      goodsCategoryId: otherSearch.goodsCategoryId?.[otherSearch.goodsCategoryId.length - 1],
+      userMerchantId,
+      userMerchantType,
+    };
+
+
+    await dispatch({
+      type: 'goods/queryCount',
+      payload: { param: JSON.stringify(param) },
+    });
+    delete param.userMerchantId;
+    delete param.userMerchantType;
+    const { queryCount } = this.props?.goods;
     return {
       platform: 1,
       exportType,
@@ -200,30 +254,17 @@ export default class List extends PureComponent {
       prefix,
       dataUrl: '/ht-mj-goods-server/exportTemplate/goods/exportData',
       param: {
-        param: {
-          prefix: 804001,
-          ...otherSearch,
-          status: Array.isArray(
-            otherSearch.status
-          ) ? (
-              otherSearch.status.length > 0 ? null : otherSearch.status[0]
-            ) : otherSearch.status,
-          auditStatus: Array.isArray(
-            otherSearch.auditStatus
-          ) ? (
-              otherSearch.auditStatus.length > 0 ? null : otherSearch.auditStatus[0]
-            ) : otherSearch.auditStatus,
-        },
+        param,
         // skuId: 1,
         // prefixBusinessType: 1,
         // ...otherSearch,
       },
-      totalCount: pageInfo?.totalCount || pagination?.total || 0,
+      totalCount: queryCount,
     };
   }
 
   render() {
-    const { user, goods, loading, goodsCategory, searchDefault } = this.props;
+    const { user, goods, loading, goodsCategory, searchDefault, audit } = this.props;
     const { modalAuditVisible, modalCopyVisible, modalImportVisible } = this.state;
     const goodsCategoryCascaderOptions = flat2nested(goodsCategory.list || [], { id: 'categoryId', parentId: 'parentId' });
 
@@ -238,7 +279,11 @@ export default class List extends PureComponent {
           <PanelList>
             <Search
               ref={(inst) => { this.search = inst; }}
-              searchDefault={searchDefault}
+              searchDefault={{
+                ...searchDefault,
+                auditStatus: Number(goods?.linkState) ||
+                  audit || Object.values(AUDITSTATUS).map(({ value }) => value),
+              }}
               onSearch={this.handleSearch}
             >
               <Search.Item label="商品标题" simple>
@@ -350,6 +395,7 @@ export default class List extends PureComponent {
                     form.getFieldDecorator('createdTime', {
                     })(
                       <DatePicker.RangePicker
+                        style={{ width: '100%' }}
                         format="YYYY-MM-DD HH:mm:ss"
                         showTime={{
                           defaultValue: [moment('00:00:00', 'HH:mm:ss'), moment('23:59:59', 'HH:mm:ss')],
@@ -362,20 +408,33 @@ export default class List extends PureComponent {
             </Search>
 
             <Batch>
-              <Authorized authority={[OPERPORT_JIAJU_PRODUCTLIST_ADD]}>
-                <a href="#/goods/list/add/0" target="_blank">
-                  <Button icon="plus" type="primary">新建</Button>
-                </a>
-              </Authorized>
-              <Authorized authority={[OPERPORT_JIAJU_PRODUCTLIST_EXPORT]}>
-                <ModalExportBusiness
-                  exportModalType={3}
-                  prefix="804001"
-                  title="商品"
-                  convertParam={this.convertExportParam}
-                  onOk={this.handleExportOk}
-                />
-              </Authorized>
+              {
+                !audit
+                  ? (
+                    <Authorized authority={[OPERPORT_JIAJU_PRODUCTLIST_ADD]}>
+                      <a href="#/goods/list/add/0" target="_blank">
+                        <Button icon="plus" type="primary">新建</Button>
+                      </a>
+                    </Authorized>
+                  )
+                  : ''
+              }
+              {
+                !audit && goods.list?.list?.length > 0
+                  ? (
+                    <Authorized authority={[OPERPORT_JIAJU_PRODUCTLIST_EXPORT]}>
+                      <ModalExportBusiness
+                        exportModalType={3}
+                        prefix="804001"
+                        title="商品"
+                        btnTitle="按查询结果导出"
+                        convertParam={this.convertExportParam}
+                        onOk={this.handleExportOk}
+                      />
+                    </Authorized>
+                  )
+                  : ''
+              }
               {
                 isFactory || isSmallBusiness
                   ? <Button onClick={this.modalImportShow.bind(this)}>导入</Button>
@@ -441,7 +500,7 @@ export default class List extends PureComponent {
                     };
 
                     return (
-                      uniqStatus.length > 1
+                      !audit && uniqStatus.length > 1
                         ? (
                           <Authorized authority={[
                             OPERPORT_JIAJU_PRODUCTLIST_BATCHPUBLISH,
@@ -454,7 +513,7 @@ export default class List extends PureComponent {
                             </Popover>
                           </Authorized>
                         )
-                        : uniqStatus.length === 1
+                        : !audit && uniqStatus.length === 1
                           ? uniqContent(rows, uniqStatus)
                           : ''
                     );
@@ -492,12 +551,43 @@ export default class List extends PureComponent {
                   }
                 }
               </Batch.Item>
+              <Batch.Item>
+                {
+                  ({ rows }) => {
+                    const disabled = !(rows.length > 0);
+                    return (
+                      (
+                        <Authorized authority="OPERPORT_JIAJU_PRODUCTLIST_RECOVER">
+                          <Popconfirm
+                            placement="top"
+                            title="确认移至回收站?"
+                            onConfirm={handleOperate.bind(this, {
+                                goodsIds: rows?.map(r => r.goodsId),
+                                isRecovery: 2,
+                              },
+                              'goods',
+                              'recovery',
+                              '移至回收站',
+                              () => {
+                                this.search?.props?.setSelectedRows([]);
+                              })}
+                            okText="确认"
+                            cancelText="取消"
+                          >
+                            <Button disabled={disabled} loading={loading.effects['goods/recovery']}>移至回收站</Button>
+                          </Popconfirm>
+                        </Authorized>
+                      )
+                    );
+                  }
+                }
+              </Batch.Item>
             </Batch>
 
             <Table
               loading={loading.models.goods}
               searchDefault={searchDefault}
-              columns={getColumns(this, searchDefault, loading)}
+              columns={getColumns(this, searchDefault, audit)}
               dataSource={goods.list?.list}
               pagination={goods.list?.pagination}
               rowKey="goodsId"

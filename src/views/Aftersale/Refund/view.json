@@ -1,0 +1,16 @@
+{
+  "route": {
+    "params": "",
+    "authority": "OPERPORT_JIAJU_REFUNDLIST_LIST"
+  },
+  "menu": {
+    "name": "退款单管理",
+    "icon": "",
+    "order": 1,
+    "authority": "OPERPORT_JIAJU_REFUNDLIST_LIST"
+  },
+  "model": [
+
+    "refound"
+  ]
+}

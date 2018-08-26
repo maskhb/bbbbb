@@ -1,13 +1,13 @@
 {
   "route": {
     "params": "",
-    "authority": ""
+    "authority": "OPERPORT_JIAJU_PROMOTIONLIST_LIST"
   },
   "menu": {
     "name": "促销规则列表",
     "icon": "",
     "order": 0,
-    "authority": ""
+    "authority": "OPERPORT_JIAJU_PROMOTIONLIST_LIST"
   },
-  "model": [""]
+  "model": ["promotionRules"]
 }

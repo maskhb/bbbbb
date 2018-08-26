@@ -1,7 +1,5 @@
-import AUDITSTATUS from 'components/AuditStatus';
 import common from '../services/common';
 import global from '../services/global';
-import goods from '../services/goods';
 
 export default {
   namespace: 'global',
@@ -31,36 +29,25 @@ export default {
         },
       });
     },
-    *fetchNotices(_, { call, put }) {
-      const pageInfo = {
-        pageSize: 1,
-        currPage: 1,
-      };
-
-      const response0 = yield call(goods.list, {
-        auditStatus: [AUDITSTATUS.WAIT.value],
-        pageInfo,
-      });
-
-      const response1 = yield call(goods.list, {
-        auditStatus: [AUDITSTATUS.FAIL.value],
-        pageInfo,
-      });
-
-      const goodsListAuditWaitTotal = response0?.pagination?.total || 0;
-      const goodsListAuditFailTotal = response1?.pagination?.total || 0;
+    *fetchNotices({ payload }, { call, put }) {
+      const response = yield call(global.queryGoodsAndPackageCount, payload);
 
       yield put({
         type: 'saveNotices',
         payload: [
-          goodsListAuditWaitTotal,
-          goodsListAuditFailTotal,
+          response.goodsListWillAudit,
+          response.goodsListNotPass,
+          response.packageListWillAudit,
+          response.packageListNotPass,
         ],
       });
 
       yield put({
         type: 'user/changeNotifyCount',
-        payload: goodsListAuditWaitTotal + goodsListAuditFailTotal,
+        payload: response.goodsListWillAudit +
+          response.goodsListNotPass +
+          response.packageListWillAudit +
+          response.packageListNotPass,
       });
     },
     *clearNotices({ payload }, { put, select }) {

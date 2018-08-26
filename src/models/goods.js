@@ -1,5 +1,6 @@
 import { validateSync } from 'class-validator';
-import { plainToClassFromExist } from 'class-transformer';
+import { plainToClassFromExist, classToPlain } from 'class-transformer';
+import { message } from 'antd';
 import service from 'services/goods';
 import { GoodsPaginationList } from 'viewmodels/Goods';
 
@@ -17,13 +18,34 @@ export default {
       const errors = validateSync(vm);
       if (errors.length > 0) {
         console.log('validation failed. errors: ', errors); /* eslint no-console: 0 */
+        message.error('数据异常，请稍后再试!');
         return;
       }
 
       yield put({
         type: 'save',
         payload: {
-          list: response,
+          // list: response,
+          list: classToPlain(vm),
+        },
+      });
+    },
+    *recoveryList({ payload }, { call, put }) {
+      const response = yield call(service.recoveryList, payload);
+
+      const vm = plainToClassFromExist(GoodsPaginationList(), response || {});
+      const errors = validateSync(vm);
+      if (errors.length > 0) {
+        console.log('validation failed. errors: ', errors); /* eslint no-console: 0 */
+        message.error('数据异常，请稍后再试!');
+        return;
+      }
+
+      yield put({
+        type: 'save',
+        payload: {
+          // list: response,
+          list: classToPlain(vm),
         },
       });
     },
@@ -34,13 +56,14 @@ export default {
       const errors = validateSync(vm);
       if (errors.length > 0) {
         console.log('validation failed. errors: ', errors); /* eslint no-console: 0 */
+        message.error('数据异常，请稍后再试!');
         return;
       }
 
       yield put({
         type: 'save',
         payload: {
-          [`listAudit${payload.auditStatus?.join()}`]: response,
+          [`listAudit${payload.auditStatus?.join()}`]: classToPlain(vm), // response,
         },
       });
     },
@@ -57,7 +80,7 @@ export default {
       yield put({
         type: 'save',
         payload: {
-          pending: response,
+          pending: classToPlain(vm), // response,
         },
       });
     },
@@ -74,7 +97,7 @@ export default {
       yield put({
         type: 'save',
         payload: {
-          rejected: response,
+          rejected: classToPlain(vm), // response,
         },
       });
     },
@@ -113,6 +136,15 @@ export default {
         type: 'save',
         payload: {
           remove: response,
+        },
+      });
+    },
+    *removeBatch({ payload }, { call, put }) {
+      const response = yield call(service.removeBatch, payload);
+      yield put({
+        type: 'save',
+        payload: {
+          removeBatch: response,
         },
       });
     },
@@ -201,6 +233,24 @@ export default {
         type: 'save',
         payload: {
           linkState: null,
+        },
+      });
+    },
+    *queryCount({ payload }, { call, put }) {
+      const response = yield call(service.queryCount, payload);
+      yield put({
+        type: 'save',
+        payload: {
+          queryCount: response,
+        },
+      });
+    },
+    *recovery({ payload }, { call, put }) {
+      const response = yield call(service.recovery, payload);
+      yield put({
+        type: 'save',
+        payload: {
+          recovery: response,
         },
       });
     },

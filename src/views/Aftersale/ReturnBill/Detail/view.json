@@ -1,0 +1,15 @@
+{
+  "route": {
+    "params": "/:id",
+    "authority": "OPERPORT_JIAJU_RETURNSLIST_DETAILS"
+  },
+  "breadcrumb": {
+    "name": "退货单详情",
+    "icon": "",
+    "order": 0,
+    "authority": "OPERPORT_JIAJU_RETURNSLIST_DETAILS"
+  },
+  "model": [
+    "aftersale"
+  ]
+}

@@ -1,10 +1,21 @@
 import React, { Component } from 'react';
-import { Input } from 'antd';
+import Input from './DecorateInput';
 import './MonitorInput.less';
 
 export default class MonitorInput extends Component {
   state = {
     currNum: 0,
+  }
+
+  componentWillMount() {
+    if ('value' in this.props) {
+      const { value } = this.props;
+      if (value) {
+        this.setState({
+          currNum: value.length,
+        });
+      }
+    }
   }
 
   componentWillReceiveProps(nextProps) {
@@ -23,13 +34,20 @@ export default class MonitorInput extends Component {
   }
 
   handleChange(e) {
+    const { onChange, whitespace } = this.props;
     const { value } = e.target;
+
+    if (value && whitespace === true) {
+      e.target.value = value.replace(/^\s/, '').replace(/(\s{2}$)/g, ' ');
+    }
+
     this.setState({
       currNum: value.length,
     });
 
-    this.props.onChange(value);
+    onChange?.(e);
   }
+
 
   render() {
     const { maxLength, simple } = this.props;

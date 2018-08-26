@@ -1,0 +1,13 @@
+{
+  "route": {
+    "params": "",
+    "authority": ""
+  },
+  "breadcrumb": {
+    "name": "批量派发",
+    "icon": "",
+    "order": 0,
+    "authority": ""
+  },
+  "model": ["marketing"]
+}

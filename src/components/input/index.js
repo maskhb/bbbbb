@@ -4,6 +4,8 @@ import NumericInputNumber from './NumericInputNumber';
 import DynamicFieldSet from './DynamicFieldSet';
 import TipLabel from './TipLabel';
 import rules from './rules';
+import SelectWithOptions from './SelectWithOptions';
+import DecorateInput from './DecorateInput';
 
 export {
   MonitorInput,
@@ -12,4 +14,6 @@ export {
   DynamicFieldSet,
   TipLabel,
   rules,
+  SelectWithOptions,
+  DecorateInput,
 };

@@ -160,6 +160,7 @@ export default class ImageCard extends Component {
                   maxSize={2048}
                   maxLength={5}
                   action="/api/upload/img"
+                  customSort
                   listType="picture-card"
                   fileList={group.goodsImgVoList}
                   onChange={this.handleImageGroupsChange.bind(this, group)}

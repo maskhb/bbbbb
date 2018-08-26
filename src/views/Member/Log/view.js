@@ -7,10 +7,10 @@ import moment from 'moment';
 import PanelList, { Search, Table } from 'components/PanelList';
 import {
   Card,
-  Input,
   DatePicker,
   Select,
 } from 'antd';
+import Input from 'components/input/DecorateInput';
 import getColumns from '../List/column';
 import { transLogParams } from '../const';
 

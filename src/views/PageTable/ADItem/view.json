@@ -7,7 +7,7 @@
     "name": "广告项列表",
     "icon": "",
     "order": 0,
-    "authority": ""
+    "authority": "OPERPORT_JIAJU_BANNERLIST_LIST"
   },
   "model": ["ad", "adPos"]
 }

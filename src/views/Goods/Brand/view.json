@@ -6,7 +6,7 @@
   "menu": {
     "name": "品牌列表",
     "icon": "",
-    "order": 5,
+    "order": 7,
     "authority": "OPERPORT_JIAJU_BRANDLIST_LIST"
   },
   "model": ["goodsBrand"]

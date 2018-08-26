@@ -2,7 +2,9 @@ import React, { Component } from 'react';
 import { Upload, Icon, message, Modal } from 'antd';
 import cookie from 'cookies-js';
 import _ from 'lodash';
+import UploadList from './UploadList';
 import './ImageUpload.less';
+import { div } from '../../../utils/number';
 
 export default class ImageUpload extends Component {
   static defaultProps = {
@@ -53,15 +55,32 @@ export default class ImageUpload extends Component {
   }
 
   getFileListByValue = (value) => {
-    return _.map(value, (url, index) => {
-      return {
+    // console.log('filessssss', this.state);
+    const { fileList } = this.state;
+    const uids = fileList.map(l => l.uid);
+    const urls = fileList.map(l => l.$url);
+    _.forEach(value, (url, index) => {
+      if (uids.indexOf(index + url) > -1) {
+        return;
+      }
+      if (urls.indexOf(url) > -1) {
+        for (const val of fileList) {
+          if (val.$url === url) {
+            val.url = url;
+            val.thumbUrl = url;
+          }
+        }
+        return;
+      }
+      fileList.push({
         uid: index + url,
         name: url,
         status: 'done',
         url,
         thumbUrl: url,
-      };
+      });
     });
+    return fileList;
   }
 
   getHttpProps = () => {
@@ -114,6 +133,7 @@ export default class ImageUpload extends Component {
   handleChange = (e) => {
     const { fileList } = e;
     const { onChange, uploadChange } = this.props;
+    // console.log('onchange...', JSON.stringify(fileList));
     // TODO，注意， 此处的this指向的是Form，非此Class，故执行的this.onChange为Form的方法
     const newValue = fileList.map((item) => {
       let f = '';
@@ -128,6 +148,8 @@ export default class ImageUpload extends Component {
           });
         }
       }
+      // eslint-disable-next-line
+      item.$url = f;
       return f;
     });
 
@@ -159,24 +181,84 @@ export default class ImageUpload extends Component {
     }
   }
 
+  handlePrevious = (file) => {
+    const { fileList = [] } = this.state;
+    const files = [];
+    for (const f of fileList) {
+      if (f === file) {
+        const tmp = files.pop();
+        files.push(file);
+        if (tmp) {
+          files.push(tmp);
+        }
+      } else {
+        files.push(f);
+      }
+    }
+    this.setState({
+      fileList: files,
+    });
+    this.handleChange({
+      fileList: files,
+    });
+  }
+
+  handleNext = (file) => {
+    const { fileList = [] } = this.state;
+    const files = [];
+    let nextFile = null;
+    for (const f of fileList) {
+      if (f === file) {
+        nextFile = file;
+        // continue;
+      } else {
+        files.push(f);
+        if (nextFile) {
+          files.push(nextFile);
+          nextFile = null;
+        }
+      }
+    }
+    this.setState({
+      fileList: files,
+    });
+    this.handleChange({
+      fileList: files,
+    });
+  }
+
+  handleRemove = (file) => {
+    const { fileList } = this.state;
+    const files = fileList.filter(f => f !== file);
+    // console.log(file, fileList);
+    this.setState({
+      fileList: files,
+    });
+    this.handleChange({
+      fileList: files,
+    });
+  }
+
   beforeUpload = (file) => {
     const isImage = file
       .type
       .includes('image');
     if (!isImage) {
-      message.error('只能上传图片！');
+      message.error('图片格式不正确！');
       return false;
     }
 
     const { exclude, maxSize, maxLength, beforeUpload } = this.props;
 
     if (exclude.includes('gif') && file.type === 'image/gif') {
-      message.error('不能上传gif！');
+      message.error('图片格式不正确！');
       return false;
     }
 
     if (file.size > maxSize * 1024) {
-      message.error(`图片大小超出限制（${maxSize}kb）`);
+      const s = div(maxSize, 1024);
+      const msg = s >= 1 ? `${s}M` : `${maxSize}kb`;
+      message.error(`图片大小超出限制（${msg}）`);
       return false;
     }
 
@@ -190,11 +272,38 @@ export default class ImageUpload extends Component {
     }
   }
 
+  renderCustomImgList() {
+    const { listType } = this.props;
+    const { fileList } = this.state;
+
+    return (
+      <UploadList
+        listType={listType}
+        items={fileList}
+        onPreview={this.handlePreview}
+        onRemove={this.handleRemove}
+        onPrevious={this.handlePrevious}
+        onNext={this.handleNext}
+        locale={{
+          uploading: '文件上传中...',
+          removeFile: '删除',
+          uploadError: '上传失败',
+          previewFile: '预览',
+        }}
+      />
+    );
+  }
+
   render() {
     const {
       maxLength,
+      customSort,
+      disabled,
+      showUploadList = true,
+      description = '',
       ...props
     } = this.props;
+    // console.log('images....props', props);
     const { fileList, previewVisible, previewImage } = this.state;
 
     const uploadButton = (
@@ -206,6 +315,9 @@ export default class ImageUpload extends Component {
 
     return (
       <div>
+        {
+          customSort && !disabled && this.renderCustomImgList()
+        }
         <Upload
           {...props}
           {...this.getHttpProps()}
@@ -213,12 +325,17 @@ export default class ImageUpload extends Component {
           onPreview={this.handlePreview}
           onChange={this.handleChange}
           fileList={fileList}
+          disabled={disabled}
+          showUploadList={
+            disabled ? (showUploadList ? { showPreviewIcon: true, showRemoveIcon: false } : false)
+            : (customSort ? false : showUploadList)}
         >
           {fileList.length >= maxLength
             ? null
             : uploadButton
-}
+          }
         </Upload>
+        {description ? <div style={{ clear: 'both', lineHeight: '1.2em' }} >{description}</div> : null}
         <Modal visible={previewVisible} footer={null} onCancel={this.handleCancel}>
           <img
             alt="example"

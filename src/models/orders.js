@@ -2,7 +2,7 @@
  * @Author: wuhao
  * @Date: 2018-04-04 14:32:37
  * @Last Modified by: wuhao
- * @Last Modified time: 2018-05-15 16:24:48
+ * @Last Modified time: 2018-08-10 15:12:54
  *
  * 订单Modle
  */
@@ -11,6 +11,8 @@ import { fenToYuan } from 'utils/money';
 import { plainToClassFromExist, classToPlain } from 'class-transformer';
 import orders from '../services/orders';
 import * as viewModels from '../viewmodels/Orders';
+
+import { transformOrderList } from '../utils/transform/orders';
 
 export default {
   namespace: 'orders',
@@ -21,7 +23,8 @@ export default {
       yield put({
         type: 'save',
         payload: {
-          list: classToPlain(plainToClassFromExist(new viewModels.List(), response)),
+          // list: classToPlain(plainToClassFromExist(new viewModels.List(), response)),
+          list: transformOrderList(response),
         },
       });
     },
@@ -201,7 +204,32 @@ export default {
         },
       });
     },
+    *queryOrderLogisticsDetail({ payload }, { call, put }) {
+      const response = yield call(orders.queryOrderLogisticsDetail, payload);
+      yield put({
+        type: 'save',
+        payload: {
+          [`queryOrderLogisticsDetail-${payload?.orderId || 0}-${payload?.packageNumber || 0}`]: (response || [])?.map((item) => {
+            return classToPlain(plainToClassFromExist(new viewModels.LogisticsVO(), item));
+          }),
+        },
+      });
+    },
 
+    *createOrderForExcessPay({ payload }, { call, put }) {
+      const response = yield call(orders.createOrderForExcessPay, payload);
+      yield put({
+        type: 'save',
+        payload: {
+          createOrderForExcessPay: response,
+        },
+      });
+    },
+    *createSubOrder({ payload }, { call }) {
+      const response = yield call(orders.createSubOrder, payload);
+
+      return response;
+    },
 
     // ///////////
     *addOrderPayListForLocal({ payload }, { put }) {

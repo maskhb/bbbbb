@@ -35,7 +35,7 @@ console.log(fileList) //eslint-disable-line
     const { fileList, importAccount } = this.state;
     const [currentFile] = fileList;
     if (importAccount) {
-      // 批量导入帐号接口
+      // 批量导入账号接口
       this.props.dispatch({
         type: 'business/importAccount',
         payload: {
@@ -71,11 +71,11 @@ console.log(fileList) //eslint-disable-line
 
   render() {
     const { importAccount } = this.state;
-    const title = `商家${importAccount ? '帐号' : ''}批量导入须知`;
+    const title = `商家${importAccount ? '账号' : ''}批量导入须知`;
     return (
       <PageHeaderLayout>
         <Card title={title} bordered={false}>
-          <p>{`请将需批量导入的商家${importAccount ? '帐号' : ''}按下方模板所示格式上传`}</p>
+          <p>{`请将需批量导入的商家${importAccount ? '账号' : ''}按下方模板所示格式上传`}</p>
           <p>
             <Download
               baseUrl={
@@ -84,12 +84,12 @@ console.log(fileList) //eslint-disable-line
                 ) : (
                   '/ht-mj-merchant-server/merchantBase/downloadMerchantTemplate'
                 )}
-              title={`下载商家${importAccount ? '帐号' : ''}批量导入模板`}
+              title={`下载商家${importAccount ? '账号' : ''}批量导入模板`}
             />
           </p>
           <br />
           <Row gutter={16}>
-            <Col span={3} >{`上传须批量导入的商家${importAccount ? '帐号' : ''}：`}</Col>
+            <Col span={3} >{`上传须批量导入的商家${importAccount ? '账号' : ''}：`}</Col>
             <Col span={3} >
 
               <UploadFile

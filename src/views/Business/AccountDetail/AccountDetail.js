@@ -120,7 +120,7 @@ export default class AccountDetail extends Component {
             >
               {form.getFieldDecorator('accountName', {
               rules: [{
-                required: true, message: '请输入账号名',
+                required: true, whitespace: true, message: '请输入账号名',
               }],
               initialValue: data?.accountName,
             })(
@@ -133,7 +133,7 @@ export default class AccountDetail extends Component {
             >
               {form.getFieldDecorator('accountFullName', {
               rules: [{
-                required: true, message: '请输入姓名',
+                required: true, whitespace: true, message: '请输入姓名',
               }],
               initialValue: data?.accountFullName,
             })(
@@ -146,7 +146,7 @@ export default class AccountDetail extends Component {
             >
               {form.getFieldDecorator('accountPhoneNumber', {
               rules: [{
-                required: true, len: 11, pattern: /^[0-9]{11}$/, message: '请输入正确的手机号',
+                required: true, whitespace: true, len: 11, pattern: /^[0-9]{11}$/, message: '请输入正确的手机号',
               }],
               initialValue: data?.accountPhoneNumber,
             })(

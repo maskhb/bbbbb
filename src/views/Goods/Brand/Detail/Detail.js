@@ -4,6 +4,7 @@ import { Form, Card, Cascader, InputNumber, message, Spin, Row, Col, Checkbox } 
 import _ from 'lodash';
 import { OPERPORT_JIAJU_BRANDLIST_EDIT } from 'config/permission';
 import PageHeaderLayout from 'layouts/PageHeaderLayout';
+import { goTo } from 'utils/utils';
 import flat2nested from 'components/Flat2nested';
 import { MonitorInput, MonitorTextArea } from 'components/input';
 import ImageUpload from 'components/Upload/Image/ImageUpload';
@@ -100,8 +101,8 @@ export default class View extends PureComponent {
           },
         }).then((res) => {
           if (res) {
-            message.success('提交成功。', 1, () => {
-              history.back();
+            message.success('提交成功。', 0.4, () => {
+              goTo('/goods/brand');
             });
           }
         });
@@ -132,23 +133,7 @@ export default class View extends PureComponent {
     // 品牌分类
     const goodsBrandCascaderOptions = flat2nested(brandCategory?.list || [], { id: 'categoryId', parentId: 'parentId' });
 
-    const currentCategory = brandCategory?.list?.find(v =>
-      v.value === detail?.brandCategoryId) || {};
-
-    const parent = brandCategory?.list?.find(v =>
-      v.value === currentCategory.parentId) || {};
-
-    let preParentId = 0;
-    let preParent = {};
-    if (parent.parentId !== 0) {
-      preParentId = brandCategory?.list?.find(v =>
-        v.value === parent.categoryId)?.parentId;
-
-      preParent = brandCategory?.list?.find(v =>
-        v.value === preParentId);
-    }
-
-    const goodsBrandIds = _.compact([preParent?.value, parent?.value, currentCategory?.value]);
+    const goodsBrandIds = detail?.brandCategoryIdAll?.split('/').map(v => Number(v));
 
     return (
       <PageHeaderLayout>
@@ -167,7 +152,7 @@ export default class View extends PureComponent {
                       })(
                         pattern === 'detail'
                           ? <span>{data?.brandName}</span>
-                          : <MonitorInput maxLength={100} disabled={disabled} simple="true" />
+                          : <MonitorInput maxLength={100} disabled={disabled} simple="true" whitespace />
                       )}
                     </FormItem>
                     <FormItem {...formItemLayout} label="品牌分类">
@@ -267,7 +252,7 @@ export default class View extends PureComponent {
                       submitting={submitting}
                       handleSubmit={this.handleSubmit}
                       pattern={pattern}
-                      permisson={OPERPORT_JIAJU_BRANDLIST_EDIT}
+                      permission={[OPERPORT_JIAJU_BRANDLIST_EDIT]}
                       handlePatternChange={this.handlePatternChange}
                     />
                   </Form>

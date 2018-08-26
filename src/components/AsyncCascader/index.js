@@ -36,7 +36,9 @@ class AsyncCascader extends Component {
   }
 
   handleChange(value) {
-    this.props.onChange(Array.isArray(value) && value.length === 1 ? value[0] : value);
+    this.props.onChange(Array.isArray(value) && value.length === 1 ? value[0] : (
+      Array.isArray(value) && value.length === 0 ? null : value
+    ));
   }
 
 

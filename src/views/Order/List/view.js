@@ -11,8 +11,11 @@ import SearchHeader from './components/SearchHeader';
 import BatchSearchList from './components/BatchSearchList';
 
 import getColumns from './columns';
-import { getStartTimeAndEndTimeFor6Months } from '../attr';
-import { transformOrderList, transformExpandEdRowKey } from '../transform';
+// import { getStartTimeAndEndTimeFor6Months } from '../attr';
+import {
+  // transformOrderList,
+  transformExpandEdRowKey,
+} from '../transform';
 
 import styles from './index.less';
 
@@ -25,7 +28,7 @@ import styles from './index.less';
 export default class View extends PureComponent {
   static defaultProps = {
     searchDefault: {
-      orderTime: getStartTimeAndEndTimeFor6Months(),
+      orderTime: null, // getStartTimeAndEndTimeFor6Months(),
       pageInfo: {
         pageSize: 20,
       },
@@ -54,7 +57,8 @@ export default class View extends PureComponent {
               loading={loading}
               searchDefault={searchDefault}
               columns={getColumns(this, searchDefault)}
-              dataSource={transformOrderList(orders?.list?.list)}
+              // dataSource={transformOrderList(orders?.list?.list)}
+              dataSource={orders?.list?.list}
               pagination={orders?.list?.pagination}
               initExpandEdRowKey={(dataSource) => {
                 return transformExpandEdRowKey(dataSource);

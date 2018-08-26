@@ -8,7 +8,14 @@ async function list(params) {
     },
   });
 }
-
+async function listHasChild(params) {
+  return request('/mj/ht-mj-goods-server/goodsCategory/queryListAndHasChild', {
+    method: 'POST',
+    body: {
+      goodsCategoryVoQ: params,
+    },
+  });
+}
 async function listByMerchantId(params) {
   return request('/mj/ht-mj-goods-server/goodsCategory/queryListAndHasChildByMerchantId', {
     method: 'POST',
@@ -65,6 +72,7 @@ async function status(params) {
 
 export default {
   list,
+  listHasChild,
   listByMerchantId,
   detail,
   add,

@@ -1,7 +1,7 @@
 /*  树形展示所有省和省下的小区，并勾选  */
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Tree } from 'antd';
+import { Tree, Spin } from 'antd';
 import commonApi from '../../services/common';
 import styles from './index.less';
 
@@ -26,15 +26,20 @@ class CommunitySelect extends Component {
       expandedKeys: [],
       checkedCommunityIds: props?.checkedCommunityIds || [],
       allCommunityCheckArr: [], // 所有小区节点的key的集合
+      loading: false,
     };
   }
   componentWillMount() {
     const { checkType, checkedCommunityIds } = this.state;
+    this.setState({ loading: true });
     commonApi.queryCommunityList({
-      queryCondition: {},
+      queryCondition: {
+        isVirtual: 0,
+      },
       pageSize: 0,
       currentPage: 0,
     }).then((res) => {
+      this.setState({ loading: false });
       if (!res?.dataList) {
         return;
       }
@@ -53,7 +58,7 @@ class CommunitySelect extends Component {
         const checkResult = CommunitySelect.isExistInArr(existProvinceIdArr, v.provinceId);
         allCommunityArr.push({
           communityId: v.communityId,
-          communityName: v.communityName,
+          communityName: `${v.cityName} - ${v.communityName}`,
           provinceId: v.provinceId,
           provinceName: v.provinceName,
         });
@@ -64,38 +69,38 @@ class CommunitySelect extends Component {
             key: '',
             depth: 0,
             children: [{
-              title: v.communityName, value: v.communityId, key: '', depth: 1, platformFieldList: v.platformFieldList,
+              title: `${v.cityName} - ${v.communityName}`, value: v.communityId, key: '', depth: 1, platformFieldList: v.platformFieldList,
             }],
           });
           existProvinceIdArr.push(v.provinceId);
         } else {
           // 如果当前provinceId已经存在，则找到相同对象，在其children中加入小区信息
           result[checkResult.index].children.push({
-            title: v.communityName, value: v.communityId, key: '', depth: 1, platformFieldList: v.platformFieldList,
+            title: `${v.cityName} - ${v.communityName}`, value: v.communityId, key: '', depth: 1, platformFieldList: v.platformFieldList,
           });
         }
       });
-      result.sort((a, b) => {
-        if (a.title > b.title) {
-          return 1;
-        } else if (a.title < b.title) {
-          return -1;
-        } else {
-          return 0;
-        }
-      });
+      // result.sort((a, b) => {
+      //   if (a.title > b.title) {
+      //     return 1;
+      //   } else if (a.title < b.title) {
+      //     return -1;
+      //   } else {
+      //     return 0;
+      //   }
+      // });
       result.forEach((v, i) => {
         result[i].key = `0-${i}`;
         defaultExpandArr.push(result[i].key);
-        result[i].children.sort((a, b) => {
-          if (a.title > b.title) {
-            return 1;
-          } else if (a.title < b.title) {
-            return -1;
-          } else {
-            return 0;
-          }
-        });
+        // result[i].children.sort((a, b) => {
+        //   if (a.title > b.title) {
+        //     return 1;
+        //   } else if (a.title < b.title) {
+        //     return -1;
+        //   } else {
+        //     return 0;
+        //   }
+        // });
         result[i].children.forEach((item, index) => {
           result[i].children[index].key = `${result[i].key}-${index}`;
           allCommunityCheckArr.push(result[i].children[index].key);
@@ -241,10 +246,9 @@ class CommunitySelect extends Component {
     });
   }
   render() {
-    const { treeData, checkedKeys, expandAll, expandedKeys } = this.state;
-
+    const { treeData, checkedKeys, expandAll, expandedKeys, loading } = this.state;
     return (
-      <div>
+      <Spin spinning={loading} >
         <Tree
           checkable
           expandedKeys={expandAll ? expandedKeys : []}
@@ -255,7 +259,7 @@ class CommunitySelect extends Component {
         >
           {this.renderTreeNodes(treeData)}
         </Tree>
-      </div>
+      </Spin>
     );
   }
 }

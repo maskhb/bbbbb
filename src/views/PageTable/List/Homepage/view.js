@@ -45,6 +45,10 @@ export default class View extends PureComponent {
 
   modalTitleShow = () => {
     this.setState({ modalTitleVisible: true });
+    const { item } = this.state;
+    this.props.form.setFieldsValue({
+      adName: item?.adName,
+    });
   }
 
   modalTitleCancel = () => {
@@ -94,6 +98,7 @@ export default class View extends PureComponent {
                 rules: rules([{
                   required: true, message: '请输入标题',
                 }]),
+                initialValue: item?.adName,
               })(
                 <MonitorInput maxLength={10} />
               )}

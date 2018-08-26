@@ -9,6 +9,7 @@ import ImageUpload from '../Upload/Image/ImageUpload';
 const { RangePicker } = DatePicker;
 
 class CheckboxCascade extends Component {
+  // eslint-disable-next-line
   static getIndexByValue(arr, value) {
     let resultValue;
     arr.forEach((v, i) => {
@@ -18,6 +19,7 @@ class CheckboxCascade extends Component {
     });
     return resultValue;
   }
+
   constructor(props) {
     super(props);
     this.state = {
@@ -55,6 +57,8 @@ class CheckboxCascade extends Component {
       });
     }
   }
+
+
   handleChange(value) {
     const that = this;
     const { selectOptions, name } = this.state;
@@ -141,6 +145,7 @@ class CheckboxCascade extends Component {
             <Uploader
               key={currentIndex}
               dragger
+              maxLength={currentChildren?.childrenProps?.maxLength || 3}
               uploadType={currentChildren?.childrenProps?.uploadType || 'txt'}
               onChange={that.handleChildrenChange.bind(that, currentChildren.childrenType)}
             />

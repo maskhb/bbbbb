@@ -28,15 +28,12 @@ export default class List extends PureComponent {
       match: { params: { info: id } },
     } = this.props;
     this.query(info?.merchantId || id);
-    if (!info) {
-      this.props.dispatch({
-        type: 'business/queryDetail',
-        payload: {
-          merchantId: id,
-        },
-      }).then(() => {
-      });
-    }
+    this.props.dispatch({
+      type: 'business/queryDetail',
+      payload: {
+        merchantId: id,
+      },
+    });
   }
   query = (merchantId) => {
     this.props.dispatch({
@@ -49,13 +46,12 @@ export default class List extends PureComponent {
     }).then(() => {
       const res = this.props.businessAccount.list;
       if (res) {
-        const { currPage: current, pageSize, totalPage } = res;
+        console.log(res) //eslint-disable-line
+        const { pageSize, dataList } = res;
         this.setState({
           pagination: {
-            current,
-            total: res.dataList.length,
+            total: dataList.length,
             pageSize,
-            totalPage,
           },
         });
       }
@@ -64,6 +60,9 @@ export default class List extends PureComponent {
   render() {
     // eslint-disable-next-line
     const merchantName = this.props?.business?.currentDetailRes?.merchantName;
+    // eslint-disable-next-line
+    const merchantType = this.props?.business?.currentDetailRes?.merchantType;
+    console.log({merchantType}) //eslint-disable-line
     const { loading,
       searchDefault,
       businessAccount,
@@ -72,12 +71,12 @@ export default class List extends PureComponent {
       } } = this.props;
     return (
       <PageHeaderLayout>
-        <h1>{`经销商名称：${info?.merchantName || merchantName}`}</h1>
-        <Card title="经销商账号管理">
+        <h1>{`${['厂商', '经销商', '小商家'][merchantType - 1]}名称：${info?.merchantName || merchantName}`}</h1>
+        <Card title={`${['厂商', '经销商', '小商家'][merchantType - 1]}账号管理`}>
           <Authorized authority={['OPERPORT_JIAJU_SHOP_ADDACCOUNT']}>
             <Link to={`/business/list/manageAccount/AddAccount/${info?.merchantId}`}>
               <Button type="primary" style={{ marginBottom: 20 }}>
-                新增帐号
+                新增账号
               </Button>
             </Link>
           </Authorized>

@@ -1,0 +1,83 @@
+.view_order_list {
+  :global {
+    .order_list_table_title_bar {
+      >span {
+        margin-right: 10px;
+      }
+    }
+    .order_list_table_btn_addremark {
+      float: right;
+    }
+
+    .order_list_table_goodsInfo {
+      display: flex;
+      > div {
+        width: 65px;
+      }
+      .flex-1 {
+        flex: 1;
+        min-width: 160px;
+      }
+      .order_list_table_goodsInfo_img {
+        width: 65px;
+        height: 65px;
+        display: block;
+      }
+
+      .order_list_table_goodsInfo_name {
+        margin-left: 15px;
+        width: 380px;
+        span {
+          font-size: 14px;
+          line-height: 18px;
+          min-height: 34px;
+          word-break: break-all;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          overflow: hidden;
+          /* autoprefixer: off */
+          -webkit-box-orient: vertical;
+          /* autoprefixer: on */
+        }
+      }
+
+      .order_list_table_goodsInfo_desc {
+        margin-left: 15px;
+        margin-top: 10px;
+        color: #ccc;
+      }
+
+      .order_list_table_goodsInfo_tag {
+        margin-left: 15px;
+        margin-top: 10px;
+      }
+    }
+
+    .order_list_table_user {
+      span {
+        display: block;
+        text-align: center;
+        color: #87ceff;
+      }
+    }
+
+    .order_list_table_money {
+      span {
+        display: block;
+      }
+    }
+
+    .order_list_table_address {
+      span {
+        display: block;
+      }
+    }
+
+    .order_list_table_oper {
+      button {
+        display: block;
+        margin: 10px auto;
+      }
+    }
+  }
+}

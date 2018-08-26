@@ -17,6 +17,7 @@ function RouterConfig({ history, app }) {
   const routerData = getRouterData(app);
   const UserLayout = routerData['/user'].component;
   const BasicLayout = routerData['/'].component;
+  const PrintLayout = routerData['/print'].component;
   return (
     <LocaleProvider locale={zhCN}>
       <ConnectedRouter history={history}>
@@ -26,6 +27,12 @@ function RouterConfig({ history, app }) {
             render={props => <UserLayout {...props} />}
             authority={['guest']}
             redirectPath="/"
+          />
+          <AuthorizedRoute
+            path="/print"
+            render={props => <PrintLayout {...props} />}
+            authority={['user']}
+            redirectPath="/user/login"
           />
           <AuthorizedRoute
             path="/"

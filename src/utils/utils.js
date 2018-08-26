@@ -1,6 +1,12 @@
 import moment from 'moment';
 import { routerRedux } from 'dva/router';
+import { toFullPath } from './request/utils';
 import store from '../index';
+import { mul } from './number';
+
+export function goToNewWin(path) {
+  window.open(toFullPath(path), '_blank');
+}
 
 export function goTo(path) {
   store.dispatch(routerRedux.push(path));
@@ -84,7 +90,7 @@ export function digitUppercase(n) {
   let num = Math.abs(n);
   let s = '';
   fraction.forEach((item, index) => {
-    s += (digit[Math.floor(num * 10 * (10 ** index)) % 10] + item).replace(/零./, '');
+    s += (digit[Math.floor(mul(num, 10 * (10 ** index))) % 10] + item).replace(/零./, '');
   });
   s = s || '整';
   num = Math.floor(num);
@@ -215,5 +221,44 @@ export const getOptionValueForLabel = (options) => {
     const optionItem = getOptionItemForLabelOrValue(options, 'label', label);
 
     return optionItem ? optionItem.value : null;
+  };
+};
+
+
+export const getValueFromEvent = (e) => {
+  let value;
+  if (!e || !e.target) {
+    value = e;
+  } else {
+    const { target } = e;
+    // eslint-disable-next-line
+    value =  target.type === 'checkbox' ? target.checked : target.value;
+  }
+  // eslint-disable-next-line
+  if (value.__proto__ === String.prototype) {
+    return value.replace(/^\s/, '').replace(/(\s{2}$)/g, ' ');
+  }
+  return value;
+};
+
+
+export const formatAllOpion = (_obj) => {
+  const obj = { ..._obj };
+
+  Object.keys(obj).forEach((v) => {
+    if (obj[v] === -1 || obj[v] === undefined || obj[v] === '') {
+      delete obj[v];
+    }
+  });
+
+  return obj;
+};
+
+export const getCustomFieldDecorator = (vo, form, rootName) => {
+  return (field, args) => {
+    return form.getFieldDecorator(rootName ? `${rootName}.${field}` : field, {
+      ...args,
+      initialValue: args?.initialValue || vo?.[field],
+    });
   };
 };

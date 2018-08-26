@@ -1,0 +1,13 @@
+{
+  "route": {
+    "params": "",
+    "authority": "OPERPORT_JIAJU_COUPONLIST_LIST"
+  },
+  "menu": {
+    "name": "优惠券列表",
+    "icon": "",
+    "order": 1,
+    "authority": "OPERPORT_JIAJU_COUPONLIST_LIST"
+  },
+  "model": ["marketing","user"]
+}

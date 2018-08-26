@@ -1,0 +1,13 @@
+{
+  "route": {
+    "params": "",
+    "authority": ""
+  },
+  "menu": {
+    "name": "全局配置",
+    "icon": "setting",
+    "order": 43,
+    "authority": "OPERPORT_JIAJU_WHOLEALLOCATION_SAVE"
+  },
+  "model": ["global"]
+}

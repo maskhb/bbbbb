@@ -1,0 +1,194 @@
+@import "~antd/lib/style/themes/default.less";
+
+@media screen {
+  .wraper {
+    padding: 30px;
+    display: flex;
+    .printWraper {
+      width: 200mm;
+      height: 112mm;
+      position: relative;
+      border: 1px solid #000;
+      background: rgb(255, 229, 255);
+      .title {
+        text-align: center;
+        display: block;
+        width: 60mm;
+        margin: 0 auto;
+        margin-top: 8.86mm;
+        font-size: 150%;
+        font-weight: bold;
+        font-family: "SimSun", "Microsoft YaHei", "Helvetica Neue", sans-serif;
+        position: relative;
+        &::after {
+          display: block;
+          content: '';
+          position: absolute;
+          height: 1mm;
+          width: 100%;
+          left: 0;
+          bottom: -1mm;
+          border-top: 1px solid #121212;
+          border-bottom: 1px solid #121212;
+        }
+      }
+      .date {
+        position: absolute;
+        left: 90mm;
+        top: 22.3mm;
+      }
+      .number {
+        position: absolute;
+        right: 10mm;
+        top: 22.3mm;
+        color: #f00;
+      }
+      .table {
+        position: absolute;
+        top: 32.3mm;
+        left: 10mm;
+        border: 1px solid #000;
+        width: 180mm;
+        height: 66mm;
+        text-align: center;
+        z-index: 1;
+        tr {
+          border: 1px solid #000;
+          td {
+            border: 1px solid #000;
+            &:nth-child(1) {
+              width: 25mm;
+            }
+            &:nth-child(2) {
+              width: 30mm;
+            }
+            &:nth-child(3) {
+              width: 125mm;
+            }
+          }
+        }
+      }
+      .footer {
+        position: absolute;
+        bottom: 5mm;
+        left: 10mm;
+        z-index: 1;
+        span {
+          padding-right: 25mm;
+        }
+      }
+      .seal {
+        display: block;
+        position: absolute;
+        bottom: 10mm;
+        right: 10mm;
+        width: 51.9mm;
+        z-index: 1;
+      }
+    }
+
+    .buttons {
+      margin-left: 30px;
+      .printIcon {
+        font-size: 40px;
+        padding-right: 10px;
+        vertical-align: bottom;
+      }
+      .printTips {
+        margin-top: 15px;
+        color: red;
+      }
+    }
+  }
+}
+@media print {
+  .wraper {
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    .printWraper {
+      width: 200mm;
+      height: 112mm;
+      position: relative;
+      background: rgb(255, 229, 255);
+      .title {
+        text-align: center;
+        display: block;
+        width: 60mm;
+        margin: 0 auto;
+        margin-top: 8.86mm;
+        font-size: 150%;
+        font-weight: bold;
+        font-family: "SimSun", "Microsoft YaHei", "Helvetica Neue", sans-serif;
+        position: relative;
+        &::after {
+          display: block;
+          content: '';
+          position: absolute;
+          height: 1mm;
+          width: 100%;
+          left: 0;
+          bottom: -1mm;
+          border-top: 1px solid #121212;
+          border-bottom: 1px solid #121212;
+        }
+      }
+      .date {
+        position: absolute;
+        left: 90mm;
+        top: 22.3mm;
+      }
+      .number {
+        position: absolute;
+        right: 10mm;
+        top: 22.3mm;
+        color: red;
+      }
+      .table {
+        position: absolute;
+        top: 32.3mm;
+        left: 10mm;
+        border: 1px solid #000;
+        width: 180mm;
+        height: 66mm;
+        text-align: center;
+        z-index: 1;
+        tr {
+          border: 1px solid #000;
+          td {
+            border: 1px solid #000;
+            &:nth-child(1) {
+              width: 25mm;
+            }
+            &:nth-child(2) {
+              width: 30mm;
+            }
+            &:nth-child(3) {
+              width: 125mm;
+            }
+          }
+        }
+      }
+      .footer {
+        position: absolute;
+        bottom: 5mm;
+        left: 10mm;
+        z-index: 1;
+        span {
+          padding-right: 25mm;
+        }
+      }
+      .seal {
+        display: block;
+        position: absolute;
+        bottom: 10mm;
+        right: 10mm;
+        width: 51.9mm;
+        z-index: 1;
+      }
+    }
+    .buttons {
+      display: none;
+    }
+  }
+}

@@ -71,11 +71,11 @@ const logcolumns = [
   },
   {
     title: '操作人',
-    dataIndex: 'passiveOperator',
+    dataIndex: 'loginName',
   },
   {
     title: '操作对象',
-    dataIndex: 'businessName',
+    dataIndex: 'passiveOperator',
   },
   {
     title: '操作类型',
@@ -102,7 +102,7 @@ export default (me) => {
   return [
     {
       title: 'ID',
-      dataIndex: 'accountId',
+      dataIndex: 'acctId',
     },
     {
       title: '登录ID',

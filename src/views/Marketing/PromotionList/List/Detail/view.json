@@ -1,0 +1,15 @@
+{
+  "route": {
+    "params": "/:id",
+    "authority": "OPERPORT_JIAJU_PROMOTIONLIST_VIEW"
+  },
+  "breadcrumb": {
+    "name": "查看促销规则",
+    "icon": "",
+    "order": 0,
+    "authority": "OPERPORT_JIAJU_PROMOTIONLIST_VIEW"
+  },
+  "model": [
+    "promotionRules"
+  ]
+}

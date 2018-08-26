@@ -44,10 +44,10 @@ const ModalAudit = Form.create()(
         {...p}
       >
         <Form layout="horizontal">
-          <Form.Item label="审核状态" labelCol={{ span: 5 }} wrapperCol={{ span: 16 }}>
+          <Form.Item label="审核结果" labelCol={{ span: 5 }} wrapperCol={{ span: 16 }}>
             {getFieldDecorator('auditCode', {
               rules: [{
-                required: true, message: '请选择审核状态',
+                required: true, message: '请选择审核结果',
               }],
 
             })(

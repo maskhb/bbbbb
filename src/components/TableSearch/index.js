@@ -85,13 +85,18 @@ export default class TableSearch extends PureComponent {
   }
 
   handleFormReset = (e) => {
-    const { form, searchDefault } = this.props;
-    form.resetFields();
-    this.handleSearch(e, searchDefault);
+    const { form, searchDefault, onFormReset } = this.props;
+
+    if (onFormReset) {
+      onFormReset(form);
+    } else {
+      form.resetFields();
+      this.handleSearch(e, searchDefault);
+    }
   }
 
   render() {
-    const { form, children } = this.props;
+    const { form, children, queryBtnLoading = false, buttonMd = 8 } = this.props;
     const { expand } = this.state;
 
     // 不显示展开按钮：1、如果搜索控件数量小于等于1；2、如果没有simple配置的控件。
@@ -110,9 +115,9 @@ export default class TableSearch extends PureComponent {
     const operate = (
       children
         ? (
-          <Col md={8} sm={24}>
+          <Col md={buttonMd} sm={24}>
             <span styleName="operate">
-              <Button type="primary" onClick={this.handleSearch} styleName="btnSubmit">查询</Button>
+              <Button type="primary" onClick={this.handleSearch} styleName="btnSubmit" loading={queryBtnLoading}>查询</Button>
               <Button onClick={this.handleFormReset}>重置</Button>
               {
                 showExpand

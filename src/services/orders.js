@@ -2,7 +2,7 @@
  * @Author: wuhao
  * @Date: 2018-04-04 14:32:15
  * @Last Modified by: wuhao
- * @Last Modified time: 2018-05-15 16:24:21
+ * @Last Modified time: 2018-08-10 15:10:27
  *
  * 订单接口类
  */
@@ -272,10 +272,11 @@ async function queryExportTotalCount({ platform, exportType, orderQueryVO }) {
  * @param {*} param0
  */
 async function logisticsDetail({ orderId }) {
-  return request('/order/wx/logisticsDetail', {
+  return request('/order/admin/logisticsDetail', {
     method: 'POST',
     body: {
       orderId,
+      needDetail: 2,
     },
   });
 }
@@ -291,6 +292,71 @@ async function queryOrdeListTotalCount({ orderQueryVO }) {
       platform: 1,
       exportType: 0,
       orderQueryVO,
+    },
+  });
+}
+
+/**
+ * 查询订单物流信息
+ * @param {*} param0
+ */
+async function queryOrderLogisticsDetail({ orderId, packageNumber }) {
+  return request('/order/admin/logisticsDetail', {
+    method: 'POST',
+    body: {
+      orderId,
+      packageNumber,
+      needDetail: 1,
+    },
+  });
+}
+
+/**
+ * 生成超额支付订单
+ * @param {*} param0
+ */
+async function createOrderForExcessPay({
+  orderSn,
+  skuId,
+  goodsNum,
+  orderRemark,
+  merchantId,
+}) {
+  return request('/order/admin/excessPay/createOrder', {
+    method: 'POST',
+    body: {
+      orderSn,
+      skuId,
+      goodsNum,
+      orderRemark,
+      merchantId,
+    },
+  });
+}
+
+/**
+ * 生成子单(旧数据)
+ * @param {*} param0
+ */
+async function createSubOrder({ orderSn }) {
+  return request('/order/admin/createSubOrder', {
+    method: 'POST',
+    body: {
+      orderSn,
+    },
+  });
+}
+
+/**
+ * 导出订单对账总数
+ * @param {*} queryCondition
+ */
+
+async function transactionExportCount(queryCondition) {
+  return request('/order/transaction/compare/export/count', {
+    method: 'POST',
+    body: {
+      queryCondition,
     },
   });
 }
@@ -316,4 +382,8 @@ export default {
   queryExportTotalCount,
   logisticsDetail,
   queryOrdeListTotalCount,
+  queryOrderLogisticsDetail,
+  createOrderForExcessPay,
+  createSubOrder,
+  transactionExportCount,
 };

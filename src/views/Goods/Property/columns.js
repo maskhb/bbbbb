@@ -113,12 +113,11 @@ export default {
               key="4111"
               authority={
                 val.type === 1 ?
-                  P.OPERPORT_JIAJU_BASICPROPERTYLIST_SETVALUE :
-                  P.OPERPORT_JIAJU_SALESPROPERTYLIST_SETVALUE
+                  P.OPERPORT_JIAJU_BASICPROPERTYLIST_SETPROPERTY :
+                  P.OPERPORT_JIAJU_SALESPROPERTYLIST_SETPROPERTY
               }
             >
               <Link to={`/goods/property/key/${val.propertyGroupId}`}>管理属性</Link>
-              {/* <a onClick={() => self.handleManage(val.id)}>管理属性</a> */}
             </Authorized>
           ));
 
@@ -178,17 +177,37 @@ export default {
       render(val) {
         const btns = [];
         btns.push((
-          <a key="004" onClick={() => self.handleModalShow(val)}>编辑</a>
+          <Authorized
+            key="002"
+            authority={
+              self.isBaisc() ? 'OPERPORT_JIAJU_BASICPROPERTYLIST_EDIT'
+              : 'OPERPORT_JIAJU_SALESPROPERTYLIST_EDIT'
+            }
+          >
+            <a key="004" onClick={() => self.handleModalShow(val)}>编辑</a>
+          </Authorized>
         ));
         btns.push((
-          <Authorized key="002" authority="">
-            <Popconfirm placement="top" title="是否确认删除该属性组？" onConfirm={() => self.popConfirmRemove(val)}>
+          <Authorized
+            key="002"
+            authority={
+              self.isBaisc() ? 'OPERPORT_JIAJU_BASICPROPERTYLIST_DELETE'
+              : 'OPERPORT_JIAJU_SALESPROPERTYLIST_DELETE'
+            }
+          >
+            <Popconfirm placement="top" title="是否确认删除该属性？" onConfirm={() => self.popConfirmRemove(val)}>
               <a>删除</a>
             </Popconfirm>
           </Authorized>
         ));
         btns.push((
-          <Authorized key="003" authority="">
+          <Authorized
+            key="003"
+            authority={
+              self.isBaisc() ? 'OPERPORT_JIAJU_BASICPROPERTYLIST_SETPROPERTY'
+                : 'OPERPORT_JIAJU_SALESPROPERTYLIST_SETPROPERTY'
+            }
+          >
             <a onClick={() => self.handleModalValueShow(val)}>管理标准值</a>
           </Authorized>
         ));

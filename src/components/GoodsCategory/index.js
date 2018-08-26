@@ -4,6 +4,7 @@ import { Cascader } from 'antd';
 import goodsCategory from '../../services/goodsCategory';
 
 class GoodsCategory extends Component {
+  // eslint-disable-next-line
   static getCategoryList(categoryId, cb) {
     goodsCategory.list({
       parentId: categoryId,
@@ -22,6 +23,7 @@ class GoodsCategory extends Component {
       }
     });
   }
+
   constructor(props) {
     super(props);
     this.state = {
@@ -51,6 +53,7 @@ class GoodsCategory extends Component {
       value, selectedOptions,
     });
   }
+
   loadData(selectedOptions) {
     const that = this;
     const targetOption = selectedOptions[selectedOptions.length - 1];

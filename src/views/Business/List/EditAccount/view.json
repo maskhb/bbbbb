@@ -1,0 +1,13 @@
+{
+  "route": {
+    "params": "/:accountId",
+    "authority": "OPERPORT_JIAJU_SHOP_EDITACCOUNT"
+  },
+  "breadcrumb": {
+    "name": "编辑账号",
+    "icon": "",
+    "order": 0,
+    "authority": "OPERPORT_JIAJU_SHOP_EDITACCOUNT"
+  },
+  "model": ["businessAccount"]
+}

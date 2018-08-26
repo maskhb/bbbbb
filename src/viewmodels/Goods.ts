@@ -1,5 +1,5 @@
 import { IsNotEmpty, IsPositive, IsNumber, IsUrl, IsDate, IsString, MaxLength, IsOptional, IsEnum, ValidateNested } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Type,Transform } from 'class-transformer';
 import moment from 'moment';
 import PaginationList from './PaginationList';
 
@@ -73,9 +73,10 @@ export default class Goods {
   goodsId: number = 0;
 
   // 商品标题
-  @MaxLength(60)
-  @IsNotEmpty()
-  @IsString()
+  // @MaxLength(200)
+  // @IsNotEmpty()
+  // @IsString()
+  @Transform(value=>value || '')
   goodsName: string = '';
 
   // 商品图片
@@ -86,7 +87,7 @@ export default class Goods {
   merchantName: string = '';
 
   // 商品分类ID
-  @IsPositive()
+  // @IsPositive()
   goodsCategoryId: number = 0;
 
   // 上下架状态

@@ -32,6 +32,7 @@ export default {
       try {
         // 记录当前页面，再次登录后跳转回
         yield call(logout);
+        // eslint-disable-next-line
         const urlParams = new URL(window.location.href);
         const pathname = yield select(state => state.routing.location.pathname);
         cookie.clear();

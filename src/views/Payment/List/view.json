@@ -1,7 +1,7 @@
 {
   "route": {
     "params": "",
-    "authority": ""
+    "authority": "OPERPORT_JIAJU_PAYRECORDLIST_LIST"
   },
   "menu": {
     "name": "支付记录列表",

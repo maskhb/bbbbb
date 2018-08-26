@@ -64,22 +64,17 @@ export default class View extends PureComponent {
   }
 
   handleSearch = (values = {}) => {
+    console.log(values) //eslint-disable-line
     const communityList = this.props?.common?.queryCommunityList?.dataList;
     /* 格式化数据 */
     function fmtData(
       {
         createDate: [createdTimeBegin, createdTimeEnd] = [],
-        categoryId, operateScopeId, communityIdList,
+        categoryId,
+        operateScopeId,
+        communityIdList,
         ...others
       } = {}) {
-      if (Array.isArray(categoryId)) {
-          categoryId = categoryId[0]//eslint-disable-line
-      }
-      if (Array.isArray(operateScopeId)) {
-          operateScopeId = operateScopeId[0]//eslint-disable-line
-      }
-
-
       return {
         ...others,
         communityIdList: transformCommunityAll(communityList, communityIdList),
@@ -266,6 +261,16 @@ export default class View extends PureComponent {
               )
             }
               </Search.Item>
+              <Search.Item md={6} label="关联项目" simple>
+                {
+                ({ form }) => (
+                  form.getFieldDecorator('communityIdList', {
+                  })(
+                    <ProjectInput style={{ width: '100%' }} />
+                  )
+                )
+              }
+              </Search.Item>
               <Search.Item md={6} label="商家状态" simple>
                 {
                 ({ form }) => (
@@ -281,16 +286,7 @@ export default class View extends PureComponent {
                 )
               }
               </Search.Item>
-              <Search.Item md={6} label="关联项目" simple>
-                {
-                ({ form }) => (
-                  form.getFieldDecorator('communityIdList', {
-                  })(
-                    <ProjectInput style={{ width: '100%' }} />
-                  )
-                )
-              }
-              </Search.Item>
+
               <Search.Item md={6} label="创建时间" simple>
                 {
                 ({ form }) => (
@@ -307,7 +303,7 @@ export default class View extends PureComponent {
               <Authorized authority={['OPERPORT_JIAJU_SHOP_EXPORT']}>
                 <ModalExportBusiness
                   {...this.props}
-                  title="订单"
+                  title="商家"
                   params={{}}
                   convertParam={this.convertExportParam}
                   exportModalType={2}
@@ -331,9 +327,12 @@ export default class View extends PureComponent {
                 {
                   () => {
                     return (
-                      <Link to="/business/list/importBusiness/0">
-                        <Button type="primary ">导入商家</Button>
-                      </Link>
+                      <Authorized authority={['OPERPORT_JIAJU_BATCHADDING_ADDSHOP']}>
+                        <Link to="/business/list/importBusiness/0">
+                          <Button type="primary ">导入商家</Button>
+                        </Link>
+                      </Authorized>
+
                     );
                   }
                 }
@@ -342,9 +341,12 @@ export default class View extends PureComponent {
                 {
                   () => {
                     return (
-                      <Link to="/business/list/importAccount/0">
-                        <Button type="primary ">导入帐号</Button>
-                      </Link>
+                      <Authorized authority={['OPERPORT_JIAJU_BATCHADDING_ADDACCOUN']}>
+                        <Link to="/business/list/importAccount/0">
+                          <Button type="primary ">导入账号</Button>
+                        </Link>
+                      </Authorized>
+
                     );
                   }
                 }

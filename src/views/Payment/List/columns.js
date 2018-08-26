@@ -7,10 +7,17 @@ import { mul } from '../../../utils/number';
 
 
 const payTypeArr = [
-  { key: 'jjq_h5', value: '品牌家居券手机支付' },
-  { key: 'wx_jsapi', value: '微信手机支付' },
-  { key: 'ali_wap', value: '支付宝手机支付' },
-  { key: 'lakala_pos', value: '拉卡拉pos机刷卡支付' },
+  { key: 'ali_pc', value: '支付宝支付(PC)' },
+  { key: 'ali_wap', value: '支付宝支付(wap)' },
+  { key: 'jjq_h5', value: '恒大品牌家居券支付(移动端)' },
+  { key: 'jjq_pc', value: '恒大品牌家居券支付(PC)' },
+  { key: 'lakala_pc', value: '拉卡拉POS机刷卡支付(PC)' },
+  { key: 'lakala_pos', value: '拉卡拉POS机刷卡支付(移动端)' },
+  { key: 'sybpos_pc', value: '收银宝POS机刷卡支付(PC)' },
+  { key: 'sybpos_pos', value: '收银宝POS机刷卡支付(移动端)' },
+  { key: 'unionpay_pc', value: '银联全渠道网关支付' },
+  { key: 'wx_jsapi', value: '微信支付(H5)' },
+  { key: 'wx_pc', value: '微信支付(PC)' },
 ];
 
 const logcolumns = () => {
@@ -74,6 +81,9 @@ export default (me) => {
     {
       title: '支付方式',
       dataIndex: 'payType',
+      render: (val, record) => {
+        return <span>{`${val}(${record.payTypeKey})`}</span>;
+      },
     },
     {
       title: '支付金额',
@@ -108,7 +118,7 @@ export default (me) => {
       },
     },
     {
-      title: '支付平台交易流水号',
+      title: '第三方交易流水号',
       dataIndex: 'thirdPartTransactionId',
       width: '20%',
     },

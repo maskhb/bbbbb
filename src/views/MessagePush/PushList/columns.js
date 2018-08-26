@@ -18,7 +18,13 @@ export default (me) => {
     {
       title: '目标用户',
       dataIndex: 'task.targetType',
-      render: val => messagePushOptions.getLabelByValue('MBYH', val),
+      render: (val, rows) => {
+        if (val === 5) {
+          return <a target="_blank" href={JSON.parse(rows.task?.targetCondition)?.phoneFileUrl}>指定手机列表</a>;
+        } else {
+          return messagePushOptions.getLabelByValue('MBYH', val);
+        }
+      },
     },
     {
       title: '用户说明',

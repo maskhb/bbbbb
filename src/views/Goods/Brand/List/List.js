@@ -38,10 +38,6 @@ export default class View extends PureComponent {
     return dispatch({
       type: 'goodsBrand/list',
       payload: {
-        pageInfo: {
-          currPage: 0,
-          pageSize: 10,
-        },
         ...values,
       },
     });
@@ -76,6 +72,7 @@ export default class View extends PureComponent {
                 {
                   ({ form }) => (
                     form.getFieldDecorator('status', {
+                      initialValue: 0,
                     })(
                       <Select placeholder="请选择">
                         {statusOptions}

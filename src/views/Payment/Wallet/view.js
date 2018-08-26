@@ -1,7 +1,8 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'dva';
-import { Card, Button, Input, Select, Tabs, Form, Modal, DatePicker, InputNumber, message } from 'antd';
+import { Card, Button, Select, Tabs, Form, Modal, DatePicker, InputNumber, message } from 'antd';
 // import _ from 'lodash';
+import Input from 'components/input/DecorateInput';
 import { MonitorInput, rules, MonitorTextArea } from 'components/input';
 import { handleOperate } from 'components/Handle';
 import PanelList, { Search, Table, Batch } from 'components/PanelList';
@@ -133,14 +134,14 @@ export default class List extends PureComponent {
     const param = Object.assign({}, searchDefault);
     if (values?.balance?.min) {
       param.balanceStart = mul(values?.balance?.min, 100);
-      if (param.balanceStart % 1 !== 0) {
+      if (param.balanceStart % 1 !== 0 || values?.balance?.min === 0) {
         message.error('最多支持两位小数');
         return;
       }
     } else {
       param.balanceStart = -1;
     }
-    if (values?.balance?.max) {
+    if (values?.balance?.max || values?.balance?.max === 0) {
       param.balanceEnd = mul(values?.balance?.max, 100);
       if (param.balanceEnd % 1 !== 0) {
         message.error('最多支持两位小数');
@@ -341,6 +342,11 @@ export default class List extends PureComponent {
       { key: '006', value: '售后退款' },
       { key: '007', value: '订单取消退款' },
       { key: '008', value: '后台充值' },
+      { key: '011', value: '后台充值(旧) ' },
+      { key: '012', value: '会员购物(旧)' },
+      // { key: '013', value: '预存款(旧)' },
+      // { key: '014', value: '蜜家钱包(旧)' },
+      { key: '014', value: '售后退回(旧)' },
     ];
     return (
       <Card>
@@ -377,6 +383,7 @@ export default class List extends PureComponent {
                   form.getFieldDecorator('createdTime', {
                   })(
                     <DatePicker.RangePicker
+                      style={{ width: '100%' }}
                       showTime
                       format="YYYY-MM-DD HH:mm:ss"
                     />

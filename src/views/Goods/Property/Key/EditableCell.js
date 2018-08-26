@@ -30,6 +30,10 @@ class EditableCell extends PureComponent {
     if (typeof e === 'object') {
       value = e.target.value; // eslint-disable-line
     }
+
+    if (value instanceof String) {
+      value = value?.replace(/,|，/g, '');
+    }
     this.setState({ value });
     const { onChange } = this.props;
     if (onChange) {
@@ -43,6 +47,7 @@ class EditableCell extends PureComponent {
       return (
         <InputNumber
           min={1}
+          max={9999}
           onChange={e => this.handleChange(e)}
         />
       );
@@ -71,6 +76,22 @@ class EditableCell extends PureComponent {
                   rules: [
                     { required: true, message: '不允许为空!' },
                   ],
+                  getValueFromEvent(e) {
+                    // console.log(event);
+                    let v;
+                    if (!e || !e.target) {
+                      v = e;
+                    } else {
+                      const { target } = e;
+                      // eslint-disable-next-line
+                      v =  target.type === 'checkbox' ? target.checked : target.value;
+                    }
+                    // eslint-disable-next-line
+                    if (value.__proto__ === String.prototype) {
+                      return v.replace(/,|，/g, '');
+                    }
+                    return v;
+                  },
                 })(this.renderInput())
               }
 

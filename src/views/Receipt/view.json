@@ -1,0 +1,14 @@
+{
+  "route": {
+    "params": "",
+    "authority": ""
+  },
+  "menu": {
+    "name": "收据管理",
+    "icon": "setting",
+    "order": 42,
+    "authority": ""
+  },
+  "model": [""]
+  
+}

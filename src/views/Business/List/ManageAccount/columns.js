@@ -90,7 +90,7 @@ export default (me) => {
 
   return [
     {
-      title: '帐号名',
+      title: '账号名',
       dataIndex: 'accountName',
     },
     {
@@ -172,12 +172,14 @@ export default (me) => {
               </a>
             </Authorized>
         ) : ''}
+          {val.adminFlag === 0 ? (
+            <Authorized authority={['OPERPORT_JIAJU_SHOP_ACCOUNTAUTHORIZATION']}>
+              <a onClick={() => handleJumpToManageAccount(val)}>
+                设置权限
+              </a>
+            </Authorized>
+          ) : ''}
 
-          <Authorized authority={['OPERPORT_JIAJU_SHOP_ACCOUNTAUTHORIZATION']}>
-            <a onClick={() => handleJumpToManageAccount(val)}>
-            设置权限
-            </a>
-          </Authorized>
         </div>
       ),
     },

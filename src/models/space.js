@@ -54,7 +54,7 @@ export default {
       });
     },
     *queryFirstCategory({ payload }, { call, put }) {
-      const response = yield call(goodsCategory.list, payload);
+      const response = yield call(goodsCategory.listHasChild, payload);
       yield put({
         type: 'save',
         payload: {

@@ -16,8 +16,8 @@ const messagePushOptions = {
     { label: '退款成功通知用户', value: '8', key: 8 },
   ],
   YWLX: [
-    { label: '家居', value: '1', key: 1 },
-    { label: '密蜜', value: '2', key: 2 },
+    { label: '家居', value: '2', key: 2 },
+    { label: '密蜜', value: '1', key: 1 },
   ],
   TSJD: [
     { label: '计划推送', value: '0', key: 0 },
@@ -30,6 +30,13 @@ const messagePushOptions = {
     { label: '低', value: '1', key: 1 },
   ],
   MBYH: [
+    { label: '单个用户', value: '6', key: 6 },
+    { label: '指定手机列表', value: '5', key: 5 },
+    { label: '全部家居用户', value: '7', key: 7 },
+    { label: '全部密蜜注册用户', value: '1', key: 1 },
+    { label: '全部密蜜认证用户', value: '2', key: 2 },
+  ],
+  MBYH1: [
     { label: '单个用户', value: '6', key: 6 },
     { label: '指定手机列表', value: '5', key: 5 },
   ],

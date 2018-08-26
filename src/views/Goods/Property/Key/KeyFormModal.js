@@ -139,12 +139,12 @@ class KeyFormModal extends PureComponent {
           {...this.formItemLayout}
         >
           {getFieldDecorator('orderNum', {
-            initialValue: item ? item.orderNum : 1,
+            initialValue: item ? item.orderNum : 100,
             rules: [
               { required: true, message: '属性名称排序不允许为空!' },
             ],
           })(
-            <InputNumber />
+            <InputNumber min={1} max={9999} />
           )}
         </Form.Item>
       </Modal>

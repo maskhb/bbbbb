@@ -95,7 +95,6 @@ class CommunitySelectBtn extends Component {
               </Checkbox>
             </Card>
             <br />
-
             <Card title="具体小区" loading={this.props.loading}>
               <CommunitySelect
               // checkType={this.props.checkType}// 1,2 all,3 none,4 自定义,必填

@@ -1,0 +1,13 @@
+{
+  "route": {
+    "params": "/:pattern/:id",
+    "authority": ""
+  },
+  "breadcrumb": {
+    "name": "查看优惠券",
+    "icon": "",
+    "order": 0,
+    "authority": ""
+  },
+  "model": ["marketing"]
+}

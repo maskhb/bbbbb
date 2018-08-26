@@ -9,5 +9,5 @@
     "order": 0,
     "authority": ""
   },
-  "model": ["goods", "goodsPackage"]
+  "model": ["global"]
 }

@@ -79,8 +79,10 @@ export default class BasicLayout extends React.PureComponent {
     // this.props.dispatch({
     //   type: 'permission/current',
     // });
+
     this.props.dispatch({
       type: 'global/fetchNotices',
+      payload: {},
     });
   }
 
@@ -96,6 +98,7 @@ export default class BasicLayout extends React.PureComponent {
   getBashRedirect = () => {
     // According to the url parameter to redirect
     // 这里是重定向的,重定向到 url 的 redirect 参数所示地址
+    // eslint-disable-next-line
     const urlParams = new URL(window.location.href);
 
     const redirect = urlParams.searchParams.get('redirect');
@@ -136,6 +139,7 @@ export default class BasicLayout extends React.PureComponent {
     if (visible) {
       this.props.dispatch({
         type: 'global/fetchNotices',
+        payload: {},
       });
     }
   }

@@ -11,8 +11,6 @@ import getColumns from './columns';
   loading: loading.models.batchImport,
 }))
 export default class View extends PureComponent {
-  static defaultProps = {
-  };
   static handleTimeStr(timestamp, type) { // type 1:到00:00:00   2：到23:59:59
     let result = '';
     if (type === 1) {

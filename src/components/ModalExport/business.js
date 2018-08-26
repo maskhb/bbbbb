@@ -2,13 +2,15 @@
  * @Author: wuhao
  * @Date: 2018-04-18 09:34:14
  * @Last Modified by: wuhao
- * @Last Modified time: 2018-05-11 10:59:04
+ * @Last Modified time: 2018-08-17 15:15:29
  *
  * 导出弹框 业务组件
  */
 
 import React, { PureComponent } from 'react';
 import { connect } from 'dva';
+
+import { message } from 'antd';
 
 import { goTo } from 'utils/utils';
 
@@ -60,7 +62,13 @@ class ModalExportBusiness extends PureComponent {
      }
 
      if (oldServiceUrl) {
-       return `http://${env}.${oldServiceUrl}.hd${dataUrl.indexOf('/') === 0 ? '' : '/'}${dataUrl}`;
+       if (env === 'release') {
+         return `http://ht-${oldServiceUrl}.htmimi.com${dataUrl.indexOf('/') === 0 ? '' : '/'}${dataUrl}`;
+       } else if (env === 'stg') {
+         return `http://ht-${oldServiceUrl}-${env}.htmimi.com${dataUrl.indexOf('/') === 0 ? '' : '/'}${dataUrl}`;
+       } else {
+         return `http://${env}.${oldServiceUrl}.hd${dataUrl.indexOf('/') === 0 ? '' : '/'}${dataUrl}`;
+       }
      } else {
        return `http://zuul-internal-${env}.hd${dataUrl.indexOf('/') === 0 ? '' : '/'}${dataUrl}`;
      }
@@ -125,6 +133,16 @@ class ModalExportBusiness extends PureComponent {
        };
      }
 
+     // 需导出数量为0时，结束并提示
+     if ((cParam?.totalCount || totalCount || 0) < 1) {
+       message.error('查询无结果，无法导出，请重新查询');
+       return {
+         succ: false,
+         totalCount: 0,
+         sucTitle: cParam?.sucTitle,
+       };
+     }
+
      const reqParam = {
        dataUrl: this.getPrefix(
          cParam?.dataUrl || dataUrl || pubDataUrl,
@@ -141,6 +159,7 @@ class ModalExportBusiness extends PureComponent {
        },
        exportInstruction,
      };
+
 
      await dispatch({
        type: 'common/startExportFile',
@@ -171,6 +190,7 @@ class ModalExportBusiness extends PureComponent {
 
    renderResultHint = () => {
      const { params } = this.props;
+
      return (
        <ResultHint
          {...this.props}

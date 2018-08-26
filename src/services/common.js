@@ -12,12 +12,23 @@ async function queryCommunityList(params) {
     },
   });
 }
+
+const caches = {};
 async function queryRegionInfo(params) {
+  const { regionId } = params;
+  if (caches[regionId]) {
+    return new Promise(((resolve) => {
+      resolve(caches[regionId]);
+    }));
+  }
   return request('/json/region-api/region/getChildRegions', {
     method: 'POST',
     body: {
       ...params,
     },
+  }).then((data) => {
+    caches[regionId] = data;
+    return data;
   });
 }
 
@@ -81,14 +92,56 @@ async function getPaymentMethodList({ type }) {
   });
 }
 
+/**
+ * 查询促销商品信息(分页)
+ * @param {*} param0
+ */
+async function queryPromotionGoodsByPage(GoodsPromotionVo) {
+  return request('/mj/ht-mj-goods-server/goods/queryPromotionGoodsByPage', {
+    method: 'POST',
+    body: {
+      GoodsPromotionVo,
+    },
+  });
+}
+
+/**
+ * 商品分类列表
+ * @param {*} param0
+ */
+async function goodsSaleCategoryList({ parentId }) {
+  return request('/mj/ht-mj-goods-server/goodsCategory/queryList', {
+    method: 'POST',
+    body: {
+      goodsCategoryVoQ: {
+        parentId,
+      },
+    },
+  });
+}
+
+/**
+ * 根据merchantId查商品分类列表
+ * @param {*} param0
+ */
+async function goodsCategoryListByMerchantId({ merchantId }) {
+  return request('/mj/ht-mj-goods-server/goodsCategory/queryListAndHasChildByMerchantId', {
+    method: 'POST',
+    body: {
+      merchantId,
+    },
+  });
+}
+
 export default {
   getProvincesWithCommunities,
   queryCommunityList,
   queryRegionInfo,
-
+  goodsSaleCategoryList,
   startExportFile,
   queryMerchantList,
   orderGoodsListByPage,
-
+  queryPromotionGoodsByPage,
   getPaymentMethodList,
+  goodsCategoryListByMerchantId,
 };

@@ -5,10 +5,9 @@
   },
   "menu": {
     "name": "售后管理",
-    "icon": "appstore",
-    "order": 14,
-    "authority": "",
-    "hideInMenu": true
+    "icon": "setting",
+    "order": 12,
+    "authority": ""
   },
   "model": [""]
 }

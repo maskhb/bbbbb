@@ -11,8 +11,6 @@ import getColumns from './columns';
   loading: loading.models.batchImport,
 }))
 export default class View extends PureComponent {
-  static defaultProps = {
-  };
   static handleTimeStr(timestamp, type) { // type 1:到00:00:00   2：到23:59:59
     let result = '';
     if (type === 1) {
@@ -29,7 +27,7 @@ export default class View extends PureComponent {
   handleSearch = () => {
     const { dispatch } = this.props;
     const currentTime = new Date();
-    let businessTypeList = ['MERCHANT_IMPORT', 'MERCHANT_ACCOUNT_IMPORT', 'IMPORT_MEMBERS', 'GOODS_BATCH_UPDATE'];
+    let businessTypeList = ['MERCHANT_IMPORT', 'MERCHANT_ACCOUNT_IMPORT', 'IMPORT_MEMBERS', 'GOODS_BATCH_UPDATE', 'TRANSACTION_COMPARE'];
     const param = qs.parse(this.props.location.search, { ignoreQueryPrefix: true });
     if (param.businessType) {
       businessTypeList = [param.businessType];

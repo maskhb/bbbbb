@@ -2,6 +2,7 @@ import React, { PureComponent } from 'react';
 import { Button, Card, message } from 'antd';
 import { connect } from 'dva';
 import PageHeaderLayout from 'layouts/PageHeaderLayout';
+import Authorized from 'utils/Authorized';
 
 import PanelList, { Batch, Table } from 'components/PanelList';
 import columns from '../columns';
@@ -220,12 +221,24 @@ export default class View extends PureComponent {
         <Card title={detail.propertyGroupName}>
           <PanelList>
             <Batch>
-              <Button icon="plus" type="primary" onClick={() => this.handleModalShow()}>
-                新建
-              </Button>
-              <Button type="primary" onClick={this.handleModalImprtShow}>
-                导入
-              </Button>
+              <Authorized authority={
+                this.isBaisc() ? 'OPERPORT_JIAJU_BASICPROPERTYLIST_ADD'
+                : 'OPERPORT_JIAJU_SALESPROPERTYLIST_ADD'
+              }
+              >
+                <Button icon="plus" type="primary" onClick={() => this.handleModalShow()}>
+                  新建
+                </Button>
+              </Authorized>
+              <Authorized authority={
+                this.isBaisc() ? 'OPERPORT_JIAJU_BASICPROPERTYLIST_IMPORT'
+                : 'OPERPORT_JIAJU_SALESPROPERTYLIST_IMPORT'
+              }
+              >
+                <Button type="primary" onClick={this.handleModalImprtShow}>
+                  导入
+                </Button>
+              </Authorized>
             </Batch>
 
             <Table

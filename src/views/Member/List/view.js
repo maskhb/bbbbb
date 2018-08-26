@@ -12,7 +12,6 @@ import ModalExportBusiness from 'components/ModalExport/business';
 import {
   Card,
   Button,
-  Input,
   DatePicker,
   Select,
   Modal,
@@ -20,6 +19,7 @@ import {
   Col,
   Form,
 } from 'antd';
+import Input from 'components/input/DecorateInput';
 import getColumns from './column';
 import { transParams } from '../const';
 import styles from './view.less';

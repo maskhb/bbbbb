@@ -1,0 +1,13 @@
+{
+  "route": {
+    "params": "",
+    "authority": ""
+  },
+  "menu": {
+    "name": "xxx分类管理",
+    "icon": "",
+    "order": 6,
+    "authority": ""
+  },
+  "model": ["xxxCategory"]
+}

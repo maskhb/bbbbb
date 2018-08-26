@@ -14,8 +14,6 @@ const FormItem = Form.Item;
 }))
 @Form.create()
 export default class View extends PureComponent {
-  static defaultProps = {
-  };
   static handleCommunityList(allList, checkedList) {
     const result = {};
     allList.forEach((v) => {

@@ -1,0 +1,13 @@
+{
+  "route": {
+    "params": "/:id",
+    "authority": ""
+  },
+  "breadcrumb": {
+    "name": "编辑广告项",
+    "icon": "",
+    "order": 0,
+    "authority": ""
+  },
+  "model": ["ad", "adPos"]
+}

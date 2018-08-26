@@ -15,11 +15,15 @@ export default class View extends PureComponent {
   };
 
   state = {
+    // list: [
+    //   { index: 1, page: '底部导航-移动端' },
+    //   { index: 2, page: '首页-移动端' },
+    //   { index: 3, page: '商城页-移动端' },
+    //   { index: 4, page: '公共导航-PC端' }],
     list: [
       { index: 1, page: '底部导航-移动端' },
       { index: 2, page: '首页-移动端' },
-      { index: 3, page: '商城页-移动端' },
-      { index: 4, page: '公共导航-PC端' }],
+      { index: 3, page: '商城页-移动端' }],
   };
 
   edit = (key) => {

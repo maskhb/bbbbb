@@ -69,6 +69,13 @@ export default (me) => {
       dataIndex: 'arrivalTime',
     },
     {
+      title: '自动签收时间（天）',
+      dataIndex: 'acceptDay',
+      render(val) {
+        return val && val > 0 ? val : '';
+      },
+    },
+    {
       title: '是否允许使用家居券及预存款',
       dataIndex: 'isAllowUseDiscount',
 

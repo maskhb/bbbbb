@@ -89,22 +89,22 @@ export default (me) => {
     switch (type) {
       case 'up':
         genre = '上架该商家';
-        main = '上架后该商家将正常可见，也可登陆后台';
+        main = '上架后该商家将正常可见';
         updateType = 2;
         break;
       case 'down':
         genre = '下架该商家';
-        main = '下架后该商家将无法在前端显示，也无法登陆后台';
+        main = '下架后该商家将无法在前端显示';
         updateType = 1;
         break;
       case 'fz':
         genre = '冻结该商家';
-        main = '冻结后该商家将无法在前端显示';
+        main = '冻结后该商家将无法在前端显示，也无法登录后台';
         updateType = 3;
         break;
       case 'unfz':
         genre = '解冻该商家';
-        main = '解冻后该商家将正常可见';
+        main = '解冻后该商家将正常可见，也可登录后台';
         updateType = 4;
         break;
       case 'disa':
@@ -155,14 +155,20 @@ export default (me) => {
     switch (location.hostname) {
       case 'localhost':
       case 'dev':
+      case 'dev.yy.hd':
+      case 'ht-yunying-dev.hd':
         url = `http://ht-jj-sj-platform-dev.hd/#/crossauth?merchantId=${val.merchantId}&token=${token}`;
         break;
       case 'ht-yunying-test.htmimi.com':
+      case 'ht-yunying-test.hd':
       case 'test.yy-beta.hd':
         url = `http://ht-jj-sj-platform-test.hd/#/crossauth?merchantId=${val.merchantId}&token=${token}`;
         break;
+      case 'ht-yunying-stg.htmimi.com':
+        url = `http://ht-jj-sj-platform-stg.htmimi.com/#/crossauth?merchantId=${val.merchantId}&token=${token}`;
+        break;
       default:
-        url = `http://ht-jj-sj-platform-dev.hd/#/crossauth?merchantId=${val.merchantId}&token=${token}`;
+        url = `http://ht-jj-sj-platform.htmimi.com/#/crossauth?merchantId=${val.merchantId}&token=${token}`;
         break;
     }
     return url;
@@ -207,14 +213,14 @@ export default (me) => {
               ) : null }
             <Authorized authority={['OPERPORT_JIAJU_SHOP_ACCOUNTLIST']}>
               <a onClick={() => handleJumpToManageAccount(val)}>
-              管理帐号
+              管理账号
               </a>
             </Authorized>
             <Authorized authority={['OPERPORT_JIAJU_SHOP_SHOPSYSTEM']}>
-              <a href={getUrl(val)} target="_blank" >商家后台 </a>
+              <a href={getUrl(val)} rel="noopener noreferrer" target="_blank" >商家后台 </a>
             </Authorized>
 
-            <Authorized authority={['OPERPORT_JIAJU_PRODUCTLIST_PUBLISH']}>
+            <Authorized authority={['OPERPORT_JIAJU_SHOP_UPDATE']}>
               <a onClick={showModelConfirm.bind(this, status, 'up', val)}>上架</a>
             </Authorized>
 
@@ -250,14 +256,14 @@ export default (me) => {
               ) : null }
             <Authorized authority={['OPERPORT_JIAJU_SHOP_ACCOUNTLIST']}>
               <a onClick={() => handleJumpToManageAccount(val)}>
-              管理帐号
+              管理账号
               </a>
             </Authorized>
             <Authorized authority={['OPERPORT_JIAJU_SHOP_SHOPSYSTEM']}>
-              <a href={getUrl(val)} target="_blank" >商家后台 </a>
+              <a href={getUrl(val)} rel="noopener noreferrer" target="_blank" >商家后台 </a>
             </Authorized>
 
-            <Authorized authority={['OPERPORT_JIAJU_PRODUCTLIST_UNPUBLISH']}>
+            <Authorized authority={['OPERPORT_JIAJU_SHOP_FROMSALE']}>
               <a onClick={showModelConfirm.bind(this, status, 'down', val)}>下架</a>
             </Authorized>
 
@@ -292,11 +298,11 @@ export default (me) => {
               ) : null }
             <Authorized authority={['OPERPORT_JIAJU_SHOP_ACCOUNTLIST']}>
               <a onClick={() => handleJumpToManageAccount(val)}>
-              管理帐号
+              管理账号
               </a>
             </Authorized>
             <Authorized authority={['OPERPORT_JIAJU_SHOP_SHOPSYSTEM']}>
-              <a href={getUrl(val)} target="_blank" >商家后台 </a>
+              <a href={getUrl(val)} rel="noopener noreferrer" target="_blank" >商家后台 </a>
             </Authorized>
             <Authorized authority={['OPERPORT_JIAJU_SHOP_UNFREEZE']}>
               <a onClick={showModelConfirm.bind(this, status, 'unfz', val)}>解冻</a>
@@ -330,7 +336,8 @@ export default (me) => {
         return (
           <a
             target="_blank"
-            href={`jj-platform#/business/list?${data.merchantId}`}
+            rel="noopener noreferrer"
+            href={`jj-platform#/business/list?${data.unionMerchantId}`}
           >
             {val}
           </a>

@@ -28,7 +28,13 @@ export default (me, searchDefault) => {
       dataIndex: 'brandName',
       render(val, record) {
         return (
-          <a target="_blank" href={`#/goods/brand/list/detail/${record.brandId}`}><TextBeyond content={val} maxLength="12" width="300px" /></a>
+          <a
+            rel="noopener noreferrer"
+            target="_blank"
+            href={`#/goods/brand/list/detail/${record.brandId}`}
+          >
+            <TextBeyond content={val} maxLength="12" width="300px" />
+          </a>
         );
       },
     },

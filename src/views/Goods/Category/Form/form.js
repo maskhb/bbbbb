@@ -108,8 +108,10 @@ export default class View extends PureComponent {
   }
 
   handleSubmit = () => {
-    const { form, dispatch, match: { params: { id, pid } } } = this.props;
+    const { form, dispatch, goodsCategory, match: { params: { id, pid } } } = this.props;
     const { validateFieldsAndScroll } = form;
+
+    const data = goodsCategory?.[`detail${id}`] || {};
 
     validateFieldsAndScroll((error, values) => {
       // console.log('values:', values);
@@ -125,6 +127,9 @@ export default class View extends PureComponent {
         delete newValues.status;
       }
       if (!error) {
+        if (!newValues.acceptDay && data?.acceptDay) {
+          newValues.acceptDay = 0;
+        }
         dispatch({
           type: `goodsCategory/${type}`,
           payload: {
@@ -225,6 +230,13 @@ export default class View extends PureComponent {
                 <InputNumber min={0} max={9999} precision={0} disabled={disabled} />
               )}
             </FormItem>
+            <FormItem {...formItemLayout} label="自动签收时间(天)">
+              {form.getFieldDecorator('acceptDay', {
+                initialValue: data?.acceptDay > 0 ? data?.acceptDay : null,
+              })(
+                <InputNumber min={1} max={9999} precision={0} disabled={disabled} />
+              )}
+            </FormItem>
             <FormItem {...formItemLayout} label="是否允许使用家居券及预存款">
               {form.getFieldDecorator('isAllowUseDiscount', {
                 rules: [],
@@ -248,7 +260,7 @@ export default class View extends PureComponent {
               })(
                 <ImageUpload
                   exclude={['gif']}
-                  maxSize={5120}
+                  maxSize={2048}
                   maxLength={1}
                   fileList={fileList}
                   listType="picture-card"

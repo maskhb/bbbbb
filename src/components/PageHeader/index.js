@@ -102,14 +102,14 @@ export default class PageHeader extends PureComponent {
         const name = url.match(/\//g)?.length === 1
           ? configs[url.split('/')[1].toLowerCase().replace(/( |^)[a-z]/g, v => v.toUpperCase())]?.menu?.name
           : null;
-
         const isLinkable = (index !== pathSnippets.length - 1) && currentBreadcrumb.component;
+        const isLast = index === pathSnippets.length - 1;
         return currentBreadcrumb.name && !currentBreadcrumb.hideInBreadcrumb ? (
           <Breadcrumb.Item key={url}>
             {createElement(
               isLinkable ? linkElement : 'span',
               { [linkElement === 'a' ? 'href' : 'to']: url },
-              currentBreadcrumb.name,
+              isLast && this.props.crumbTitle ? this.props.crumbTitle : currentBreadcrumb.name,
             )}
           </Breadcrumb.Item>
         ) : name ? (
@@ -117,11 +117,12 @@ export default class PageHeader extends PureComponent {
             {createElement(
               'span',
               {},
-              name,
+              isLast && this.props.crumbTitle ? this.props.crumbTitle : name,
             )}
           </Breadcrumb.Item>
         ) : null;
       });
+
       const breadcrumbItems = [(
         <Breadcrumb.Item key="home">
           {createElement(linkElement, {

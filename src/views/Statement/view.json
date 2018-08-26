@@ -1,0 +1,15 @@
+{
+  "route": {
+    "params": "",
+    "authority": "OPERPORT_JIAJU_ACCOUNTS_LIST"
+  },
+  "menu": {
+    "name": "流水对账",
+    "icon": "setting",
+    "order": 13,
+    "authority": "OPERPORT_JIAJU_ACCOUNTS_LIST"
+  },
+  "model": [
+    "statement"
+  ]
+}

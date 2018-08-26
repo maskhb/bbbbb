@@ -1,13 +1,13 @@
 {
   "route": {
     "params": "/:id",
-    "authority": ""
+    "authority": "OPERPORT_JIAJU_BATCHADDING_ADDSHOP"
   },
   "breadcrumb": {
     "name": "导入商家",
     "icon": "",
     "order": 1,
-    "authority": ""
+    "authority": "OPERPORT_JIAJU_BATCHADDING_ADDSHOP"
   },
   "model": ["business"]
 }
