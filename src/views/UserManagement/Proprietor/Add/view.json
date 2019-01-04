@@ -1,0 +1,13 @@
+{
+  "route": {
+    "params": "",
+    "authority": "PMS_USERMANAGEMENT_PROPRIETOR_ADD"
+  },
+  "breadcrumb": {
+    "name": "新建业主",
+    "icon": "",
+    "order": 0,
+    "authority": "PMS_USERMANAGEMENT_PROPRIETOR_ADD"
+  },
+  "model": ["proprietor","building","houseStatus","floor","baseSetting","common","tag"]
+}

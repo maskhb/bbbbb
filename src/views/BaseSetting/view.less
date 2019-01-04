@@ -1,0 +1,47 @@
+@borderColor:#ccc;
+
+.organization{
+  width: 100%;
+  margin-top: 20px;
+  border-top:1px solid @borderColor;
+  position: relative;
+  overflow:auto;
+  :global{
+    .organizeList{
+      padding: 0 10px 10px;
+      box-sizing: border-box;
+      width: 400px;
+      overflow: hidden;
+      border-right:1px solid @borderColor;
+      min-height: 450px;
+    }
+    .organizeDetail{
+      position: absolute;
+      left: 400px;
+      top:0;
+      padding: 0 10px 10px;
+      box-sizing: border-box;
+      min-width: 500px;
+    }
+    .title{
+      line-height: 50px;
+      font-size: 14px;
+      border-bottom: 1px solid @borderColor;
+    }
+    .detailTable{
+      margin: 20px;
+      line-height: 30px;
+      b{ display: inline-block; width: 100px; }
+      span{ }
+    }
+    .largeLabel{
+      b{ width: 120px; }
+    }
+  }
+}
+
+:global{
+  .fl_r{
+    float: right;
+  }
+}

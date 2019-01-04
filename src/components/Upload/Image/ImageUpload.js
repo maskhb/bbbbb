@@ -32,7 +32,7 @@ export default class ImageUpload extends Component {
     previewImage: '',
   }
 
-  // componentWillMount() {   const { fileList } = this.props;   this.setState({
+  // componentDidMount() {   const { fileList } = this.props;   this.setState({
   //   fileList,   }); }
 
   componentWillReceiveProps(nextProps) {
@@ -55,32 +55,15 @@ export default class ImageUpload extends Component {
   }
 
   getFileListByValue = (value) => {
-    // console.log('filessssss', this.state);
-    const { fileList } = this.state;
-    const uids = fileList.map(l => l.uid);
-    const urls = fileList.map(l => l.$url);
-    _.forEach(value, (url, index) => {
-      if (uids.indexOf(index + url) > -1) {
-        return;
-      }
-      if (urls.indexOf(url) > -1) {
-        for (const val of fileList) {
-          if (val.$url === url) {
-            val.url = url;
-            val.thumbUrl = url;
-          }
-        }
-        return;
-      }
-      fileList.push({
+    return _.map(value, (url, index) => {
+      return {
         uid: index + url,
         name: url,
         status: 'done',
         url,
         thumbUrl: url,
-      });
+      };
     });
-    return fileList;
   }
 
   getHttpProps = () => {
@@ -89,7 +72,7 @@ export default class ImageUpload extends Component {
         action: '/api/upload/img',
         data: {
           token: cookie.get('x-manager-token'),
-          loginType: 1,
+          loginType: 7,
           type: 2,
           watermark: ((this.props.watermark)
             ? 1
@@ -133,7 +116,6 @@ export default class ImageUpload extends Component {
   handleChange = (e) => {
     const { fileList } = e;
     const { onChange, uploadChange } = this.props;
-    // console.log('onchange...', JSON.stringify(fileList));
     // TODO，注意， 此处的this指向的是Form，非此Class，故执行的this.onChange为Form的方法
     const newValue = fileList.map((item) => {
       let f = '';
@@ -148,8 +130,6 @@ export default class ImageUpload extends Component {
           });
         }
       }
-      // eslint-disable-next-line
-      item.$url = f;
       return f;
     });
 
@@ -219,6 +199,7 @@ export default class ImageUpload extends Component {
         }
       }
     }
+
     this.setState({
       fileList: files,
     });
@@ -231,6 +212,15 @@ export default class ImageUpload extends Component {
     const { fileList } = this.state;
     const files = fileList.filter(f => f !== file);
     // console.log(file, fileList);
+    this.setState({
+      fileList: files,
+    });
+    this.handleChange({
+      fileList: files,
+    });
+  }
+
+  handleSort = (files) => {
     this.setState({
       fileList: files,
     });
@@ -284,6 +274,7 @@ export default class ImageUpload extends Component {
         onRemove={this.handleRemove}
         onPrevious={this.handlePrevious}
         onNext={this.handleNext}
+        onSort={this.handleSort}
         locale={{
           uploading: '文件上传中...',
           removeFile: '删除',
@@ -340,8 +331,8 @@ export default class ImageUpload extends Component {
           <img
             alt="example"
             style={{
-            width: '100%',
-          }}
+              width: '100%',
+            }}
             src={previewImage}
           />
         </Modal>

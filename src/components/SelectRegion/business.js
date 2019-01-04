@@ -11,9 +11,8 @@ import { connect } from 'dva';
 
 import SelectRegion from './index';
 
-@connect(({ common, loading }) => ({
+@connect(({ common }) => ({
   common,
-  loading: loading.models.common,
 }))
 class SelectRegionBusiness extends PureComponent {
   static defaultProps = {};

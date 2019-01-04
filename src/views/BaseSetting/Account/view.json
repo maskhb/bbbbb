@@ -1,0 +1,13 @@
+{
+  "route": {
+    "params": "",
+    "authority": "PMS_BASICSETTING_ACCOUNT_LIST"
+  },
+  "menu": {
+    "name": "账号管理",
+    "icon": "",
+    "order": 1,
+    "authority": "PMS_BASICSETTING_ACCOUNT_LIST"
+  },
+  "model": ["accountInfo", "user", "baseSetting"]
+}

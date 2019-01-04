@@ -1,6 +1,6 @@
 function current(req, res) {
   const result = {
-    name: '张鹏',
+    name: '吴豪',
     avatar: 'https://gw.alipayobjects.com/zos/rmsportal/BiazfanxmamNRoxxVxka.png',
     userid: '00000001',
     notifyCount: 12,

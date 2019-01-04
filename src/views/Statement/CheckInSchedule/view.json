@@ -1,0 +1,14 @@
+{
+  "route": {
+    "params": "",
+    "authority": "PMS_REPORTFORMS_RECELVABLESDAILY_LIST"
+  },
+  "menu": {
+    "name": "收款日报表",
+    "icon": "",
+    "order": 1,
+    "authority": "PMS_REPORTFORMS_RECELVABLESDAILY_LIST",
+    "orgType": 1
+  },
+  "model": ["statement"]
+}

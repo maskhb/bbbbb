@@ -2,7 +2,7 @@
  * @Author: wuhao
  * @Date: 2018-04-18 09:34:14
  * @Last Modified by: wuhao
- * @Last Modified time: 2018-08-17 15:15:29
+ * @Last Modified time: 2018-08-17 15:35:03
  *
  * 导出弹框 业务组件
  */
@@ -69,6 +69,7 @@ class ModalExportBusiness extends PureComponent {
        } else {
          return `http://${env}.${oldServiceUrl}.hd${dataUrl.indexOf('/') === 0 ? '' : '/'}${dataUrl}`;
        }
+       //  return `http://${env}.${oldServiceUrl}.hd${dataUrl.indexOf('/') === 0 ? '' : '/'}${dataUrl}`;
      } else {
        return `http://zuul-internal-${env}.hd${dataUrl.indexOf('/') === 0 ? '' : '/'}${dataUrl}`;
      }
@@ -161,6 +162,7 @@ class ModalExportBusiness extends PureComponent {
      };
 
 
+     console.log(dispatch);
      await dispatch({
        type: 'common/startExportFile',
        payload: reqParam,
@@ -190,7 +192,6 @@ class ModalExportBusiness extends PureComponent {
 
    renderResultHint = () => {
      const { params } = this.props;
-
      return (
        <ResultHint
          {...this.props}

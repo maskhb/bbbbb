@@ -1,0 +1,13 @@
+{
+  "route": {
+    "params": "",
+    "authority": "PMS_ROOMRESOURCES_TAG_LIST"
+  },
+  "menu": {
+    "name": "标签管理",
+    "icon": "",
+    "order": 2,
+    "authority": "PMS_ROOMRESOURCES_TAG_LIST"
+  },
+  "model": ["tag"]
+}

@@ -45,8 +45,15 @@ export function checkStatus(response) {
 
 export function checkIsMock(json) {
   if (isMockResponse(json)) {
-    // eslint-disable-next-line
-    json.isMock = true;
+    if (!isNaN(json)) {
+      return {
+        isMock: true,
+        data: json,
+      };
+    } else {
+      // eslint-disable-next-line
+      json.isMock = true;
+    }
   } else {
     return json;
   }
@@ -194,7 +201,7 @@ function errorMessage(errorText, json) {
   if (errorCodeQueue.indexOf(json.msgCode) === -1) {
     errorCodeQueue.push(json.msgCode);
     if (
-      json.msgCode === 402 || json.msgCode === 401 ||
+      json.busCode === 1001001 || json.msgCode === 402 || json.msgCode === 401 ||
       errorText.indexOf('未登录') > -1 || errorText === '无效授权'
     ) {
       Modal.confirm({
@@ -212,7 +219,7 @@ function errorMessage(errorText, json) {
           if (location.hostname === 'localhost') {
             window.location.reload();
           } else {
-            location.href = '/jj-platform/';
+            location.href = '/';
           }
         },
       });

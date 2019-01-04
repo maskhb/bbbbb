@@ -1,0 +1,14 @@
+{
+  "route": {
+    "params": "",
+    "authority": "PMS_CHECKIN_CHECKINREGISTER_LIST"
+  },
+  "menu": {
+    "name": "入住登记单管理",
+    "icon": "",
+    "order": 3,
+    "authority": "PMS_CHECKIN_CHECKINREGISTER_LIST",
+    "orgType": 1
+  },
+  "model": ["checkIn","user","exportFile","nightCheck","cashier"]
+}

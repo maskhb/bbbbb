@@ -1,0 +1,14 @@
+{
+  "route": {
+    "params": "",
+    "authority": "PMS_ACCOUNT_ACCOUNTRECEIVABLE_LIST"
+  },
+  "menu": {
+    "name": "应收账号管理",
+    "icon": "",
+    "order": 3,
+    "authority": "PMS_ACCOUNT_ACCOUNTRECEIVABLE_LIST",
+    "orgType": 1
+  },
+  "model": ["cashier"]
+}

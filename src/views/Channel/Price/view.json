@@ -1,0 +1,14 @@
+{
+  "route": {
+    "params": "",
+    "authority": "PMS_CHANNEL_PRICECODE_LIST"
+  },
+  "menu": {
+    "name": "价格代码管理",
+    "icon": "",
+    "order": 2,
+    "authority": "PMS_CHANNEL_PRICECODE_LIST",
+    "orgType": 1
+  },
+  "model": ["cashier"]
+}

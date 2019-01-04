@@ -18,7 +18,7 @@ export default class Download extends Component {
   }
 
 
-  componentWillMount() {
+  componentDidMount() {
     const { async } = this.props;
     if (!async) {
       this.getEncData();
@@ -33,6 +33,9 @@ export default class Download extends Component {
   getEncData = () => {
     const { query = {} } = this.props;
     query.token = getToken();
+    console.log({ query });
+
+
     this.setState({
       loading: true,
     });

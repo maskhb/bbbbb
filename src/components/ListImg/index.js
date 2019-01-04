@@ -5,28 +5,17 @@ export default class ListImg extends PureComponent {
   render() {
     const { url, width = 80, height = 50 } = this.props;
 
-    const imgdiv = (val, multi = 1, size) => {
-      let src = val;
-      const isBmp = src.toLowerCase().indexOf('.bmp') > -1;
-      if (val) {
-        const ims = val.split('.');
-        if (ims.length > 1 && !isBmp) {
-          ims[ims.length - 2] = `${ims[ims.length - 2]}_${width * multi}X${height * multi}`;
-          src = ims.join('.');
-        }
-      }
-      return (
-        <div style={{
+    const imgdiv = (val, multi = 1, size) => (
+      <div style={{
         width: width * multi,
         height: height * multi,
-        backgroundImage: `url(${src})`,
+        backgroundImage: `url(${val})`,
         backgroundSize: size ? 'contain' : 'cover',
         backgroundRepeat: 'no-repeat',
         backgroundPosition: 'center center',
         }}
-        />
-      );
-    };
+      />
+    );
 
     return (
       url

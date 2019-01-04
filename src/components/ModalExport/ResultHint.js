@@ -1,8 +1,8 @@
 /*
  * @Author: wuhao
  * @Date: 2018-04-26 10:20:35
- * @Last Modified by: fuanzhao
- * @Last Modified time: 2018-07-19 14:35:13
+ * @Last Modified by: wuhao
+ * @Last Modified time: 2018-05-10 16:18:16
  *
  * 提示--导出模版2
  */
@@ -74,14 +74,13 @@ class ResultHint extends PureComponent {
 
 
   render() {
-    const { btnTitle = '导出', disabled = false } = this.props;
+    const { btnTitle = '导出' } = this.props;
     const { loading } = this.state;
 
     const defaultBtnElm = <Button icon="download" type="primary" >{btnTitle}</Button>;
     const { btnElm = defaultBtnElm } = this.props;
 
     return React.cloneElement(btnElm, {
-      disabled,
       loading,
       onClick: this.handleBtnClick,
     });

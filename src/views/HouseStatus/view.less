@@ -1,0 +1,585 @@
+@line-color: #ccc;
+@th-bg: #f9f9f9;
+@td-bg: #fff;
+@td-lineHeight: 36px;
+@opacity: 0.9;
+
+.toolbar {
+  a {
+    margin-right: 10px;
+  }
+}
+
+ul, li {
+  margin: 0;
+  padding: 0;
+}
+
+/* 今日房态 */
+.sortSelect {
+  width: 120px;
+}
+
+.searchInput {
+  width: 250px !important;
+}
+
+.searchDom {
+  width: 100%;
+}
+
+.houstTypeList {
+  overflow: auto;
+  font-size: 12px;
+  vertical-align: middle;;
+  margin-top: 7px;
+  li {
+    position: relative;
+    float: left;
+    padding-left: 20px;
+    margin-right: 20px;
+  }
+  li:last-child {
+    margin-right: 0;
+  }
+  li:before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 3px;
+    width: 14px;
+    height: 14px;
+    border: 1px solid #ccc;
+  }
+  .none {
+    padding-left: 0;
+  }
+  .none:before {
+    background-color: transparent;
+    border-color: transparent;
+  }
+  .white:before {
+    background-color: #fff;
+    border-color: #ccc;
+  }
+  .lightBlue:before {
+    background-color: #3DB1FF;
+    border-color: #3DB1FF;
+  }
+  .blue:before {
+    background-color: #3c84d7;
+    border-color: #1d70d1;
+  }
+  .green:before {
+    background-color: #2ec2c7;
+    border-color: #0cb8be;
+  }
+  .violet:before {
+    background-color: #a150c6;
+    border-color: #9234bd;
+  }
+  .red:before {
+    background-color: #c65552;
+    border-color: #bd3a36;
+  }
+  .black:before {
+    background-color: #999;
+    border-color: #898989;
+  }
+}
+
+.houstTypeListNew {
+  overflow: auto;
+  font-size: 12px;
+  vertical-align: middle;;
+  margin-top: 7px;
+  :global{
+    li {
+      float: left;
+      margin-right: 20px;
+      cursor: pointer;
+    }
+    li:last-child {
+      margin-right: 0;
+    }
+    li > i {
+      display: inline-block;
+      position: relative;
+      width: 16px;
+      height: 16px;
+      box-sizing: border-box;
+      border: 1px solid #ccc;
+      vertical-align: middle;
+    }
+    li > span {
+      vertical-align: middle;
+      display:inline-block;
+      margin-left: 5px;
+    }
+    .checked:after{
+      position: absolute;
+      top: 0;
+      left: 4px;
+      width: 6px;
+      height: 10px;
+      border-style: solid;
+      border-color: #fff;
+      border-width: 0 2px 2px 0;
+      transform: rotateZ(40deg);
+      content: "";
+    }
+    .checked.white:after{
+      border-color: #666;
+    }
+    .none {
+      display: none;
+    }
+    .white {
+      background-color: #fff;
+      border-color: #ccc;
+    }
+    .lightBlue {
+      background-color: #3DB1FF;
+      border-color: #3DB1FF;
+    }
+    .blue {
+      background-color: #3c84d7;
+      border-color: #1d70d1;
+    }
+    .green {
+      background-color: #2ec2c7;
+      border-color: #0cb8be;
+    }
+    .violet {
+      background-color: #a150c6;
+      border-color: #9234bd;
+    }
+    .red {
+      background-color: #c65552;
+      border-color: #bd3a36;
+    }
+    .black {
+      background-color: #999;
+      border-color: #898989;
+    }
+  }
+
+}
+
+.typeDom {
+  margin-bottom: 20px;
+  h1 {
+    font-size: 14px;
+  }
+}
+
+.diyHouseList {
+  overflow: auto;
+  > li {
+    position: relative;
+    float: left;
+    margin: 0 10px 10px 0;
+    width: 150px;
+    border-radius: 4px;
+    height: 100px;
+    border: 1px solid #ccc;
+    :global {
+      .title {
+        padding-left: 10px;
+        line-height: 24px;
+        width: 130px;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+      }
+      .leave {
+        content: '';
+        position: absolute;
+        right: 5px;
+        top: 5px;
+        width: 16px;
+        height: 16px;
+        background: url(../../assets/icon.png) no-repeat left top;
+        background-size: 192px 32px;
+        background-position-y: -16px;
+        background-position-x: -160px;
+      }
+      .center {
+        margin-top: 10px;
+        text-align: center;
+      }
+      .toolBar {
+        position: absolute;
+        bottom: 5px;
+        left: 5px;
+        width: 100%;
+        ul {
+          li {
+            background: url(../../assets/icon.png) no-repeat left top;
+            background-position-y: -16px;
+            width: 16px;
+            height: 16px;
+            margin-right: 5px;
+            float: left;
+            background-size: 192px 32px;
+          }
+          li:last-child {
+            margin-right: 0;
+          }
+          li.icon1 {
+            background-position-x: 0;
+          }
+          li.icon2 {
+            background-position-x: -16px;
+          }
+          li.icon3 {
+            background-position-x: -32px;
+          }
+          li.icon4 {
+            background-position-x: -48px;
+          }
+          li.icon5 {
+            background-position-x: -64px;
+          }
+          li.icon6 {
+            background-position-x: -80px;
+          }
+          li.icon7 {
+            background-position-x: -96px;
+          }
+          li.icon8 {
+            background-position-x: -112px;
+          }
+          li.icon9 {
+            background-position-x: -128px;
+          }
+          li.icon10 {
+            background-position-x: -144px;
+          }
+        }
+        .more {
+          position: absolute;
+          right: 10px;
+          bottom: 0;
+          cursor: pointer;
+          background: url(../../assets/icon.png) no-repeat left top;
+          background-position-y: -16px;
+          background-position-x: -176px;
+          width: 16px;
+          height: 16px;
+          background-size: 192px 32px;
+        }
+      }
+    }
+  }
+  li:last-child {
+    margin-right: 0;
+  }
+  .white {
+    background-color: #fff;
+    border-color: #ccc;
+    :global {
+      .toolBar {
+        ul {
+          li {
+            background-position-y: 0;
+          }
+        }
+        .more {
+          background-position-y: 0;
+        }
+      }
+    }
+  }
+  .blue {
+    color: #fff;
+    background-color: #3c84d7;
+    border-color: #1d70d1;
+  }
+  .green {
+    color: #fff;
+    background-color: #2ec2c7;
+    border-color: #0cb8be;
+  }
+  .violet {
+    color: #fff;
+    background-color: #a150c6;
+    border-color: #9234bd;
+  }
+  .red {
+    color: #fff;
+    background-color: #c65552;
+    border-color: #bd3a36;
+  }
+  .black {
+    color: #fff;
+    background-color: #999;
+    border-color: #898989;
+  }
+}
+
+.repairIcon {
+  background: url(../../assets/repair.png) no-repeat left top;
+  background-size: 32px 32px;
+  display: inline-block;
+  margin: 0 auto;
+  width: 32px;
+  height: 32px;
+}
+
+.buildGroup {
+  margin-bottom: 20px;
+}
+
+.menuList {
+  margin: -5px -10px;
+  :global {
+    li {
+      padding: 0 10px;
+      line-height: 34px;
+      display: block;
+      cursor: pointer;
+    }
+    li:hover {
+      background-color: #f2f2f2;
+    }
+  }
+}
+
+/* 远期房态 */
+.dateSelect {
+  width: 150px;
+  margin-right: 10px;
+}
+
+.buildSelect {
+  width: 150px;
+  margin-right: 10px;
+}
+
+.houseSelect {
+  width: 150px;
+}
+
+.forwardTable {
+  position: relative;
+  :global {
+    .rowTitle {
+      line-height: 36px;
+      text-align: center;
+      width: 120px;
+      border: 1px solid @line-color;
+      border-bottom: 0;
+      .diyTh {
+        line-height: 30px;
+        height: 50px;
+        position: relative;
+        background-color: transparent;
+        border-bottom: 1px solid @line-color;
+        box-sizing: border-box;
+        .left {
+          position: absolute;
+          left: 10px;
+          bottom: 0;
+          z-index: 1;
+        }
+        .right {
+          position: absolute;
+          right: 10px;
+          top: 0;
+        }
+      }
+      .diyTh:before {
+        position: absolute;
+        top: 0;
+        right: 0;
+        left: 0;
+        bottom: 0;
+        border-bottom: 50px solid @line-color;
+        border-right: 120px solid transparent;
+        content: "";
+      }
+      .diyTh:after {
+        position: absolute;
+        left: 0;
+        right: 1px;
+        top: 1px;
+        bottom: 0;
+        border-bottom: 49px solid @th-bg;
+        border-right: 119px solid transparent;
+        content: "";
+      }
+      .headerTh {
+        box-sizing: border-box;
+        background-color: @th-bg;
+        border-bottom: 1px solid @line-color;
+      }
+      .th {
+        box-sizing: border-box;
+        background-color: @th-bg;
+        border-bottom: 1px solid @line-color;
+        height: 37px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .td {
+        background-color: @td-bg;
+        border-bottom: 1px solid @line-color;
+        height: 37px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+    .rowContent {
+      position: absolute;
+      left: 120px;
+      top: 0;
+      right: 0;
+      bottom: -20px;
+      background-color: #fff;
+      overflow-x: auto;
+      overflow-y: hidden;
+      border-top: 1px solid @line-color;
+      border-right: 1px solid @line-color;
+      .content {
+        width: 1500px;
+        .th {
+          width: 50px;
+          box-sizing: border-box;
+          float: left;
+          text-align: center;
+          background-color: @th-bg;
+          border-right: 1px solid @line-color;
+        }
+        .td {
+          width: 50px;
+          box-sizing: border-box;
+          float: left;
+          text-align: center;
+          background-color: @td-bg;
+          border-right: 1px solid @line-color;
+        }
+        .td:hover {
+          background-color: #f9f9f9;
+        }
+        .dateRow {
+          border-bottom: 1px solid @line-color;
+          overflow: auto;
+          .th {
+            height: 50px;
+            padding-top: 5px;
+          }
+          .th:last-child {
+            border-right: 0;
+          }
+        }
+        .thRow {
+          box-sizing: border-box;
+          line-height: @td-lineHeight;
+          border-bottom: 1px solid @line-color;
+          overflow: auto;
+          .th:last-child {
+            border-right: 0;
+          }
+        }
+        .tdRow {
+          box-sizing: border-box;
+          line-height: @td-lineHeight;
+          border-bottom: 1px solid @line-color;
+          overflow: hidden;
+          position: relative;
+          .td:hover {
+            background-color: #f9f9f9;
+          }
+          .td:last-child {
+            border-right: 0;
+          }
+          .tdNoBorder {
+            border-right: 0;
+          }
+          .diyTd {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+          }
+          .lightBlue {
+            background-color: #3DB1FF;
+            opacity: @opacity;
+          }
+          .blue {
+            background-color: #3c84d7;
+            opacity: @opacity;
+          }
+          .green {
+            background-color: #2ec2c7;
+            opacity: @opacity;
+          }
+          .violet {
+            background-color: #a150c6;
+            opacity: @opacity;
+          }
+          .red {
+            background-color: #c65552;
+            opacity: @opacity;
+          }
+          .black {
+            background-color: #999;
+            opacity: @opacity;
+          }
+        }
+      }
+    }
+  }
+}
+
+:global {
+  .forwardToolTip {
+    p {
+      margin: 0;
+      padding: 0;
+      max-width: 300px;
+      i, span {
+        font-style: normal;
+        vertical-align: top;
+        display: inline-block;
+      }
+      span {
+        max-width: 300px;
+      }
+    }
+  }
+  .omit, .channel{
+    display: inline-block;
+    vertical-align: middle;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .omit{
+    max-width:58px;
+  }
+  .channel{
+    font-style: normal;
+    max-width: 70px;
+  }
+  //.ant-popover-title{
+  //  background-color: #F2F2F2;
+  //  border-radius: 4px 4px 0 0 ;
+  //}
+  .ant-popover-inner {
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
+  }
+  .fl_r {
+    float: right;
+  }
+  .left{
+    text-align: left;
+  }
+  .f_12{ font-size: 12px;}
+  .p_10{
+    padding: 0 10px;
+  }
+}

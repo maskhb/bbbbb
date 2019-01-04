@@ -21,9 +21,7 @@ export function baseRequest(url, options) {
   if (!newOptions.method) {
     newOptions.method = 'POST';
   }
-  // if (options.pagination && typeof (newOptions.body) === 'object' && !newOptions.body.pageInfo) {
-  //   newOptions.body.pageInfo = { pageSize: 1, currPage: 10 };
-  // }
+
   const isFormData = newOptions.body instanceof FormData;
 
   if ((newOptions.method === 'POST' || newOptions.method === 'PUT') && !isFormData) {

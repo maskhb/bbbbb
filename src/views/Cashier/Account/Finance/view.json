@@ -1,0 +1,16 @@
+{
+  "route": {
+    "params": "/:accountId",
+    "authority": ""
+  },
+  "breadcrumb": {
+    "name": "账务详情",
+    "icon": "",
+    "order": 1,
+    "authority": ""
+  },
+  "model": [
+    "cashier",
+    "exportFile"
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "route": {
+    "params": "",
+    "authority": ""
+  },
+  "menu": {
+    "name": "房态管理",
+    "icon": "calendar",
+    "order": 1,
+    "authority": "",
+    "defaultOpen":true
+  },
+  "model": [""]
+}

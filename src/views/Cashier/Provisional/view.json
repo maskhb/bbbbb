@@ -1,0 +1,14 @@
+{
+  "route": {
+    "params": "",
+    "authority": "PMS_ACCOUNT_ONACCOUNT_LIST"
+  },
+  "menu": {
+    "name": "临时挂账登记单列表",
+    "icon": "",
+    "order": 1,
+    "authority": "PMS_ACCOUNT_ONACCOUNT_LIST",
+    "orgType": 1
+  },
+  "model": ["cashier"]
+}

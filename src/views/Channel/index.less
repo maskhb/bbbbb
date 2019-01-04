@@ -1,0 +1,69 @@
+.tableContainer {
+  margin: 50px 0;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  border: 1px solid #e3e3e3;
+  .leftArea {
+    padding: 50px 0;
+    width: 180px;
+    box-sizing: border-box;
+    border-right: 1px solid #e3e3e3;
+    .projectInfo {
+      text-align: center;
+      .portrait {
+        width: 72px;
+        height: 72px;
+        -webkit-border-radius: 36px;
+        -moz-border-radius: 36px;
+        border-radius: 36px;
+        margin: 0 auto 18px;
+        background-image: url('../../assets/default_img.png');
+        background-size: 72px 72px;
+        > img {
+          width: 72px;
+          height: 72px;
+          -webkit-border-radius: 36px;
+          -moz-border-radius: 36px;
+          border-radius: 36px;
+        }
+      }
+      > p {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 40px;
+      }
+      .setPriceBtn {
+        background: #2ac7e3;
+        border: 1px solid #2ac7e3;
+        margin-bottom: 20px;
+      }
+    }
+  }
+  .tableArea {
+    flex: 1;
+    margin: 0 auto;
+    .priceTable {
+      width: 100%;
+      box-sizing: border-box;
+      border-collapse: collapse;
+      th, td {
+        border-right: 1px solid #e3e3e3;
+        border-bottom: 1px solid #e3e3e3;
+        text-align: center;
+        font-size: 16px;
+        line-height: 40px;
+      }
+      .assessDetail {
+        td {
+          background-color: #fff;
+        }
+      }
+      :global {
+        .lastTh { border-right: 0; }
+      }
+    }
+  }
+}
+

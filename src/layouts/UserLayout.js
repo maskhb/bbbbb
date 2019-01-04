@@ -4,35 +4,37 @@ import DocumentTitle from 'react-document-title';
 import { Icon } from 'antd';
 import GlobalFooter from '../components/GlobalFooter';
 import styles from './UserLayout.less';
-import logo from '../assets/logo.jpg';
+// import logo from '../assets/logo.jpg';
 import { getRoutes } from '../utils/utils';
 
-const links = [{
-  key: 'help',
-  title: '帮助',
-  href: '',
-  blankTarget: '_blank',
-}, {
-  key: 'privacy',
-  title: '隐私',
-  href: '',
-  blankTarget: '_blank',
-}, {
-  key: 'terms',
-  title: '条款',
-  href: '',
-  blankTarget: '_blank',
-}];
+const links = [
+  // {
+  //   key: 'help',
+  //   title: '帮助',
+  //   href: '',
+  //   blankTarget: '_blank',
+  // }, {
+  //   key: 'privacy',
+  //   title: '隐私',
+  //   href: '',
+  //   blankTarget: '_blank',
+  // }, {
+  //   key: 'terms',
+  //   title: '条款',
+  //   href: '',
+  //   blankTarget: '_blank',
+  // },
+];
 
-const copyright = <div>Copyright <Icon type="copyright" /> 2018 恒腾网络技术部出品</div>;
+const copyright = <div>Copyright <Icon type="copyright" /> 2018 广州纷程网络科技有限公司</div>;
 
 class UserLayout extends React.PureComponent {
   getPageTitle() {
     const { routerData, location } = this.props;
     const { pathname } = location;
-    let title = '运营后台-家居';
+    let title = '纷程酒店管理系统';
     if (routerData[pathname] && routerData[pathname].name) {
-      title = `${routerData[pathname].name} - 运营后台-家居`;
+      title = `${routerData[pathname].name} - ${title}`;
     }
     return title;
   }
@@ -44,8 +46,8 @@ class UserLayout extends React.PureComponent {
           <div className={styles.top}>
             <div className={styles.header}>
               <Link to="/">
-                <img alt="logo" className={styles.logo} src={logo} />
-                {/* <span className={styles.title}>恒腾网络</span> */}
+                {/* <img alt="logo" className={styles.logo} src={logo} /> */}
+                <span className={styles.title}>纷程酒店管理系统</span>
               </Link>
             </div>
             {/* <div className={styles.desc}>hengten networks</div> */}

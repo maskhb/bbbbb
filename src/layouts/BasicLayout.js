@@ -10,11 +10,13 @@ import { enquireScreen } from 'enquire-js';
 import GlobalHeader from '../components/GlobalHeader';
 import GlobalFooter from '../components/GlobalFooter';
 import SiderMenu from '../components/SiderMenu';
+import WakeNotice from '../components/WakeNotice';
 import NotFound from '../views/Exception/404/view.js';
-import { getRoutes } from '../utils/utils';
+import { getRoutes, goTo } from '../utils/utils';
 import Authorized from '../utils/Authorized';
 import { getMenuData } from '../core/menu';
-import logo from '../assets/favicon.ico';
+import logoFull from '../assets/logo.png';
+import logo from '../assets/fc.png';
 
 const { Content } = Layout;
 const { AuthorizedRoute } = Authorized;
@@ -73,9 +75,9 @@ export default class BasicLayout extends React.PureComponent {
         isMobile: mobile,
       });
     });
-    this.props.dispatch({
-      type: 'user/current',
-    });
+    // this.props.dispatch({
+    //   type: 'user/current',
+    // });
     // this.props.dispatch({
     //   type: 'permission/current',
     // });
@@ -89,9 +91,9 @@ export default class BasicLayout extends React.PureComponent {
   getPageTitle() {
     const { routerData, location } = this.props;
     const { pathname } = location;
-    let title = '运营后台-家居';
+    let title = '纷程酒店管理系统';
     if (routerData[pathname] && routerData[pathname].name) {
-      title = `${routerData[pathname].name} - 运营后台-家居`;
+      title = `${routerData[pathname].name} - 纷程酒店管理系统`;
     }
     return title;
   }
@@ -133,6 +135,8 @@ export default class BasicLayout extends React.PureComponent {
       this.props.dispatch({
         type: 'login/logout',
       });
+    } else if (key === 'editpwd') {
+      goTo('/basesetting/account/editpwd');
     }
   }
   handleNoticeVisibleChange = (visible) => {
@@ -152,7 +156,7 @@ export default class BasicLayout extends React.PureComponent {
     const layout = (
       <Layout>
         <SiderMenu
-          logo={logo}
+          logo={collapsed ? logo : logoFull}
           // 不带Authorized参数的情况下如果没有权限,会强制跳到403界面
           // If you do not have the Authorized parameter
           // you will be forced to jump to the 403 interface without permission
@@ -200,14 +204,15 @@ export default class BasicLayout extends React.PureComponent {
             <GlobalFooter
               copyright={
                 <div>
-                  Copyright <Icon type="copyright" /> 2018 恒腾网络技术部出品
+                  Copyright <Icon type="copyright" /> 2018 广州纷程网络科技有限公司
                 </div>
               }
             />
           </Content>
         </Layout>
+        <WakeNotice />
       </Layout>
-    );
+    ); 
 
     return (
       <DocumentTitle title={this.getPageTitle()}>

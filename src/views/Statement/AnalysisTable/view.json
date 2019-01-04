@@ -1,0 +1,14 @@
+{
+  "route": {
+    "params": "",
+    "authority": "PMS_REPORTFORMS_CHECKINANALYSIS_LIST"
+  },
+  "menu": {
+    "name": "入住分析表",
+    "icon": "",
+    "order": 1,
+    "authority": "PMS_REPORTFORMS_CHECKINANALYSIS_LIST",
+    "orgType": 1
+  },
+  "model": ["analysisTable"]
+}

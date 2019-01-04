@@ -1,26 +1,17 @@
 // 公用 api 请求
 import request from '../utils/request';
 
-async function globalSettingDetail(params) {
-  return request('/mj/ht-mj-cms-server/setting/getListMap', {
+/**
+ * 首页信息查询
+ */
+async function homeInfo() {
+  return request('/fc/ht-fc-pms-server/gres/getFromPage', {
     method: 'POST',
-    body: {
-      ...params,
-    },
+    body: {},
   });
 }
-
-async function globalSettingAdd(params) {
-  return request('/mj/ht-mj-cms-server/setting/save', {
-    method: 'POST',
-    body: {
-      ...params,
-    },
-  });
-}
-
-async function queryGoodsAndPackageCount(params) {
-  return request('/mj/ht-mj-goods-server/package/queryGoodsAndPackageCount', {
+async function getBusinessTime(params) {
+  return request('/fc/ht-fc-pms-server/nightAuditRecord/businessTime', {
     method: 'POST',
     body: {
       ...params,
@@ -29,7 +20,6 @@ async function queryGoodsAndPackageCount(params) {
 }
 
 export default {
-  globalSettingDetail,
-  globalSettingAdd,
-  queryGoodsAndPackageCount,
+  homeInfo,
+  getBusinessTime,
 };

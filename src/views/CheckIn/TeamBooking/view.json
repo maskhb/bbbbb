@@ -1,0 +1,14 @@
+{
+  "route": {
+    "params": "",
+    "authority": "PMS_CHECKIN_GROUPRESERVATION_LIST"
+  },
+  "menu": {
+    "name": "团队预订及登记",
+    "icon": "",
+    "order": 2,
+    "authority": "PMS_CHECKIN_GROUPRESERVATION_LIST",
+    "orgType": 1
+  },
+  "model": ["checkIn","user","nightCheck","cashier"]
+}

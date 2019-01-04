@@ -1,7 +1,0 @@
-{
-  "route": {
-    "params": "/:id",
-    "authority": ""
-  },
-  "model": ["receipt"]
-}

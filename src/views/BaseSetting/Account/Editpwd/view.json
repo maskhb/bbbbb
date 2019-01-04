@@ -1,0 +1,7 @@
+{
+  "route": {
+    "params": "",
+    "authority": ""
+  },
+  "model": ["accountInfo", "user"]
+}

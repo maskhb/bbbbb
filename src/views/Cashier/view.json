@@ -1,0 +1,15 @@
+{
+  "route": {
+    "params": "",
+    "authority": ""
+  },
+  "menu": {
+    "name": "收银管理",
+    "icon": "pay-circle-o",
+    "order": 4,
+    "authority": ""
+  },
+  "model": [
+    ""
+  ]
+}

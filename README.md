@@ -38,7 +38,7 @@ mock 使用说明
 * 可以接口请求中添加headers 属性,强制请求mock
 ```javascript
 request('/api/login', {mock: true, ...}) # 在非production 环境下强制使用mock
-request('/api/login', {mock: false, ...}) # 强制不适用mock
+request('/api/login', {mock: false, ...}) # 强制不使用mock
 // 注意在请求的url 中无须加上 /mock !!!
 ```
 
@@ -119,5 +119,16 @@ request('/api/login', {mock: false, ...}) # 强制不适用mock
 我们非常欢迎你的贡献，你可以通过以下方式和我们一起共建：
 
 ## 修改文件生效的注意项
-* 修改proxy.json，保存.roadhogrc.mock.js生效
-* 新增src/views/xx/view.js、src/views/xx/view.json，保存src/core/router/centra.js生效路由，保存src/core/menu/centra.js生效菜单
+* 修改tools/proxy.json，保存.roadhogrc.mock.js生效
+* 新增src/views/xx/view.js、src/views/xx/view.json ->
+  * 保存src/core/router/centra.js生效路由
+  * 保存src/core/menu/centra.js生效菜单
+
+
+## 技术分层
+* UI: antd, react, 
+* lib: lodash, cookie, moment, qs, draft
+* 状态: redux, dva, 
+* 通信：axios, redux-saga, mockjs
+* 架构：webpack, babel, roadhog, 
+* 规范：eslint

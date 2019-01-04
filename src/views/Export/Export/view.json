@@ -1,0 +1,13 @@
+{
+  "route": {
+    "params": "/:prefix?",
+    "authority": "PMS_EXPORTMANAGEMENT_EXPORTMANAGEMENT_LIST"
+  },
+  "menu": {
+    "name": "导出管理",
+    "icon": "",
+    "order": 1,
+    "authority": "PMS_EXPORTMANAGEMENT_EXPORTMANAGEMENT_LIST"
+  },
+  "model": ["exportFile"]
+}

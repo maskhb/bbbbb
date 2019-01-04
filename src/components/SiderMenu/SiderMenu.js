@@ -1,5 +1,6 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'dva';
+import _ from 'lodash';
 import { Layout, Menu, Icon } from 'antd';
 import { Link } from 'dva/router';
 import styles from './index.less';
@@ -31,32 +32,66 @@ export default class SiderMenu extends PureComponent {
   constructor(props) {
     super(props);
     this.menus = props.menuData;
+    const defaultOpenKeys = this.getDefaultOpenKeys(this.menus);
     this.state = {
-      openKeys: this.getDefaultCollapsedSubMenus(props),
+      openKeys: this.getDefaultCollapsedSubMenus(props, defaultOpenKeys),
     };
   }
   componentWillReceiveProps(nextProps) {
     if (nextProps.location.pathname !== this.props.location.pathname) {
+      /**
+       * 用于过滤掉非展开目录
+       * （
+       * 注：getDefaultCollapsedSubMenus方法中会自动在openKeys中添加当前路由拆分，
+       * 由于路由和目录匹配，需过滤掉
+       * 如：
+       * /checkin/orderform/edit/568
+       * 会添加： checkin checkin/orderform checkin/edit
+       * 不过滤会导致目录判断出错，
+       * 只需保存要开启的一级和当前路由的拆分
+       *
+       * author：wuhao
+       * ）
+       */
+      const newKeys = (this.state.openKeys || []).filter(item => item.indexOf('/') === -1);
       this.setState({
-        openKeys: this.getDefaultCollapsedSubMenus(nextProps),
+        openKeys: this.getDefaultCollapsedSubMenus(nextProps, newKeys),
       });
     }
   }
-  getDefaultCollapsedSubMenus(props) {
+  getDefaultOpenKeys(menus = [], type = 'defaultOpen') {
+    let defaultOpenKeys = [];
+    menus?.forEach((item) => {
+      if (item[type]) {
+        defaultOpenKeys.push(item.path);
+      }
+
+      if (item.children) {
+        defaultOpenKeys = defaultOpenKeys.concat(this.getDefaultOpenKeys(item.children, type));
+      }
+    });
+
+    return defaultOpenKeys;
+  }
+  getDefaultCollapsedSubMenus(props, openKeys) {
     const { location: { pathname } } = props || this.props;
     const snippets = pathname.split('/').slice(1, -1);
     const currentPathSnippets = snippets.map((item, index) => {
-      const arr = snippets.filter((_, i) => i <= index);
+      const arr = snippets.filter((s, i) => i <= index);
       return arr.join('/');
     });
     let currentMenuSelectedKeys = [];
     currentPathSnippets.forEach((item) => {
       currentMenuSelectedKeys = currentMenuSelectedKeys.concat(this.getSelectedMenuKeys(item));
     });
-    if (currentMenuSelectedKeys.length === 0) {
-      return ['dashboard'];
-    }
-    return currentMenuSelectedKeys;
+
+    currentMenuSelectedKeys?.forEach((item) => {
+      if (openKeys.indexOf(item) === -1) {
+        openKeys.push(item);
+      }
+    });
+
+    return _.uniq(openKeys || []);
   }
   getFlatMenuKeys(menus) {
     let keys = [];
@@ -78,6 +113,7 @@ export default class SiderMenu extends PureComponent {
     if (flatMenuKeys.indexOf(path.replace(/^\//, '').replace(/\/$/, '')) > -1) {
       return [path.replace(/^\//, '').replace(/\/$/, '')];
     }
+
     return flatMenuKeys.filter((item) => {
       const itemRegExpStr = `^${item.replace(/:[\w-]+/g, '[\\w-]+')}$`;
       const itemRegExp = new RegExp(itemRegExpStr);
@@ -117,6 +153,7 @@ export default class SiderMenu extends PureComponent {
    */
   getSubMenuOrItem=(item) => {
     if (item.children && item.children.some(child => child.name)) {
+      const allwaysOpenKeys = this.getDefaultOpenKeys(this.menus, 'alwaysOpen') || [];
       return (
         <SubMenu
           title={
@@ -128,6 +165,7 @@ export default class SiderMenu extends PureComponent {
             ) : item.name
             }
           key={item.key || item.path}
+          className={allwaysOpenKeys.indexOf(item.path) !== -1 ? 'hideArrow' : ''}
         >
           {this.getNavMenuItems(item.children)}
         </SubMenu>
@@ -148,7 +186,7 @@ export default class SiderMenu extends PureComponent {
     if (!menusData) {
       return [];
     }
-    return menusData
+    return this.filterMenus(menusData)
       .filter(item => item.name && !item.hideInMenu)
       .map((item) => {
         const ItemDom = this.getSubMenuOrItem(item);
@@ -156,6 +194,57 @@ export default class SiderMenu extends PureComponent {
       })
       .filter(item => !!item);
   }
+
+  /* 区分项目级和管理级功能 */
+  filterMenus = (menusData) => {
+    let newArr = [];
+    let orgType = 0;
+    let user = localStorage.user;
+    if (user) {
+      user = JSON.parse(user);
+      if (user.orgType) {
+        orgType = user.orgType || 0;
+      } else {
+        orgType = user?.orgVOSelected?.orgType || 0;
+      }
+    }
+    switch (orgType) {
+      case 1:
+        menusData.map((v) => {
+          const item = v || {};
+          if (v.children) {
+            item.children = v.children.filter(cv => cv.orgType !== 2);
+          }
+          newArr.push(item);
+          return '';
+        });
+        break;
+      case 2:
+        menusData.map((v) => {
+          const item = v || {};
+          if (v.children) {
+            item.children = v.children.filter(cv => cv.orgType !== 1);
+          }
+          newArr.push(item);
+          return '';
+        });
+        break;
+      default:
+        newArr = menusData;
+        break;
+    }
+    const lastArr = [];
+    newArr.map((v) => {
+      if (v.level === 0 && (v.children.length !== 0 || v.name === '首页')) {
+        lastArr.push(v);
+      } else if (v.level !== 0) {
+        lastArr.push(v);
+      }
+      return lastArr;
+    });
+    return lastArr;
+  };
+
   // conversion Path
   // 转化路径
   conversionPath=(path) => {
@@ -178,20 +267,17 @@ export default class SiderMenu extends PureComponent {
     return ItemDom;
   }
   handleOpenChange = (openKeys) => {
-    const lastOpenKey = openKeys[openKeys.length - 1];
-    const isMainMenu = this.menus.some(
-      item => lastOpenKey && (item.key === lastOpenKey || item.path === lastOpenKey)
-    );
     this.setState({
-      openKeys: isMainMenu ? [lastOpenKey] : [...openKeys],
+      openKeys,
     });
   }
   render() {
     const { logo, collapsed, location: { pathname }, onCollapse } = this.props;
     const { openKeys } = this.state;
+    const allwaysOpenKeys = this.getDefaultOpenKeys(this.menus, 'alwaysOpen');
     // Don't show popup menu when it is been collapsed
     const menuProps = collapsed ? {} : {
-      openKeys,
+      openKeys: openKeys.concat(allwaysOpenKeys),
     };
     // if pathname can't match, use the nearest parent's key
     let selectedKeys = this.getSelectedMenuKeys(pathname);
@@ -216,7 +302,6 @@ export default class SiderMenu extends PureComponent {
         <div className={styles.logo} key="logo">
           <Link to="/">
             <img src={logo} alt="logo" />
-            <h1>运营后台-家居</h1>
           </Link>
         </div>
         <Menu
@@ -227,8 +312,7 @@ export default class SiderMenu extends PureComponent {
           onOpenChange={this.handleOpenChange}
           selectedKeys={selectedKeys}
           style={{
-            padding: '16px 0',
-            width: '100%',
+            background: '#606C6E',
           }}
         >
           {this.getNavMenuItems(this.menus)}

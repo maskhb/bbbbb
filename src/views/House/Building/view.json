@@ -1,0 +1,13 @@
+{
+  "route": {
+    "params": "",
+    "authority": "PMS_ROOMRESOURCES_BUILDINGS_LIST"
+  },
+  "menu": {
+    "name": "楼栋管理",
+    "icon": "",
+    "order": 2,
+    "authority": "PMS_ROOMRESOURCES_BUILDINGS_LIST"
+  },
+  "model": ["building"]
+}

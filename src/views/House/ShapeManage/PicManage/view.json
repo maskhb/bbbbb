@@ -1,0 +1,13 @@
+{
+  "route": {
+    "params": "/:id",
+    "authority": "PMS_ROOMRESOURCES_ROOMTYPES_PICTURES"
+  },
+  "breadcrumb": {
+    "name": "房型图片管理",
+    "icon": "",
+    "order": 0,
+    "authority": "PMS_ROOMRESOURCES_ROOMTYPES_PICTURES"
+  },
+  "model": ["roomType"]
+}

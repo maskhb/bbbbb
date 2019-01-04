@@ -1,0 +1,13 @@
+{
+  "route": {
+    "params": "",
+    "authority": "PMS_BASICSETTING_CHARACTERGROUP_LIST"
+  },
+  "menu": {
+    "name": "角色组管理",
+    "icon": "",
+    "order": 4,
+    "authority": "PMS_BASICSETTING_CHARACTERGROUP_LIST"
+  },
+  "model": ["baseSetting"]
+}

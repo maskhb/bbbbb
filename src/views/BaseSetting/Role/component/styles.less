@@ -1,0 +1,46 @@
+.form-modal {
+  :global {
+    .ant-form-item-control-wrapper {
+      input {
+        width: 75%;
+      }
+    }
+  }
+}
+
+:global {
+  .role-group-select-modal-container {
+    max-height: 70vh;
+    overflow: auto;
+    padding-top: 10px;
+    li.ant-tree-treenode-disabled > .ant-tree-node-content-wrapper span {
+      color: rgba(0, 0, 0, 0.8);
+    }
+    & > ul.ant-tree > li {
+      width: 33%;
+      float: left;
+      & > .ant-tree-node-content-wrapper {
+        font-size: 18px;
+        font-weight: bold;
+      }
+      & > .ant-tree-child-tree {
+        & > .ant-tree-treenode-switcher-open {
+          & > .ant-tree-node-content-wrapper {
+            font-size: 16px;
+            font-weight: bold; 
+          }
+        }
+      }
+      // display: inline-block;
+    }
+    clear: both;
+  }
+  .choose-role-group-modal-table {
+    .ant-table-thead > tr > th, .ant-table-tbody > tr > td {
+      padding: 8px 8px;
+    }
+    th.ant-table-selection-column .ant-checkbox-wrapper {
+      display: none;
+    }
+  }
+}

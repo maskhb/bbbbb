@@ -8,6 +8,7 @@ const maxLevel = Math.max(...Object.keys(configs).map(key => getLevel(key)));
 let menus = [];
 let done = false;
 
+// todo
 function getChildren(items, level = 1) {
   if (level === 1) {
     return items;

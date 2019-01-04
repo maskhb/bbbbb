@@ -2,7 +2,7 @@
  * @Author: wuhao
  * @Date: 2018-04-09 09:53:46
  * @Last Modified by: wuhao
- * @Last Modified time: 2018-05-09 14:48:50
+ * @Last Modified time: 2018-07-24 14:31:40
  *
  * 表格过滤选择栏
  */
@@ -28,16 +28,13 @@ class TableSearchFilterBar extends PureComponent {
 
     const params = radioOptions?.[radioOptionValue]?.value;
     // eslint-disable-next-line
-    const { pageInfo, ...otherParams} = stateOfSearch;
+    const { ...otherParams} = stateOfSearch;
 
     const values = {
       ...searchDefault,
       ...otherParams,
       ...params,
-      pageInfo: {
-        ...pageInfo,
-        currPage: 1,
-      },
+      currPage: 1,
     };
 
     setStateOfSearch(values);

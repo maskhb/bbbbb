@@ -1,0 +1,14 @@
+{
+  "route": {
+    "params": "",
+    "authority": "PMS_ROOMSTATUS_TODAYROOMSTATUS_LIST"
+  },
+  "menu": {
+    "name": "今日房态",
+    "icon": "",
+    "order": 1,
+    "authority": "PMS_ROOMSTATUS_TODAYROOMSTATUS_LIST",
+    "orgType": 1
+  },
+  "model": ["houseStatus"]
+}

@@ -148,7 +148,7 @@ class SelectRegion extends PureComponent {
 
   render() {
     const { data, value } = this.state;
-    const { dataSource, loadData, ...other } = this.props;
+    const { dataSource, loadData, callback, defValue, dispatch, ...other } = this.props;
     return (
       <Cascader
         {...other}

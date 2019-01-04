@@ -15,15 +15,8 @@ import fieldLabels from './fieldLabels';
 @Form.create()
 export default class View extends Component {
   state = {
-    pattern: 'detail',
+    pattern: Number(this.props.match?.params?.id) === 0 ? 'add' : 'detail',
   };
-
-  componentWillMount() {
-    const { match: { params: { id } } } = this.props;
-    this.setState({
-      pattern: Number(id) === 0 ? 'add' : 'detail',
-    });
-  }
 
   componentDidMount() {
     const { dispatch, match: { params: { id } } } = this.props;
@@ -34,6 +27,7 @@ export default class View extends Component {
       });
     }
   }
+
 
   handlePatternChange = () => {
     const { pattern } = this.state;

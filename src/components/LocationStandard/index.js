@@ -34,46 +34,8 @@ class LocationStandard extends Component {
     };
   }
 
-  componentWillMount() {
-    // const that = this;
-    this.initData();
-  }
-  componentWillReceiveProps(nextProps) {
-    const { defaultOptions } = this.state;
-    if (typeof nextProps.value === 'undefined') {
-      this.setState({
-        options: JSON.parse(JSON.stringify(defaultOptions)),
-        casValue: [],
-      });
-    } else if (
-      nextProps.value?.value?.length === 3 && !this.checkEqValue(
-        nextProps.value, this.state.casValue)) {
-      this.state.casValue = nextProps.value.value;
-      this.initData();
-    } else if (nextProps.value?.value !== this.props.value?.value) {
-      this.state.casValue = nextProps.value?.value;
-    }
-  }
-
-
-  onChange(value, selectedOptions) {
+  componentDidMount() {
     const that = this;
-    that.setState({
-      casValue: value,
-    });
-    that.props.onChange({
-      value, selectedOptions,
-    });
-  }
-
-  checkEqValue = (oldVal, newVal) => {
-    if (oldVal?.length !== newVal?.length) {
-      return false;
-    }
-    return oldVal[0] === newVal[0] && oldVal[2] === newVal[2];
-  }
-
-  initData = () => {
     commonService.queryRegionInfo({
       regionId: 0,
     }).then((res) => {
@@ -98,15 +60,34 @@ class LocationStandard extends Component {
                         r.children = res0;
                       }
                     });
-                    this.setState({ options: optionList, defaultOptions: optionList });
+                    that.setState({ options: optionList, defaultOptions: optionList });
                   });
               }
             });
           });
         } else {
-          this.setState({ options: optionList, defaultOptions: optionList });
+          that.setState({ options: optionList, defaultOptions: optionList });
         }
       }
+    });
+  }
+  componentWillReceiveProps(nextProps) {
+    const { defaultOptions } = this.state;
+    if (typeof nextProps.value === 'undefined') {
+      this.setState({
+        options: JSON.parse(JSON.stringify(defaultOptions)),
+        casValue: [],
+      });
+    }
+  }
+
+  onChange(value, selectedOptions) {
+    const that = this;
+    that.setState({
+      casValue: value,
+    });
+    that.props.onChange({
+      value, selectedOptions,
     });
   }
 

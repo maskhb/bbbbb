@@ -1,4 +1,6 @@
-import common from '../services/common';
+// import common from '../services/common';
+// import global from '../services/global';
+
 import global from '../services/global';
 
 export default {
@@ -11,62 +13,21 @@ export default {
   },
 
   effects: {
-    *globalSettingDetail({ payload }, { call, put }) {
-      const response = yield call(global.globalSettingDetail, payload);
+    * homeInfo({ payload }, { call, put }) {
+      const response = yield call(global.homeInfo, payload);
       yield put({
         type: 'save',
         payload: {
-          globalSettingDetail: response,
+          homeInfo: response,
         },
       });
     },
-    *globalSettingAdd({ payload }, { call, put }) {
-      const response = yield call(global.globalSettingAdd, payload);
+    *businessTime({ payload }, { call, put }) {
+      const response = yield call(global.getBusinessTime, payload);
       yield put({
         type: 'save',
         payload: {
-          globalSettingAdd: response,
-        },
-      });
-    },
-    *fetchNotices({ payload }, { call, put }) {
-      const response = yield call(global.queryGoodsAndPackageCount, payload);
-
-      yield put({
-        type: 'saveNotices',
-        payload: [
-          response.goodsListWillAudit,
-          response.goodsListNotPass,
-          response.packageListWillAudit,
-          response.packageListNotPass,
-        ],
-      });
-
-      yield put({
-        type: 'user/changeNotifyCount',
-        payload: response.goodsListWillAudit +
-          response.goodsListNotPass +
-          response.packageListWillAudit +
-          response.packageListNotPass,
-      });
-    },
-    *clearNotices({ payload }, { put, select }) {
-      yield put({
-        type: 'saveClearedNotices',
-        payload,
-      });
-      const count = yield select(state => state.global.notices.length);
-      yield put({
-        type: 'user/changeNotifyCount',
-        payload: count,
-      });
-    },
-    *communities({ payload }, { call, put }) {
-      const response = yield call(common.getProvincesWithCommunities, payload);
-      yield put({
-        type: 'saveCommunities',
-        payload: {
-          communities: response,
+          businessTime: response,
         },
       });
     },
@@ -77,24 +38,6 @@ export default {
       return {
         ...state,
         collapsed: payload,
-      };
-    },
-    saveNotices(state, { payload }) {
-      return {
-        ...state,
-        notices: payload,
-      };
-    },
-    saveClearedNotices(state, { payload }) {
-      return {
-        ...state,
-        notices: state.notices.filter(item => item.type !== payload),
-      };
-    },
-    saveCommunities(state, action) {
-      return {
-        ...state,
-        ...action.payload,
       };
     },
     save(state, action) {

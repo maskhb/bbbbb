@@ -1,0 +1,13 @@
+{
+  "route": {
+    "params": "/:gresId",
+    "authority": "PMS_CHECKIN_GROUPRESERVATION_EDIT"
+  },
+  "breadcrumb": {
+    "name": "编辑",
+    "icon": "",
+    "order": 0,
+    "authority": "PMS_CHECKIN_GROUPRESERVATION_EDIT"
+  },
+  "model": ["checkIn","nightCheck"]
+}

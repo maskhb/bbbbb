@@ -1,0 +1,13 @@
+{
+  "route": {
+    "params": "",
+    "authority": ""
+  },
+  "menu": {
+    "name": "导出管理",
+    "icon": "file",
+    "order": 20,
+    "authority": ""
+  },
+  "model": [""]
+}

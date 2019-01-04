@@ -1,0 +1,31 @@
+.container {
+  display: inline-block;
+  :global {
+    .orgName {
+      color: #666;
+      font-size: 16px;
+      font-weight: bold;
+      i {
+          margin-left: 5px;
+      }
+    }
+    .ant-select-selection{
+      border: 0;
+      font-weight: bold;
+    }
+  }
+}
+:global {
+  .ant-dropdown-menu-item .ant-dropdown-menu-submenu-arrow,
+  .ant-dropdown-menu-submenu-title .ant-dropdown-menu-submenu-arrow {
+    top: 0;
+    line-height: 32px;
+  }
+  .menuDisabled {
+    color: #aaa !important;
+  }
+  .ant-dropdown-menu {
+    min-height: 200px;
+    margin-left: -2px;
+  }
+}

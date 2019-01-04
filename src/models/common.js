@@ -1,15 +1,11 @@
-import { plainToClassFromExist } from 'class-transformer/index';
-import { validateSync } from 'class-validator/index';
-import * as viewModels from 'viewmodels/GoodsPackage';
-
 import common from '../services/common';
-
-const { MerchantQuery } = viewModels;
 
 export default {
   namespace: 'common',
 
-  state: {},
+  state: {
+    setModalWithForm: {},
+  },
 
   effects: {
     * queryCommunityList({ payload }, { call, put }) {
@@ -31,62 +27,6 @@ export default {
         },
       });
     },
-    * queryMerchantList({ payload: { keyName, parentItem = [], ...others } }, { call, put }) {
-      const vm = plainToClassFromExist(new MerchantQuery(), others);
-      const errors = validateSync(vm);
-
-
-      if (errors.length) {
-        /* eslint no-console:0 */
-        return console.warn(errors);
-      }
-      const response = yield call(common.queryMerchantList, {
-        MerchantBaseVoMultiCondition: {
-          ...others,
-        },
-      });
-
-      if (response?.msgCode && response?.msgCode !== 200) {
-        return yield put({
-          type: 'save',
-          payload: {
-            [keyName]: [],
-          },
-        });
-      }
-
-      const data = plainToClassFromExist(new viewModels.MerchantList(), response);
-      data.dataList = [...parentItem, ...data.dataList].map(item =>
-        plainToClassFromExist(new viewModels.Merchant(), item)
-      );
-
-      yield put({
-        type: 'save',
-        payload: {
-          [keyName]: data,
-        },
-      });
-    },
-
-    *orderGoodsListByPage({ payload }, { call, put }) {
-      const response = yield call(common.orderGoodsListByPage, payload);
-      yield put({
-        type: 'save',
-        payload: {
-          orderGoodsListByPage: response,
-        },
-      });
-    },
-
-    *getPaymentMethodList({ payload }, { call, put }) {
-      const response = yield call(common.getPaymentMethodList, payload);
-      yield put({
-        type: 'save',
-        payload: {
-          [`getPaymentMethodList-${payload.type}`]: response,
-        },
-      });
-    },
 
     *queryRegionInfo({ payload }, { call, put }) {
       const response = yield call(common.queryRegionInfo, payload);
@@ -98,36 +38,59 @@ export default {
       });
     },
 
-    *queryPromotionGoodsByPage({ payload }, { call, put }) {
-      const response = yield call(common.queryPromotionGoodsByPage, payload);
+    *setModalWithForm({ payload }, { call, put }) {
       yield put({
-        type: 'save',
+        type: 'modalForm',
         payload: {
-          queryPromotionGoodsByPage: response,
+          [payload.id]: payload.data,
         },
       });
     },
 
-    *goodsSaleCategoryList({ payload }, { call, put }) {
-      const response = yield call(common.goodsSaleCategoryList, payload);
+    *getGoodSubjects({ payload }, { call, put }) {
+      const response = yield call(common.getGoodSubjects, payload);
       yield put({
         type: 'save',
         payload: {
-          goodsSaleCategoryList: response,
+          getGoodSubjects: response,
         },
       });
     },
 
-
-    *goodsCategoryListByMerchantId({ payload }, { call, put }) {
-      const response = yield call(common.goodsCategoryListByMerchantId, payload);
+    * canWake({ payload }, { call, put }) {
+      const response = yield call(common.canWake, payload);
       yield put({
         type: 'save',
         payload: {
-          goodsCategoryListByMerchantId: response,
+          canWake: response,
         },
       });
+      return response;
     },
+
+    * wakeFinish({ payload }, { call, put }) {
+      const response = yield call(common.wakeFinish, payload);
+      yield put({
+        type: 'save',
+        payload: {
+          wakeFinish: response,
+        },
+      });
+      return response;
+    },
+    
+    * regionGetOrgRegion({ payload }, { call, put }) {
+      const response = yield call(common.regionGetOrgRegion, payload);
+      yield put({
+        type: 'save',
+        payload: {
+          regionGetOrgRegion: response,
+        },
+      });
+      return response;
+    },
+
+    //
   },
 
   reducers: {
@@ -135,6 +98,15 @@ export default {
       return {
         ...state,
         ...action.payload,
+      };
+    },
+    modalForm(state, action) {
+      return {
+        ...state,
+        setModalWithForm: {
+          ...state.setModalWithForm,
+          ...action.payload,
+        },
       };
     },
   },

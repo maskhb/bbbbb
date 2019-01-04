@@ -42,7 +42,7 @@ class Editor extends Component {
   }
 
 
-  componentWillMount() {
+  componentDidMount() {
     fetchEditor().then((UE) => {
       if (this.props.toolbars && window.UEDITOR_CONFIG) {
         this._init_toolbars = window.UEDITOR_CONFIG.toolbars;
@@ -64,7 +64,7 @@ class Editor extends Component {
       this.UE = UE;
       this.setState({ inited: true });
     });
-    super.componentWillMount && super.componentWillMount();
+    super.componentDidMount && super.componentDidMount();
   }
 
   componentDidMount() {

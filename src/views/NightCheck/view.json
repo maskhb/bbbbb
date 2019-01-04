@@ -1,0 +1,13 @@
+{
+  "route": {
+    "params": "",
+    "authority": ""
+  },
+  "menu": {
+    "name": "夜审",
+    "icon": "tool",
+    "order": 2,
+    "authority": ""
+  },
+  "model": [""]
+}

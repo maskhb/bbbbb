@@ -13,7 +13,7 @@ export default class TableSearch extends PureComponent {
     lastValue: null,
   };
 
-  componentWillMount() {
+  componentDidMount() {
     const { searchDefault, setStateOfSearch, uuid } = this.props;
     setStateOfSearch(searchDefault);
 
@@ -40,23 +40,17 @@ export default class TableSearch extends PureComponent {
 
     form.validateFields((err, fieldsValue) => {
       if (err) return;
-      const pageInfo = {
-        pageSize: searchDefault?.pageInfo?.pageSize || 10,
-        ...stateOfSearch?.pageInfo,
-        ...params.pageInfo,
-      };
       const values = {
         ...searchDefault,
         ...stateOfSearch,
         ...fieldsValue,
         ...params,
-        pageInfo,
       };
 
       let diff = false;
       if (this.state.lastValue) {
         for (const [key, value] of Object.entries(values)) {
-          if (key !== 'currentPage' && key !== 'pageSize' && key !== 'pageInfo') {
+          if (key !== 'currentPage' && key !== 'pageSize' && key !== 'currPage') {
             /* eslint eqeqeq: 0 */
             if (value != this.state.lastValue[key]) {
               diff = true;
@@ -71,12 +65,17 @@ export default class TableSearch extends PureComponent {
 
       // 不仅仅是改变了页码和每页数量，要重置页码，重置多选
       if (diff) {
-        values.pageInfo.currPage = 1;
+        values.currPage = 1;
         setSelectedRows([]);
       }
 
-      if (!values.pageInfo.currPage) {
-        values.pageInfo.currPage = 1;
+      if (!values.currPage) {
+        values.currPage = 1;
+      }
+
+      // 修改默认的分页条数为10条
+      if (!values.pageSize) {
+        values.pageSize = 10;
       }
       // console.log(999, values) //eslint-disable-line
       setStateOfSearch(values);
@@ -96,7 +95,7 @@ export default class TableSearch extends PureComponent {
   }
 
   render() {
-    const { form, children, queryBtnLoading = false, buttonMd = 8 } = this.props;
+    const { form, children, queryBtnLoading = false } = this.props;
     const { expand } = this.state;
 
     // 不显示展开按钮：1、如果搜索控件数量小于等于1；2、如果没有simple配置的控件。
@@ -104,7 +103,7 @@ export default class TableSearch extends PureComponent {
     if (showExpand) {
       let show = false;
       children.map((c) => {
-        if (!c.props.simple) {
+        if (!c?.props?.simple) {
           show = true;
         }
         return null;
@@ -115,7 +114,7 @@ export default class TableSearch extends PureComponent {
     const operate = (
       children
         ? (
-          <Col md={buttonMd} sm={24}>
+          <Col md={8} sm={24}>
             <span styleName="operate">
               <Button type="primary" onClick={this.handleSearch} styleName="btnSubmit" loading={queryBtnLoading}>查询</Button>
               <Button onClick={this.handleFormReset}>重置</Button>

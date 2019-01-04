@@ -1,0 +1,13 @@
+{
+  "route": {
+    "params": "",
+    "authority": "PMS_CHANNEL_CHANNELLIST_LIST"
+  },
+  "menu": {
+    "name": "渠道列表",
+    "icon": "",
+    "order": 1,
+    "authority": "PMS_CHANNEL_CHANNELLIST_LIST"
+  },
+  "model": ["channel"]
+}

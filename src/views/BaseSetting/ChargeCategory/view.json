@@ -1,0 +1,13 @@
+{
+  "route": {
+    "params": "",
+    "authority": "PMS_BASICSETTING_CHARGECATEGORY_LIST"
+  },
+  "menu": {
+    "name": "收费类目设置",
+    "icon": "",
+    "order": 5,
+    "authority": "PMS_BASICSETTING_CHARGECATEGORY_LIST"
+  },
+  "model": ["paymentItem"]
+}

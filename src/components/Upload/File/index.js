@@ -108,7 +108,7 @@ class Uploader extends Component {
   }
 
   handleBeforeUpload(e) {
-    const { uploadType, manual, onChange, override = false } = this.props;
+    const { uploadType, manual, onChange } = this.props;
     if (uploadType === 'txt' && !(e.type === 'text/plain')) {
       message.error('只能上传 txt 文件哦！');
       return false;
@@ -122,7 +122,7 @@ class Uploader extends Component {
       message.error('文件大小已超出限制,请重新上传');
       return false;
     }
-    if (this.state.fileList.length >= this.props.maxLength && !override) {
+    if (this.state.fileList.length >= this.props.maxLength) {
       message.error('文件数量已超出限制');
       return false;
     }
@@ -167,19 +167,14 @@ class Uploader extends Component {
 
   renderFileUpload(fileList) {
     const { value, maxLength, defaultValue, wraperStyle, ...props } = this.props;
-    let files = [];
-    if (maxLength === 1 && Array.isArray(fileList) && fileList.length > 1) {
-      files[0] = fileList[fileList.length - 1];
-    } else {
-      files = fileList;
-    }
+
     return (
       <Upload
         {...props}
         {...this.getHttpProps()}
         beforeUpload={this.handleBeforeUpload.bind(this)}
         onChange={this.handleChange.bind(this)}
-        fileList={files}
+        fileList={fileList}
       >
         <Button>
           <Icon type="plus" />

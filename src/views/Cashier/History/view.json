@@ -1,0 +1,14 @@
+{
+  "route": {
+    "params": "",
+    "authority": "PMS_ACCOUNT_HISTORICALACCOUNT_LIST"
+  },
+  "menu": {
+    "name": "历史账务查询",
+    "icon": "",
+    "order": 2,
+    "authority": "PMS_ACCOUNT_HISTORICALACCOUNT_LIST",
+    "orgType": 1
+  },
+  "model": ["cashier","exportFile"]
+}

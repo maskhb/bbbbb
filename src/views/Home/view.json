@@ -4,8 +4,8 @@
     "authority": ""
   },
   "menu": {
-    "name": "",
-    "icon": "",
+    "name": "首页",
+    "icon": "home",
     "order": 0,
     "authority": ""
   },

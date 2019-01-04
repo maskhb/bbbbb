@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Cascader } from 'antd';
-import AsyncCascaderReq from 'services/AsyncCascaderReq.js';
+import AsyncCascaderReq from './AsyncCascaderReq.js';
 
 class AsyncCascaderNew extends Component {
   constructor(props) {
@@ -11,17 +11,21 @@ class AsyncCascaderNew extends Component {
       data: [],
     };
   }
-  componentWillMount() {
+  componentDidMount() {
     this.init();
   }
   init() {
     const that = this;
     const { asyncType } = this.props;
-    const { params, labelParam, filter } = this.props;
+    const { params, labelParam, filter, queryPageType } = this.props;
 
     if (asyncType && params) {
       AsyncCascaderReq[asyncType](params).then((res) => {
         const options = [];
+        if (queryPageType) {
+          /* eslint-disable-next-line */
+          res = res.dataList;
+        }
         this.state.data = res;
         if (res && Array.isArray(res) && res.length > 0) {
           res.forEach((v) => {
@@ -93,7 +97,7 @@ class AsyncCascaderNew extends Component {
           <Cascader
             value={casValue}
             placeholder={placeholder}
-            options={this.state.options}
+            options={this.state.options.length ? this.state.options : [{ value: '0', label: '没有数据', disabled: true }]}
             changeOnSelect
             resetFields={resetFields}
             onChange={this.handleChange.bind(this)}
@@ -106,11 +110,13 @@ class AsyncCascaderNew extends Component {
 AsyncCascaderNew.defaultProps = {
   params: {},
   filter: () => true,
+  queryPageType: false,
 };
 AsyncCascaderNew.propTypes = {
   ...AsyncCascaderNew.propTypes,
   asyncType: PropTypes.string.isRequired,
   params: PropTypes.object,
+  queryPageType: PropTypes.bool,
   filter: PropTypes.func, /* 筛选器 */
   labelParam: PropTypes.object.isRequired, /* 定义option的label和value */
 };

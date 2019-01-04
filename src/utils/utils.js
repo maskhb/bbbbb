@@ -2,8 +2,10 @@ import moment from 'moment';
 import { routerRedux } from 'dva/router';
 import { toFullPath } from './request/utils';
 import store from '../index';
-import { mul } from './number';
 
+export function goToLocation(path) {
+  window.location = toFullPath(path);
+}
 export function goToNewWin(path) {
   window.open(toFullPath(path), '_blank');
 }
@@ -16,7 +18,40 @@ export function goTo(path) {
 export function fixedZero(val) {
   return val * 1 < 10 ? `0${val}` : val;
 }
-
+export function getWeekday(timestamp) {
+  const day = new Date(timestamp).getDay();
+  const arr = ['日', '一', '二', '三', '四', '五', '六'];
+  return `星期${arr[day]}`;
+}
+export function handleTime(type, time) { // type 1:当天0点，2：当天晚上11点59
+  const result = new Date(time);
+  if (type === 1) {
+    result.setHours(0);
+    result.setMinutes(0);
+    result.setSeconds(0);
+    result.setMilliseconds(0);
+  } else if (type === 2) {
+    result.setHours(23);
+    result.setMinutes(59);
+    result.setSeconds(59);
+    result.setMilliseconds(999);
+  }
+  return result.getTime();
+}
+export function checkArr(arr, label, value) { // 检查数组中是否包含某个值
+  let hasElement = false;
+  let index = 0;
+  const thisArr = arr || [];
+  thisArr.forEach((v, i) => {
+    if (v[label] === value) {
+      hasElement = true;
+      index = i;
+    }
+  });
+  return {
+    hasElement, index,
+  };
+}
 export function getTimeDistance(type) {
   const now = new Date();
   const oneDay = 1000 * 60 * 60 * 24;
@@ -90,7 +125,7 @@ export function digitUppercase(n) {
   let num = Math.abs(n);
   let s = '';
   fraction.forEach((item, index) => {
-    s += (digit[Math.floor(mul(num, 10 * (10 ** index))) % 10] + item).replace(/零./, '');
+    s += (digit[Math.floor(num * 10 * (10 ** index)) % 10] + item).replace(/零./, '');
   });
   s = s || '整';
   num = Math.floor(num);
@@ -262,3 +297,24 @@ export const getCustomFieldDecorator = (vo, form, rootName) => {
     });
   };
 };
+/**
+ * 根据value获取对应的label
+ */
+export const getLabelByValue = (options, value, valueName, labelName) => {
+  let resultLabel = '';
+  const keyName = valueName || 'value';
+  const labelName2 = labelName || 'label';
+  if (options instanceof Array) {
+    options.forEach((v) => {
+      if (Number(v[keyName]) === Number(value)) {
+        resultLabel = v[labelName2];
+      }
+    });
+  }
+  return resultLabel;
+};
+
+export function formatFloat(f, digit) { // 维持Float数字精度   f：数字， digit：保留位数
+  const m = 10 ** digit;
+  return Math.round(f * m, 10) / m;
+}

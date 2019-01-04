@@ -1,0 +1,13 @@
+{
+  "route": {
+    "params": "",
+    "authority": "PMS_ROOMRESOURCES_ROOMMANAGEMENT_LIST"
+  },
+  "menu": {
+    "name": "房间管理",
+    "icon": "",
+    "order": 4,
+    "authority": "PMS_ROOMRESOURCES_ROOMMANAGEMENT_LIST"
+  },
+  "model": ["room", "exportFile"]
+}

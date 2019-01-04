@@ -1,0 +1,14 @@
+{
+  "route": {
+    "params": "",
+    "authority": ""
+  },
+  "menu": {
+    "name": "房价管理",
+    "icon": "",
+    "order": 3,
+    "authority": "PMS_CHANNEL_ROOMRATE_LIST",
+    "orgType": 1
+  },
+  "model": ["housing"]
+}

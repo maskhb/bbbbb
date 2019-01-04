@@ -25,6 +25,7 @@ export default class PanelList extends Component {
       selectedRows,
       setSelectedRows,
     } = this.props;
+    
     const passProps = {
       form,
       stateOfSearch,

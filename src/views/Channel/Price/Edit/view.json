@@ -1,0 +1,15 @@
+{
+  "route": {
+    "params": "/:id",
+    "authority": ""
+  },
+  "breadcrumb": {
+    "name": "编辑价格代码",
+    "icon": "",
+    "order": 0,
+    "authority": ""
+  },
+  "model": [
+    "cashier"
+  ]
+}

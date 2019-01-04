@@ -1,0 +1,14 @@
+{
+  "route": {
+    "params": "",
+    "authority": ""
+  },
+  "menu": {
+    "name": "房源管理",
+    "icon": "key",
+    "order": 12,
+    "authority": "",
+    "defaultOpen":false
+  },
+  "model": [""]
+}

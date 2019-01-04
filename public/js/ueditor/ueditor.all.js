@@ -24477,7 +24477,7 @@ methodName = opt.all || opt.dir == 1 ? 'getNextDomNode' : 'getPreDomNode';
 
                             var currTime = new Date().getTime();
                             var t_token = getCookie('x-manager-token');
-                            var clientId = getCookie('x-client-id') || 'jj-platform';
+                            var clientId = getCookie('x-client-id') || 'fcpms-platform';
                             // var signature = (md5.hex_md5)(t_token + "ever$!@grande*&" + currTime).toUpperCase();
 
                             fd.append("token", t_token);

@@ -2,7 +2,7 @@
  * @Author: wuhao
  * @Date: 2018-06-14 17:45:34
  * @Last Modified by: fuanzhao
- * @Last Modified time: 2018-07-20 14:09:51
+ * @Last Modified time: 2018-07-10 15:56:34
  *
  * 封装Tabs Card组件
  */
@@ -39,10 +39,10 @@ class TabsCard extends PureComponent {
             children && children.filter(l => !!l).sort(
               (a, b) => a.props.order - b.props.order
             ).map((item, index) => {
-              const { tab, forceRender = false } = item?.props || {};
+              const { tab } = item?.props || {};
               const idx = index;
               return (
-                <TabPane tab={tab} key={`${idx}`} forceRender={forceRender}>
+                <TabPane tab={tab} key={`${idx}`}>
                   {childrenWithProps(item, { ...this.props })}
                 </TabPane>
               );

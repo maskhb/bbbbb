@@ -1,0 +1,13 @@
+{
+  "route": {
+    "params": "",
+    "authority": "PMS_BASICSETTING_DEPARTMENT_LIST"
+  },
+  "menu": {
+    "name": "部门管理",
+    "icon": "",
+    "order": 2,
+    "authority": "PMS_BASICSETTING_DEPARTMENT_LIST"
+  },
+  "model": ["baseSetting"]
+}

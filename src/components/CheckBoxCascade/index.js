@@ -31,7 +31,7 @@ class CheckboxCascade extends Component {
       rightResult: null, // 右侧组件的值
     };
   }
-  componentWillMount() {
+  componentDidMount() {
     const { selectOptions, leftValue } = this.state;
     if (leftValue) {
       this.setState({
@@ -145,7 +145,6 @@ class CheckboxCascade extends Component {
             <Uploader
               key={currentIndex}
               dragger
-              maxLength={currentChildren?.childrenProps?.maxLength || 3}
               uploadType={currentChildren?.childrenProps?.uploadType || 'txt'}
               onChange={that.handleChildrenChange.bind(that, currentChildren.childrenType)}
             />

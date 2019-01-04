@@ -1,0 +1,14 @@
+{
+  "route": {
+    "params": "",
+    "authority": ""
+  },
+  "menu": {
+    "name": "入住管理",
+    "icon": "usergroup-add",
+    "order": 2,
+    "authority": "",
+    "defaultOpen":true
+  },
+  "model": []
+}

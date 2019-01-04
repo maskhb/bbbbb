@@ -2,7 +2,7 @@
  * @Author: wuhao
  * @Date: 2018-04-10 10:33:30
  * @Last Modified by: wuhao
- * @Last Modified time: 2018-05-15 15:39:05
+ * @Last Modified time: 2018-07-24 14:31:13
  *
  * 订单表格
  */
@@ -25,7 +25,7 @@ class TableOrderList extends PureComponent {
     expandedRowKeys: [],
   }
 
-  componentWillMount() {
+  componentDidMount() {
     const { dataSource, getInitExpandedRowKeys } = this.props;
     if (dataSource) {
       this.setState({
@@ -105,10 +105,8 @@ class TableOrderList extends PureComponent {
     const params = {
       ...stateOfSearch,
       // 兼容,不单只有列表页的table,还有许多非列表页的table
-      pageInfo: {
-        currPage: current,
-        pageSize,
-      },
+      currPage: current,
+      pageSize,
     };
 
     emitter.emit(`panellist.search.${uuid}`, null, params);

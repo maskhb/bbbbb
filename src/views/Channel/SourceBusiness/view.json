@@ -1,0 +1,13 @@
+{
+  "route": {
+    "params": "",
+    "authority": "PMS_CHANNEL_BUSINESSSOURCES_LIST"
+  },
+  "menu": {
+    "name": "业务来源管理",
+    "icon": "",
+    "order": 1,
+    "authority": "PMS_CHANNEL_BUSINESSSOURCES_LIST"
+  },
+  "model": ["channel","baseSetting"]
+}

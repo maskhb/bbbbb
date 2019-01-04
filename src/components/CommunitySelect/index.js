@@ -29,7 +29,7 @@ class CommunitySelect extends Component {
       loading: false,
     };
   }
-  componentWillMount() {
+  componentDidMount() {
     const { checkType, checkedCommunityIds } = this.state;
     this.setState({ loading: true });
     commonApi.queryCommunityList({

@@ -1,0 +1,13 @@
+{
+  "route": {
+    "params": "",
+    "authority": "PMS_BASICSETTING_ORGANIZATION_LIST"
+  },
+  "menu": {
+    "name": "组织管理",
+    "icon": "",
+    "order": 1,
+    "authority": "PMS_BASICSETTING_ORGANIZATION_LIST"
+  },
+  "model": ["baseSetting", "user"]
+}

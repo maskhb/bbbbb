@@ -1,0 +1,13 @@
+{
+  "route": {
+    "params": "/:roomId",
+    "authority": "PMS_ROOMRESOURCES_ROOMMANAGEMENT_EDIT"
+  },
+  "breadcrumb": {
+    "name": "编辑房间",
+    "icon": "",
+    "order": 0,
+    "authority": "PMS_ROOMRESOURCES_ROOMMANAGEMENT_EDIT"
+  },
+  "model": ["building","roomType","floor","tag","room"]
+}

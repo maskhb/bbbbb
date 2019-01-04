@@ -1,0 +1,14 @@
+{
+  "route": {
+    "params": "",
+    "authority": "PMS_CHECKIN_SERVICETICKET_LIST"
+  },
+  "menu": {
+    "name": "服务单管理",
+    "icon": "",
+    "order": 4,
+    "authority": "",
+    "orgType": 1
+  },
+  "model": ["checkIn","user","nightCheck","cashier","exportFile"]
+}

@@ -5,8 +5,6 @@ import classNames from 'classnames';
 import { configs } from '../../core/collectConfigs';
 import styles from './index.less';
 
-const { TabPane } = Tabs;
-
 function getBreadcrumb(breadcrumbNameMap, url) {
   if (breadcrumbNameMap[url]) {
     return breadcrumbNameMap[url];
@@ -33,11 +31,6 @@ export default class PageHeader extends PureComponent {
     location: PropTypes.object,
     breadcrumbNameMap: PropTypes.object,
   };
-  onChange = (key) => {
-    if (this.props.onTabChange) {
-      this.props.onTabChange(key);
-    }
-  };
   getBreadcrumbProps = () => {
     return {
       routes: this.props.routes || this.context.routes,
@@ -60,9 +53,8 @@ export default class PageHeader extends PureComponent {
     const { routes, params, location, breadcrumbNameMap } = this.getBreadcrumbProps();
 
     const {
-      title, logo, action, content, extraContent,
-      breadcrumbList, tabList, className, linkElement = 'a',
-      tabActiveKey,
+      breadcrumbList, className, linkElement = 'a',
+      withoutBreadcrumb,
     } = this.props;
     const clsString = classNames(styles.pageHeader, className);
     let breadcrumb;
@@ -138,50 +130,10 @@ export default class PageHeader extends PureComponent {
     } else {
       breadcrumb = null;
     }
-
-    let tabDefaultValue;
-    if (tabActiveKey !== undefined && tabList) {
-      tabDefaultValue = tabList.filter(item => item.default)[0] || tabList[0];
-    }
-
-    const activeKeyProps = {
-      defaultActiveKey: tabDefaultValue && tabDefaultValue.key,
-    };
-    if (tabActiveKey !== undefined) {
-      activeKeyProps.activeKey = tabActiveKey;
-    }
-
-    return (
+    return !withoutBreadcrumb ? (
       <div className={clsString}>
         {breadcrumb}
-        <div className={styles.detail}>
-          {logo && <div className={styles.logo}>{logo}</div>}
-          <div className={styles.main}>
-            <div className={styles.row}>
-              {title && <h1 className={styles.title}>{title}</h1>}
-              {action && <div className={styles.action}>{action}</div>}
-            </div>
-            <div className={styles.row}>
-              {content && <div className={styles.content}>{content}</div>}
-              {extraContent && <div className={styles.extraContent}>{extraContent}</div>}
-            </div>
-          </div>
-        </div>
-        {
-          tabList &&
-          tabList.length && (
-            <Tabs
-              className={styles.tabs}
-              {...activeKeyProps}
-              onChange={this.onChange}
-            >
-              {
-                tabList.map(item => <TabPane tab={item.tab} key={item.key} />)
-              }
-            </Tabs>
-          )
-        }
       </div>
-    );
+    ) : '';
   }
 }

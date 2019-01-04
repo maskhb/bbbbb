@@ -16,7 +16,7 @@ request('mj/[服务名]/api-path',{
   }
 })
 
-// 请求就接口
+// 请求旧接口
 request('json/[服务名]/api-path',{
   headers,
   body,

@@ -1,8 +1,8 @@
 /*
  * @Author: wuhao
  * @Date: 2018-04-26 11:26:45
- * @Last Modified by: fuanzhao
- * @Last Modified time: 2018-07-19 14:30:53
+ * @Last Modified by: wuhao
+ * @Last Modified time: 2018-05-08 10:10:59
  *
  * 导出模版--提示
  */
@@ -66,13 +66,13 @@ class ResultPrompt extends PureComponent {
 
 
   render() {
-    const { btnTitle = '导出', disabled = false } = this.props;
+    const { btnTitle = '导出' } = this.props;
     const { loading } = this.state;
 
     const defaultBtnElm = <Button icon="download" type="primary" >{btnTitle}</Button>;
     const { btnElm = defaultBtnElm } = this.props;
+
     return React.cloneElement(btnElm, {
-      disabled,
       loading,
       onClick: this.handleBtnClick,
     });

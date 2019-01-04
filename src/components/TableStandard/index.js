@@ -36,11 +36,8 @@ class TableStandard extends PureComponent {
     const params = {
       ...stateOfSearch,
       ...filters,
-      // 兼容,不单只有列表页的table,还有许多非列表页的table
-      pageInfo: {
-        currPage: pagination.currentPage || pagination.current,
-        pageSize: pagination.pageSize,
-      },
+      currPage: pagination.currentPage || pagination.current,
+      pageSize: pagination.pageSize,
     };
 
     if (sorter.field) {

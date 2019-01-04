@@ -1,0 +1,13 @@
+{
+  "route": {
+    "params": "/:gresId?",
+    "authority": "PMS_CHECKIN_INDIVIDUALRESERVATION_EDIT"
+  },
+  "breadcrumb": {
+    "name": "编辑",
+    "icon": "",
+    "order": 1,
+    "authority": "PMS_CHECKIN_INDIVIDUALRESERVATION_EDIT"
+  },
+  "model": ["checkIn"]
+}

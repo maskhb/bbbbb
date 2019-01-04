@@ -1,0 +1,13 @@
+{
+  "route": {
+    "params": "/:roomOwnerId",
+    "authority": "PMS_USERMANAGEMENT_PROPRIETOR_EDIT"
+  },
+  "breadcrumb": {
+    "name": "编辑业主",
+    "icon": "",
+    "order": 0,
+    "authority": "PMS_USERMANAGEMENT_PROPRIETOR_EDIT"
+  },
+  "model": ["proprietor","building","houseStatus","floor","baseSetting","common","tag"]
+}

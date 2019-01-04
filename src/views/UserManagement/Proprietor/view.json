@@ -1,0 +1,13 @@
+{
+  "route": {
+    "params": "",
+    "authority": "PMS_USERMANAGEMENT_PROPRIETOR_LIST"
+  },
+  "menu": {
+    "name": "业主管理",
+    "icon": "",
+    "order": 0,
+    "authority": "PMS_USERMANAGEMENT_PROPRIETOR_LIST"
+  },
+  "model": ["proprietor"]
+}

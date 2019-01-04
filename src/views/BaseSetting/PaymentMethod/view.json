@@ -1,0 +1,13 @@
+{
+  "route": {
+    "params": "",
+    "authority": "PMS_BASICSETTING_WAYSOFCHARGING_LIST"
+  },
+  "menu": {
+    "name": "收款方式设置",
+    "icon": "",
+    "order": 6,
+    "authority": "PMS_BASICSETTING_WAYSOFCHARGING_LIST"
+  },
+  "model": ["paymentMethod"]
+}

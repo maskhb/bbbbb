@@ -3,6 +3,12 @@ import Animate from 'rc-animate';
 import { Icon, Tooltip, Progress } from 'antd';
 import classNames from 'classnames';
 
+import Sortable from 'react-anything-sortable';
+import 'react-anything-sortable/sortable.css';
+
+import SortableItem from './SortableItem';
+
+
 // https://developer.mozilla.org/en-US/docs/Web/API/FileReader/readAsDataURL
 const previewFile = (file, callback) => {
   const reader = new FileReader();
@@ -87,6 +93,7 @@ export default class UploadList extends React.Component {
 
   render() {
     const { prefixCls, items = [], listType, showPreviewIcon, showRemoveIcon, locale } = this.props;
+
     const list = items.map((file) => {
       let progress;
       let icon = <Icon type={file.status === 'uploading' ? 'loading' : 'paper-clip'} />;
@@ -184,7 +191,7 @@ export default class UploadList extends React.Component {
         ? <Tooltip title={message}>{icon}{preview}</Tooltip>
         : <span>{icon}{preview}</span>;
       return (
-        <div className={infoUploadingClass} key={file.uid}>
+        <SortableItem className={infoUploadingClass} key={file.uid} sortData={file}>
           <div
             className={`${prefixCls}-list-item-previous`}
           >
@@ -217,7 +224,7 @@ export default class UploadList extends React.Component {
           <Animate transitionName="fade" component="">
             {progress}
           </Animate>
-        </div>
+        </SortableItem>
       );
     });
     const listClassNames = classNames({
@@ -232,7 +239,9 @@ export default class UploadList extends React.Component {
         component="div"
         className={listClassNames}
       >
-        {list}
+        <Sortable onSort={this.props.onSort} dynamic>
+          {list}
+        </Sortable>
       </Animate>
     );
   }

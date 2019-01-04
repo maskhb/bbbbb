@@ -1,0 +1,14 @@
+{
+  "route": {
+    "params": "",
+    "authority": "PMS_BASICSETTING_SERVICEITEM_LIST"
+  },
+  "menu": {
+    "name": "服务项管理",
+    "icon": "",
+    "order": 9,
+    "authority": "PMS_BASICSETTING_SERVICEITEM_LIST",
+    "orgType": 1
+  },
+  "model": ["serviceItem", "paymentItem"]
+}

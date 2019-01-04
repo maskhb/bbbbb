@@ -7,7 +7,7 @@ export default class MonitorInput extends Component {
     currNum: 0,
   }
 
-  componentWillMount() {
+  componentDidMount() {
     if ('value' in this.props) {
       const { value } = this.props;
       if (value) {

@@ -1,0 +1,14 @@
+{
+  "route": {
+    "params": "",
+    "authority": "PMS_ROOMSTATUS_MAINTENANCEBILL_LIST"
+  },
+  "menu": {
+    "name": "维修单",
+    "icon": "",
+    "order": 3,
+    "authority": "PMS_ROOMSTATUS_MAINTENANCEBILL_LIST",
+    "orgType": 1
+  },
+  "model": ["houseStatus", "exportFile", "housing"]
+}

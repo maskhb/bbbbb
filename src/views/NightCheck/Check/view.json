@@ -1,0 +1,14 @@
+{
+  "route": {
+    "params": "",
+    "authority": ""
+  },
+  "menu": {
+    "name": "夜审",
+    "icon": "",
+    "order": 2,
+    "authority": "PMS_NIGHTTRIAL_NIGHTTRIAL_LIST",
+    "orgType": 1
+  },
+  "model": ["nightCheck"]
+}

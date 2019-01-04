@@ -55,8 +55,8 @@ module.exports = (webpackConfig) => {
     loader: 'ts-loader',
   });
 
-  // 公共资源路径
-  webpackConfig.output.publicPath = process.env.NODE_ENV === 'production' ? '/jj-platform/' : '';
+  // 公共资源路径 （纷程项目不需要设置）
+  // webpackConfig.output.publicPath = process.env.NODE_ENV === 'production' ? '/' : '';
 
   webpackConfig.plugins = webpackConfig.plugins.concat([
     // 定义全局变量
@@ -91,6 +91,7 @@ module.exports = (webpackConfig) => {
         resource.match(/\.js$/)
       ),
     }),
+
   ]);
 
   return webpackConfig;

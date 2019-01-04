@@ -2,7 +2,9 @@
 import request from '../utils/request';
 
 async function getProvincesWithCommunities() {
-  return request('/mj/ht-mj-cms-server/community/getAllComCommunity', { mock: false });
+  return request('/mj/ht-mj-cms-server/community/getAllComCommunity', {
+    mock: false,
+  });
 }
 async function queryCommunityList(params) {
   return request('/json/community-api/community/base/listPage', {
@@ -12,23 +14,20 @@ async function queryCommunityList(params) {
     },
   });
 }
-
-const caches = {};
 async function queryRegionInfo(params) {
-  const { regionId } = params;
-  if (caches[regionId]) {
-    return new Promise(((resolve) => {
-      resolve(caches[regionId]);
-    }));
-  }
-  return request('/json/region-api/region/getChildRegions', {
+  // return request("/json/region-api/region/getChildRegions", {
+  return request('/fc/ht-fc-pms-server/region/getChildRegions', {
     method: 'POST',
     body: {
       ...params,
     },
-  }).then((data) => {
-    caches[regionId] = data;
-    return data;
+  });
+}
+
+async function regionGetOrgRegion(params) {
+  return request('/fc/ht-fc-pms-server/region/getOrgRegion', {
+    method: 'POST',
+    body: params,
   });
 }
 
@@ -53,83 +52,35 @@ async function startExportFile(params) {
   });
 }
 
-/**
- * 查询所有商家列表
- * @param params
- * @returns {*}
- */
-const queryMerchantList = (params) => {
-  return request('/mj/ht-mj-merchant-server/merchantBase/queryListByMutilCondition', {
-    method: 'POST',
-    body: params,
-  });
-};
-
-/**
- * 查询商品信息--订单
- * @param {*} param0
- */
-async function orderGoodsListByPage({ goodsBaseVoList }) {
-  return request('/mj/ht-mj-goods-server/goods/orderGoodsListByPage', {
+// 查询全部层级
+async function queryHierarchy(sourcePageVO) {
+  return request('/fc/ht-fc-pms-server/source/list', {
     method: 'POST',
     body: {
-      goodsBaseVoList,
-    },
-    pagination: true,
-  });
-}
-
-/**
- * 查询支付方式--订单
- * @param {*} param0
- */
-async function getPaymentMethodList({ type }) {
-  return request('/mj/ht-mj-order-server/order/admin/getPaymentMethodList', {
-    method: 'POST',
-    body: {
-      type,
+      sourcePageVO,
     },
   });
 }
 
 /**
- * 查询促销商品信息(分页)
- * @param {*} param0
+ * 获取可叫醒列表
+ * @param {*} obj
  */
-async function queryPromotionGoodsByPage(GoodsPromotionVo) {
-  return request('/mj/ht-mj-goods-server/goods/queryPromotionGoodsByPage', {
+async function canWake(obj) {
+  return request('/fc/ht-fc-pms-server/roomStatus/canWake', {
     method: 'POST',
-    body: {
-      GoodsPromotionVo,
-    },
+    body: obj,
   });
 }
 
 /**
- * 商品分类列表
- * @param {*} param0
+ * 完成叫醒
+ * @param {*} roomId
  */
-async function goodsSaleCategoryList({ parentId }) {
-  return request('/mj/ht-mj-goods-server/goodsCategory/queryList', {
+async function wakeFinish(roomId) {
+  return request('/fc/ht-fc-pms-server/roomStatus/wake/finish', {
     method: 'POST',
-    body: {
-      goodsCategoryVoQ: {
-        parentId,
-      },
-    },
-  });
-}
-
-/**
- * 根据merchantId查商品分类列表
- * @param {*} param0
- */
-async function goodsCategoryListByMerchantId({ merchantId }) {
-  return request('/mj/ht-mj-goods-server/goodsCategory/queryListAndHasChildByMerchantId', {
-    method: 'POST',
-    body: {
-      merchantId,
-    },
+    body: roomId,
   });
 }
 
@@ -137,11 +88,9 @@ export default {
   getProvincesWithCommunities,
   queryCommunityList,
   queryRegionInfo,
-  goodsSaleCategoryList,
   startExportFile,
-  queryMerchantList,
-  orderGoodsListByPage,
-  queryPromotionGoodsByPage,
-  getPaymentMethodList,
-  goodsCategoryListByMerchantId,
+  queryHierarchy,
+  canWake,
+  wakeFinish,
+  regionGetOrgRegion,
 };

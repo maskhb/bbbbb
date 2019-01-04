@@ -1,0 +1,13 @@
+{
+  "route": {
+    "params": "/:viewType/:beginDate/:id?/:name?",
+    "authority": ""
+  },
+  "breadcrumb": {
+    "name": "房价规则设置",
+    "icon": "",
+    "order": 0,
+    "authority": ""
+  },
+  "model": ["housing"]
+}

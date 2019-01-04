@@ -1,0 +1,13 @@
+{
+  "route": {
+    "params": "",
+    "authority": "PMS_CHECKIN_GROUPRESERVATION_GROUPRESERVE"
+  },
+  "breadcrumb": {
+    "name": "新增",
+    "icon": "",
+    "order": 0,
+    "authority": "PMS_CHECKIN_GROUPRESERVATION_GROUPRESERVE"
+  },
+  "model": ["checkIn"]
+}

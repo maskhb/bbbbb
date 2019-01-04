@@ -1,0 +1,13 @@
+{
+  "route": {
+    "params": "",
+    "authority": "PMS_CHECKIN_INDIVIDUALRESERVATION_INDIVIDUALRESERVE"
+  },
+  "breadcrumb": {
+    "name": "新增",
+    "icon": "",
+    "order": 1,
+    "authority": "PMS_CHECKIN_INDIVIDUALRESERVATION_INDIVIDUALRESERVE"
+  },
+  "model": ["checkIn"]
+}

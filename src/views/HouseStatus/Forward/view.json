@@ -1,0 +1,14 @@
+{
+  "route": {
+    "params": "",
+    "authority": "PMS_ROOMSTATUS_FORWARDROOMSTATUS_LIST"
+  },
+  "menu": {
+    "name": "远期房态",
+    "icon": "",
+    "order": 2,
+    "authority": "PMS_ROOMSTATUS_FORWARDROOMSTATUS_LIST",
+    "orgType": 1
+  },
+  "model": ["houseStatus"]
+}

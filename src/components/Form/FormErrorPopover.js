@@ -20,9 +20,7 @@ export default class FormError extends PureComponent {
         const labelNode = document.querySelector(`label[for="${fieldKey}"]`);
         if (labelNode) {
           // 判断是否是的tab
-          // window.labelNode = labelNode;
-          const tabParent = labelNode.closest('.ant-tabs-tabpane');
-          // console.log('lfidjsifojdsofl....', tabParent, labelNode);
+          const tabParent = labelNode.closest('.ant-tabs-tabpane-inactive');
           if (tabParent) {
             tabParent.closest('.ant-tabs')?.scrollIntoView(true);
             tabParent.parentNode.childNodes.forEach((node, i) => {
